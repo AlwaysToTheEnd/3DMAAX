@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="D12App">
+      <UniqueIdentifier>{f1d175c1-594c-4e78-87b6-9cb83d0f6093}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OBJECTS">
+      <UniqueIdentifier>{b5fb56ba-0e4a-4c6c-a811-c774bb0ac8f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{3334d577-1f3b-44c1-90e5-e3b1a0ae70b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass">
+      <UniqueIdentifier>{33d45329-906b-4787-a11b-b09e9f54e71a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass\cRenderItemMG">
+      <UniqueIdentifier>{1dc54cdc-8e5b-49e8-ac62-1ff336cf7bb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass\cFontMG">
+      <UniqueIdentifier>{5d038177-4056-4fcb-88fd-aed99b4518eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12TextureApp">
+      <UniqueIdentifier>{eb152862-70fb-4054-9644-bb43ce0d9057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12TextureApp\cTextureHeap">
+      <UniqueIdentifier>{39fe9927-055d-4dfd-8544-b5e7e745c8ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12TextureApp\cCamera">
+      <UniqueIdentifier>{39310a70-d4d4-4197-92f1-423419117506}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass\D12Util">
+      <UniqueIdentifier>{44675d16-ea4e-4a06-a938-4cdff2c794a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OBJECTS\MeshObject">
+      <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OBJECTS\ElementObject">
+      <UniqueIdentifier>{a48e8c07-d0ec-4ebd-b60f-eb44946d9f64}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="05_Texture.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="D12Util.h">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+    <ClInclude Include="D12App.h">
+      <Filter>D12App</Filter>
+    </ClInclude>
+    <ClInclude Include="D12TextureApp.h">
+      <Filter>D12App\D12TextureApp</Filter>
+    </ClInclude>
+    <ClInclude Include="cRenderItemMG.h">
+      <Filter>ManagedClass\cRenderItemMG</Filter>
+    </ClInclude>
+    <ClInclude Include="cObejct.h">
+      <Filter>OBJECTS</Filter>
+    </ClInclude>
+    <ClInclude Include="cTextureHeap.h">
+      <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTimer.h">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryGenerator.h">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameResource.h">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+    <ClInclude Include="cCamera.h">
+      <Filter>D12App\D12TextureApp\cCamera</Filter>
+    </ClInclude>
+    <ClInclude Include="UploadBuffer.h">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+    <ClInclude Include="cUIObject.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="cFontManager.h">
+      <Filter>ManagedClass\cFontMG</Filter>
+    </ClInclude>
+    <ClInclude Include="cOcTree.h">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+    <ClInclude Include="cMirror.h">
+      <Filter>OBJECTS\MeshObject</Filter>
+    </ClInclude>
+    <ClInclude Include="cPercentageValueSet.h">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="05_Texture.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="D12Util.cpp">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+    <ClCompile Include="D12App.cpp">
+      <Filter>D12App</Filter>
+    </ClCompile>
+    <ClCompile Include="D12TextureApp.cpp">
+      <Filter>D12App\D12TextureApp</Filter>
+    </ClCompile>
+    <ClCompile Include="cRenderItemMG.cpp">
+      <Filter>ManagedClass\cRenderItemMG</Filter>
+    </ClCompile>
+    <ClCompile Include="cObejct.cpp">
+      <Filter>OBJECTS</Filter>
+    </ClCompile>
+    <ClCompile Include="cTextureHeap.cpp">
+      <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometryGenerator.cpp">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+    <ClCompile Include="MathHelper.cpp">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+    <ClCompile Include="cCamera.cpp">
+      <Filter>D12App\D12TextureApp\cCamera</Filter>
+    </ClCompile>
+    <ClCompile Include="cUIObject.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="cFontManager.cpp">
+      <Filter>ManagedClass\cFontMG</Filter>
+    </ClCompile>
+    <ClCompile Include="cOcTree.cpp">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+    <ClCompile Include="cMirror.cpp">
+      <Filter>OBJECTS\MeshObject</Filter>
+    </ClCompile>
+    <ClCompile Include="cPercentageValueSet.cpp">
+      <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="05_Texture.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="05_Texture.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Default.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\LightingUtil.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\UIShader.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="ShadowShader.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
