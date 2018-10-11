@@ -1,6 +1,7 @@
 #pragma once
 
 #define OCTREE_TREENUM 8
+//TEST
 
 class cOcTree
 {
