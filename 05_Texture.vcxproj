@@ -153,7 +153,6 @@
     <ClInclude Include="05_Texture.h" />
     <ClInclude Include="cCamera.h" />
     <ClInclude Include="cFontManager.h" />
-    <ClInclude Include="cMirror.h" />
     <ClInclude Include="cObejct.h" />
     <ClInclude Include="cOcTree.h" />
     <ClInclude Include="cPercentageValueSet.h" />
@@ -175,7 +174,6 @@
     <ClCompile Include="05_Texture.cpp" />
     <ClCompile Include="cCamera.cpp" />
     <ClCompile Include="cFontManager.cpp" />
-    <ClCompile Include="cMirror.cpp" />
     <ClCompile Include="cObejct.cpp" />
     <ClCompile Include="cOcTree.cpp" />
     <ClCompile Include="cPercentageValueSet.cpp" />

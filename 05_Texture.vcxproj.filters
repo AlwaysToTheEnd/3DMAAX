@@ -105,9 +105,6 @@
     <ClInclude Include="cOcTree.h">
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
-    <ClInclude Include="cMirror.h">
-      <Filter>OBJECTS\MeshObject</Filter>
-    </ClInclude>
     <ClInclude Include="cPercentageValueSet.h">
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
@@ -157,9 +154,6 @@
     </ClCompile>
     <ClCompile Include="cOcTree.cpp">
       <Filter>ManagedClass\D12Util</Filter>
-    </ClCompile>
-    <ClCompile Include="cMirror.cpp">
-      <Filter>OBJECTS\MeshObject</Filter>
     </ClCompile>
     <ClCompile Include="cPercentageValueSet.cpp">
       <Filter>ManagedClass\D12Util</Filter>

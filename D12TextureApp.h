@@ -50,7 +50,6 @@ private:
 	mt19937 m_random;
 
 private:
-	unique_ptr<cMirror> m_Mirror = nullptr;
 	unique_ptr<cObject> m_sphere = nullptr;
 	RenderFont* m_font = nullptr;
 	cUIObject m_UIObject;

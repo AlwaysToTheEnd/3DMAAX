@@ -118,28 +118,7 @@ void D12TextureApp::Draw()
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 	RENDERITEMMG->Render(m_CommandList.Get(), m_CurrFrameResource, "opaque");
 
-	//m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap.Get(),
-	//	D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
-	//m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap.Get(),
-	//	D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ));
-	////////////////
-	m_CommandList->OMSetStencilRef(1);
-	m_CommandList->SetPipelineState(m_PSOs["markStencilMirrors"].Get());
-	RENDERITEMMG->Render(m_CommandList.Get(), m_CurrFrameResource, "Mirror");
-
-	m_CommandList->SetPipelineState(m_PSOs["drawStencilReflections"].Get());
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
-	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
-	RENDERITEMMG->Render(m_CommandList.Get(), m_CurrFrameResource, "reflectionObject");
-
-	passCBAddress -= d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
-	m_CommandList->OMSetStencilRef(0);
-
-	m_CommandList->SetPipelineState(m_PSOs["transparent"].Get());
-	RENDERITEMMG->Render(m_CommandList.Get(), m_CurrFrameResource, "Mirror");
-
-	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants))*2;
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 
 	m_CommandList->SetPipelineState(m_PSOs["UI"].Get());
@@ -223,19 +202,6 @@ void D12TextureApp::UpdateMainPassCB()
 	auto currPassCB = m_CurrFrameResource->passCB.get();
 	currPassCB->CopyData(0, m_MainPassCB);
 
-	XMMATRIX R = XMLoadFloat4x4(&m_Mirror->GetRenderItem()->world);
-
-	// Reflect the lighting.
-	for (int i = 0; i < 3; ++i)
-	{
-		XMVECTOR lightDir = XMLoadFloat3(&m_MainPassCB.Lights[i].direction);
-		XMVECTOR reflectedLightDir = XMVector3TransformNormal(lightDir, R);
-		XMStoreFloat3(&m_MainPassCB.Lights[i].direction, reflectedLightDir);
-	}
-
-	currPassCB->CopyData(1, m_MainPassCB);
-
-
 	m_MainPassCB.view = MathHelper::Identity4x4();
 	m_MainPassCB.invView = MathHelper::Identity4x4();
 	proj = XMMatrixOrthographicOffCenterLH(0, m_ClientWidth, m_ClientHeight, 0, -1, 1);
@@ -244,7 +210,7 @@ void D12TextureApp::UpdateMainPassCB()
 	m_MainPassCB.viewProj = MathHelper::Identity4x4();
 	m_MainPassCB.invViewProj = MathHelper::Identity4x4();
 
-	currPassCB->CopyData(2, m_MainPassCB);
+	currPassCB->CopyData(1, m_MainPassCB);
 }
 
 
@@ -343,80 +309,6 @@ void D12TextureApp::BuildGeometry()
 	subMesh.indexCount = sphere.Indices32.size();
 	sphereGeo->DrawArgs["sphere"] = subMesh;
 	m_Geometries[sphereGeo->name] = move(sphereGeo);
-
-	//////////////////////
-
-	//////////////
-	auto cubeGeo = make_unique<MeshGeometry>();
-	cubeGeo->name = "cube";
-	GeometryGenerator::MeshData cube = geoGen.CreateBox(1, 1, 1, 1);
-	vertices.clear();
-	vertices.resize(cube.Vertices.size());
-
-	const UINT cubeGeoDataSize = sizeof(Vertex)*vertices.size();
-	const UINT cubeGeoIndexSize = sizeof(UINT16)*cube.Indices32.size();
-
-	for (int i = 0; i < cube.Vertices.size(); i++)
-	{
-		vertices[i].pos = cube.Vertices[i].Position;
-		vertices[i].normal = cube.Vertices[i].Normal;
-		vertices[i].uv = cube.Vertices[i].TexC;
-	}
-
-	cubeGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		vertices.data(), cubeGeoDataSize, cubeGeo->vertexUploadBuffer);
-
-	cubeGeo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		cube.GetIndices16().data(), cubeGeoIndexSize, cubeGeo->indexUploadBuffer);
-
-	cubeGeo->indexFormat = DXGI_FORMAT_R16_UINT;
-	cubeGeo->indexBufferByteSize = cubeGeoIndexSize;
-	cubeGeo->vertexBufferByteSize = cubeGeoDataSize;
-	cubeGeo->vertexByteStride = sizeof(Vertex);
-
-	subMesh.baseVertexLocation = 0;
-	subMesh.startIndexLocation = 0;
-	subMesh.indexCount = cube.Indices32.size();
-	cubeGeo->DrawArgs["cube"] = subMesh;
-	m_Geometries[cubeGeo->name] = move(cubeGeo);
-
-	///////////
-	auto mirrorGeo = make_unique<MeshGeometry>();
-	mirrorGeo->name = "Mirror";
-	vertices.resize(4);
-
-	vertices[0] = { {0,0,0},{0,0,-1},{0,1} };
-	vertices[1] = { {30,0,0},{0,0,-1},{1,1} };
-	vertices[2] = { {30,30,0},{0,0,-1},{1,0} };
-	vertices[3] = { {0,30,0},{0,0,-1},{0,0} };
-
-	vector<UINT16> Indices;
-	Indices.push_back(0);
-	Indices.push_back(2);
-	Indices.push_back(1);
-	Indices.push_back(0);
-	Indices.push_back(3);
-	Indices.push_back(2);
-
-	const UINT mirrorGeoDataSize = sizeof(Vertex)*vertices.size();
-	const UINT mirrorGeoIndexSize = sizeof(UINT16)*Indices.size();
-
-	mirrorGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		vertices.data(), mirrorGeoDataSize, mirrorGeo->vertexUploadBuffer);
-
-	mirrorGeo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		Indices.data(), mirrorGeoIndexSize, mirrorGeo->indexUploadBuffer);
-
-	mirrorGeo->indexFormat = DXGI_FORMAT_R16_UINT;
-	mirrorGeo->indexBufferByteSize = mirrorGeoIndexSize;
-	mirrorGeo->vertexBufferByteSize = mirrorGeoDataSize;
-	mirrorGeo->vertexByteStride = sizeof(Vertex);
-
-	subMesh.baseVertexLocation = 0;
-	subMesh.startIndexLocation = 0;
-	subMesh.indexCount = Indices.size();
-	mirrorGeo->DrawArgs["Mirror"] = subMesh;
-	m_Geometries[mirrorGeo->name] = move(mirrorGeo);
 
 	cUIObject::UIMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
@@ -536,7 +428,6 @@ void D12TextureApp::BuildPSOs()
 	RENDERITEMMG->AddRenderSet("UI");
 	RENDERITEMMG->AddRenderSet("Mirror");
 	RENDERITEMMG->AddRenderSet("reflectionObject");
-	cMirror::SetReflectionRenderPipeLine("reflectionObject");
 }
 
 void D12TextureApp::BuildTextures()
@@ -585,12 +476,6 @@ void D12TextureApp::BuildObjects()
 	m_UIObject.SetMaterial(m_Materials["wirefence"].get());
 	m_UIObject.SetSize({ 300,300 });
 	m_UIObject.SetPos({ 0,0,0 });
-
-	m_Mirror = make_unique<cMirror>();
-	m_Mirror->Build("Mirror", m_Geometries["Mirror"].get(),
-		m_Materials["icemirror"].get(), m_TextureHeap->GetTexture("ice"), "Mirror");
-	m_Mirror->SetPos({ 5,15,15 });
-	m_Mirror->SetRotX(-XM_PIDIV4);
 
 	m_sphere= make_unique<cObject>();
 	m_sphere->Build("sphere", m_Geometries["sphere"].get(),
