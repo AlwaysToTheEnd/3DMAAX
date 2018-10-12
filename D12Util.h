@@ -8,15 +8,20 @@ struct PICKRAY
 	XMVECTOR ray;
 };
 
-inline static XMFLOAT3 operator-(XMFLOAT3& lhs, XMFLOAT3& rhs)
+inline XMFLOAT3 operator-(XMFLOAT3& lhs, XMFLOAT3& rhs)
 {
 	return { lhs.x - rhs.x,lhs.y - rhs.y,lhs.z - rhs.z };
 }
 
 
-inline static XMFLOAT3 operator+(XMFLOAT3& lhs, XMFLOAT3& rhs)
+inline XMFLOAT3 operator+(XMFLOAT3& lhs, XMFLOAT3& rhs)
 {
 	return { lhs.x + rhs.x,lhs.y + rhs.y,lhs.z + rhs.z };
+}
+
+inline XMFLOAT4 Xmfloat4Zero()
+{
+	return { 0.0f,0.0f,0.0f,0.0f };
 }
 
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
@@ -41,7 +46,7 @@ inline void d3dSetDebugName(ID3D12DeviceChild* obj, const char* name)
 	}
 }
 
-static XMFLOAT3 operator *(const XMFLOAT3& lhs,float rhs)
+static XMFLOAT3 operator *(const XMFLOAT3& lhs, float rhs)
 {
 	return { lhs.x*rhs,lhs.y*rhs ,lhs.z*rhs };
 }

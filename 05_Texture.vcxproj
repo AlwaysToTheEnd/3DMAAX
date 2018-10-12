@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="05_Texture.h" />
     <ClInclude Include="cCamera.h" />
+    <ClInclude Include="cDrawPlane.h" />
     <ClInclude Include="cFontManager.h" />
     <ClInclude Include="cObejct.h" />
     <ClInclude Include="cOcTree.h" />
@@ -173,6 +174,7 @@
   <ItemGroup>
     <ClCompile Include="05_Texture.cpp" />
     <ClCompile Include="cCamera.cpp" />
+    <ClCompile Include="cDrawPlane.cpp" />
     <ClCompile Include="cFontManager.cpp" />
     <ClCompile Include="cObejct.cpp" />
     <ClCompile Include="cOcTree.cpp" />

@@ -36,6 +36,6 @@ private:
 	static cRenderItemMG* instance;
 	string baseKey;
 	UINT RenderItemIndexCount=0;
-	unordered_map<string, RenderItemSet> m_RenderItemSets;
+	concurrency::concurrent_unordered_map <string, RenderItemSet> m_RenderItemSets;
 };
 

@@ -42,15 +42,15 @@ private:
 	unordered_map<string, unique_ptr<MeshGeometry>> m_Geometries;
 	unordered_map<string, ComPtr<ID3D12PipelineState>> m_PSOs;
 
-	vector<D3D12_INPUT_ELEMENT_DESC> m_InputLayout;
+	vector<D3D12_INPUT_ELEMENT_DESC> m_NTVertexInputLayout;
+	vector<D3D12_INPUT_ELEMENT_DESC> m_CVertexInputLayout;
 
 	PassConstants m_MainPassCB;
 
-	XMFLOAT4X4 m_Proj = MathHelper::Identity4x4();
+	XMFLOAT4X4 m_UIProj = MathHelper::Identity4x4();
 	mt19937 m_random;
 
 private:
-	unique_ptr<cObject> m_sphere = nullptr;
 	RenderFont* m_font = nullptr;
 	cUIObject m_UIObject;
 };

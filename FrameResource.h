@@ -30,11 +30,17 @@ struct PassConstants
 	Light Lights[MAXLIGHTS];
 };
 
-struct Vertex
+struct NT_Vertex
 {
 	XMFLOAT3 pos;
 	XMFLOAT3 normal;
 	XMFLOAT2 uv;
+};
+
+struct C_Vertex
+{
+	XMFLOAT3 pos;
+	XMFLOAT4 color;
 };
 
 struct FrameResource

@@ -18,7 +18,7 @@ void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * c
 	{
 		m_uiGeo = make_unique<MeshGeometry>();
 		m_uiGeo->name = "UI";
-		vector<Vertex> vertices(4);
+		vector<NT_Vertex> vertices(4);
 
 		vertices[0] = { {0,0,0},{0,0,1},{0,0} };
 		vertices[1] = { {1,0,0},{0,0,1},{1,0} };
@@ -33,7 +33,7 @@ void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * c
 		Indices.push_back(2);
 		Indices.push_back(3);
 
-		const UINT uiGeoDataSize = sizeof(Vertex)*vertices.size();
+		const UINT uiGeoDataSize = sizeof(NT_Vertex)*vertices.size();
 		const UINT uiGeoIndexSize = sizeof(UINT16)*Indices.size();
 
 		m_uiGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
@@ -45,7 +45,7 @@ void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * c
 		m_uiGeo->indexFormat = DXGI_FORMAT_R16_UINT;
 		m_uiGeo->indexBufferByteSize = uiGeoIndexSize;
 		m_uiGeo->vertexBufferByteSize = uiGeoDataSize;
-		m_uiGeo->vertexByteStride = sizeof(Vertex);
+		m_uiGeo->vertexByteStride = sizeof(NT_Vertex);
 
 		SubMeshGeometry subMesh;
 		subMesh.baseVertexLocation = 0;

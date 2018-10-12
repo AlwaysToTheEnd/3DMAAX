@@ -6,6 +6,37 @@ void cRenderItemMG::Update(FrameResource* currFrameResource)
 {
 	auto currObjectCB = currFrameResource->objectCB.get();
 
+	Concurrency::parallel_for_each(m_RenderItemSets.begin(), m_RenderItemSets.end(), 
+		[&currObjectCB](std::pair<const string,RenderItemSet> renderItemset)
+	{
+		for (auto& it = renderItemset.second.items.begin(); it != renderItemset.second.items.end();)
+		{
+			if (it->use_count() <= 1)
+			{
+				it = renderItemset.second.items.erase(it);
+			}
+			else
+			{
+				if ((*it)->numFramesDirty > 0)
+				{
+					XMMATRIX world = XMLoadFloat4x4(&(*it)->world);
+					XMMATRIX texTransform = XMLoadFloat4x4(&(*it)->texTransform);
+
+					ObjectConstants objConstants;
+					XMStoreFloat4x4(&objConstants.world, XMMatrixTranspose(world));
+					XMStoreFloat4x4(&objConstants.TexTransform, XMMatrixTranspose(texTransform));
+
+					currObjectCB->CopyData((*it)->objCBIndex, objConstants);
+
+					(*it)->numFramesDirty--;
+				}
+
+				it++;
+			}
+		}
+	});
+
+
 	for (auto& mapIter : m_RenderItemSets)
 	{
 		for (auto& it = mapIter.second.items.begin(); it != mapIter.second.items.end();)

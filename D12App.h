@@ -42,7 +42,6 @@ protected:
 
 	ID3D12Resource* CurrentBackBuffer() const;
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE ShadowMapView() const;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const;
 
 	void LogAdapters();
@@ -79,8 +78,8 @@ protected:
 	ComPtr<IDXGISwapChain>	m_SwapChain;
 	DXGI_FORMAT				m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // 0~1 
 	DXGI_FORMAT				m_DepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	int						m_ClientWidth = 800;
-	int						m_ClientHeight = 600;
+	int						m_ClientWidth = 1000;
+	int						m_ClientHeight = 700;
 
 	ComPtr<ID3D12Device>	m_D3dDevice;
 
@@ -94,7 +93,6 @@ protected:
 	static const int				SwapChainBufferCount = 2;
 	int								m_CurrBackBuffer = 0;
 	ComPtr<ID3D12Resource>			m_SwapChainBuffer[SwapChainBufferCount];
-	ComPtr<ID3D12Resource>			m_ShadowMap;
 	ComPtr<ID3D12Resource>			m_DepthStencilBuffer;
 
 	ComPtr<ID3D12DescriptorHeap>	m_RTVHeap;

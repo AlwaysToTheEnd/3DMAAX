@@ -32,7 +32,7 @@ void D12App::CreateRtvAndDsvDescriptorHeaps()
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
-	rtvHeapDesc.NumDescriptors = SwapChainBufferCount+1;
+	rtvHeapDesc.NumDescriptors = SwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
@@ -61,7 +61,7 @@ void D12App::OnResize()
 	{
 		m_SwapChainBuffer[i] = nullptr;
 	}
-	m_ShadowMap = nullptr;
+
 	m_DepthStencilBuffer = nullptr;
 
 	ThrowIfFailed(m_SwapChain->ResizeBuffers(SwapChainBufferCount,
@@ -76,25 +76,6 @@ void D12App::OnResize()
 		m_D3dDevice->CreateRenderTargetView(m_SwapChainBuffer[i].Get(), nullptr, rtvHandle);
 		rtvHandle.Offset(1, m_RTVDescriptorSize);
 	}
-
-	D3D12_RESOURCE_DESC shadowRsvDesc;
-	shadowRsvDesc.Alignment = 0; //조정
-	shadowRsvDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	shadowRsvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	shadowRsvDesc.DepthOrArraySize = 1;
-	shadowRsvDesc.MipLevels = 1;
-	shadowRsvDesc.Width = m_ClientWidth;
-	shadowRsvDesc.Height = m_ClientHeight;
-	shadowRsvDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-	shadowRsvDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	shadowRsvDesc.SampleDesc.Count = m_4xMsaaState ? 4 : 1;
-	shadowRsvDesc.SampleDesc.Quality = m_4xMsaaState ? (m_4xmsaaQuality - 1) : 0;
-
-	ThrowIfFailed(m_D3dDevice->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE, &shadowRsvDesc,
-		D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(m_ShadowMap.GetAddressOf())));
-
-	m_D3dDevice->CreateRenderTargetView(m_ShadowMap.Get(), nullptr, rtvHandle);
 
 	D3D12_RESOURCE_DESC dsvDesc;
 	dsvDesc.Alignment = 0; //조정
@@ -555,12 +536,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE D12App::CurrentBackBufferView() const
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_RTVHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_CurrBackBuffer,m_RTVDescriptorSize);
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE D12App::ShadowMapView() const
-{
-	return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_RTVHeap->GetCPUDescriptorHandleForHeapStart(),
-		SwapChainBufferCount, m_RTVDescriptorSize);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE D12App::DepthStencilView() const

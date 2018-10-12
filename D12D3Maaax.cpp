@@ -49,7 +49,6 @@ bool D12D3Maaax::Initialize()
 	OnResize();
 
 	return true;
-
 }
 
 void D12D3Maaax::OnResize()
@@ -57,7 +56,7 @@ void D12D3Maaax::OnResize()
 	D12App::OnResize();
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
-	XMStoreFloat4x4(&m_Proj, P);
+	XMStoreFloat4x4(&m_UIProj, P);
 
 	FONTMANAGER->Resize(m_ClientWidth, m_ClientHeight);
 }
@@ -76,9 +75,6 @@ void D12D3Maaax::Update()
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
 	}
-
-
-	//m_Mirror->Update(nullptr);
 
 	m_UIObject.Update(XMMatrixIdentity());
 
@@ -103,7 +99,6 @@ void D12D3Maaax::Draw()
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LightSteelBlue, 0, nullptr);
-	//m_CommandList->ClearRenderTargetView(ShadowMapView(), Colors::White, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -171,7 +166,7 @@ void D12D3Maaax::UpdateMaterialCBs()
 void D12D3Maaax::UpdateMainPassCB()
 {
 	XMMATRIX view = XMLoadFloat4x4(m_Camera.GetViewMatrix());
-	XMMATRIX proj = XMLoadFloat4x4(&m_Proj);
+	XMMATRIX proj = XMLoadFloat4x4(&m_UIProj);
 
 	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
@@ -255,60 +250,30 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 	m_Shaders["uiVS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "VS", "vs_5_0");
 	m_Shaders["uiPS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "PS", "ps_5_0");
 
-	m_InputLayout =
+	m_NTVertexInputLayout =
 	{
 		{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
+
+	D3D12_INPUT_ELEMENT_DESC decs;
+	m_CVertexInputLayout =
+	{
+		{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
+		{ "COLOR" ,0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
+	};
 }
 
 void D12D3Maaax::BuildGeometry()
 {
-	vector<Vertex> vertices;
+	vector<NT_Vertex> vertices;
 	vector<UINT> indices;
 
 	SubMeshGeometry subMesh;
 	subMesh.baseVertexLocation = 0;
 	subMesh.startIndexLocation = 0;
 	subMesh.indexCount = indices.size();
-
-	///////////////////////
-
-	auto sphereGeo = make_unique<MeshGeometry>();
-	sphereGeo->name = "sphere";
-
-	GeometryGenerator geoGen;
-	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.15f, 10, 10);
-	vertices.clear();
-	vertices.resize(sphere.Vertices.size());
-
-	const UINT sphereDataSize = sizeof(Vertex)*vertices.size();
-	const UINT sphereIndexSize = sizeof(UINT32)*sphere.Indices32.size();
-
-	for (int i = 0; i < sphere.Vertices.size(); i++)
-	{
-		vertices[i].pos = sphere.Vertices[i].Position;
-		vertices[i].normal = sphere.Vertices[i].Normal;
-		vertices[i].uv = sphere.Vertices[i].TexC;
-	}
-
-	sphereGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		vertices.data(), sphereDataSize, sphereGeo->vertexUploadBuffer);
-
-	sphereGeo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		sphere.Indices32.data(), sphereIndexSize, sphereGeo->indexUploadBuffer);
-
-	sphereGeo->indexFormat = DXGI_FORMAT_R32_UINT;
-	sphereGeo->indexBufferByteSize = sphereIndexSize;
-	sphereGeo->vertexBufferByteSize = sphereDataSize;
-	sphereGeo->vertexByteStride = sizeof(Vertex);
-
-	subMesh.baseVertexLocation = 0;
-	subMesh.startIndexLocation = 0;
-	subMesh.indexCount = sphere.Indices32.size();
-	sphereGeo->DrawArgs["sphere"] = subMesh;
-	m_Geometries[sphereGeo->name] = move(sphereGeo);
 
 	cUIObject::UIMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
@@ -318,7 +283,7 @@ void D12D3Maaax::BuildPSOs()
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
 
 	ZeroMemory(&opaquePsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-	opaquePsoDesc.InputLayout = { m_InputLayout.data(), (UINT)m_InputLayout.size() };
+	opaquePsoDesc.InputLayout = { m_NTVertexInputLayout.data(), (UINT)m_NTVertexInputLayout.size() };
 	opaquePsoDesc.pRootSignature = m_RootSignature.Get();
 	opaquePsoDesc.VS =
 	{
@@ -342,6 +307,10 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["opaque"])));
 
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
+
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["lines"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
@@ -392,7 +361,6 @@ void D12D3Maaax::BuildFrameResources()
 	}
 }
 
-
 void D12D3Maaax::BuildMaterials()
 {
 	auto wirefence = make_unique<Material>();
@@ -421,12 +389,8 @@ void D12D3Maaax::BuildObjects()
 	m_UIObject.Build("UI");
 	m_UIObject.SetTexture(m_TextureHeap->GetTexture("ice"));
 	m_UIObject.SetMaterial(m_Materials["wirefence"].get());
-	m_UIObject.SetSize({ 300,300 });
-	m_UIObject.SetPos({ 0,0,0 });
-
-	m_sphere= make_unique<cObject>();
-	m_sphere->Build("sphere", m_Geometries["sphere"].get(),
-		m_Materials["wirefence"].get(), m_TextureHeap->GetTexture("ice"));
+	m_UIObject.SetSize({ 30,30 });
+	m_UIObject.SetPos({ 10,10,0 });
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()

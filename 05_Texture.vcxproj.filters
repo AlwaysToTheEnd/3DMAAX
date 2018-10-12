@@ -108,6 +108,9 @@
     <ClInclude Include="D12D3Maaax.h">
       <Filter>D12App\D12TextureApp</Filter>
     </ClInclude>
+    <ClInclude Include="cDrawPlane.h">
+      <Filter>Objects\ElementObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="D12D3Maaax.cpp">
       <Filter>D12App\D12TextureApp</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawPlane.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
