@@ -1,13 +1,13 @@
 #include "stdafx.h"
 
-D12TextureApp::D12TextureApp(HINSTANCE hInstance)
+D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 	:D12App(hInstance)
 	, m_random(10)
 {
 
 }
 
-D12TextureApp::~D12TextureApp()
+D12D3Maaax::~D12D3Maaax()
 {
 	delete RENDERITEMMG;
 	delete FONTMANAGER;
@@ -16,7 +16,7 @@ D12TextureApp::~D12TextureApp()
 		FlushCommandQueue();
 }
 
-bool D12TextureApp::Initialize()
+bool D12D3Maaax::Initialize()
 {
 	if (!D12App::Initialize())
 		return false;
@@ -52,7 +52,7 @@ bool D12TextureApp::Initialize()
 
 }
 
-void D12TextureApp::OnResize()
+void D12D3Maaax::OnResize()
 {
 	D12App::OnResize();
 
@@ -62,7 +62,7 @@ void D12TextureApp::OnResize()
 	FONTMANAGER->Resize(m_ClientWidth, m_ClientHeight);
 }
 
-void D12TextureApp::Update()
+void D12D3Maaax::Update()
 {
 	m_Camera.Update();
 
@@ -87,7 +87,7 @@ void D12TextureApp::Update()
 	UpdateMainPassCB();
 }
 
-void D12TextureApp::Draw()
+void D12D3Maaax::Draw()
 {
 	auto cmdListAlloc = m_CurrFrameResource->cmdListAlloc.Get();
 
@@ -144,7 +144,7 @@ void D12TextureApp::Draw()
 }
 
 
-void D12TextureApp::UpdateMaterialCBs()
+void D12D3Maaax::UpdateMaterialCBs()
 {
 	auto currMaterialCB = m_CurrFrameResource->materialCB.get();
 
@@ -168,7 +168,7 @@ void D12TextureApp::UpdateMaterialCBs()
 	}
 }
 
-void D12TextureApp::UpdateMainPassCB()
+void D12D3Maaax::UpdateMainPassCB()
 {
 	XMMATRIX view = XMLoadFloat4x4(m_Camera.GetViewMatrix());
 	XMMATRIX proj = XMLoadFloat4x4(&m_Proj);
@@ -214,7 +214,7 @@ void D12TextureApp::UpdateMainPassCB()
 }
 
 
-void D12TextureApp::BuildRootSignature()
+void D12D3Maaax::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE texTable;
 	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
@@ -247,7 +247,7 @@ void D12TextureApp::BuildRootSignature()
 		serializedRootSig->GetBufferSize(), IID_PPV_ARGS(m_RootSignature.GetAddressOf())));
 }
 
-void D12TextureApp::BuildShadersAndInputLayout()
+void D12D3Maaax::BuildShadersAndInputLayout()
 {
 	m_Shaders["standardVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_0");
 	m_Shaders["opaquePS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_0");
@@ -263,7 +263,7 @@ void D12TextureApp::BuildShadersAndInputLayout()
 	};
 }
 
-void D12TextureApp::BuildGeometry()
+void D12D3Maaax::BuildGeometry()
 {
 	vector<Vertex> vertices;
 	vector<UINT> indices;
@@ -313,7 +313,7 @@ void D12TextureApp::BuildGeometry()
 	cUIObject::UIMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
 
-void D12TextureApp::BuildPSOs()
+void D12D3Maaax::BuildPSOs()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
 
@@ -377,13 +377,13 @@ void D12TextureApp::BuildPSOs()
 	RENDERITEMMG->AddRenderSet("UI");
 }
 
-void D12TextureApp::BuildTextures()
+void D12D3Maaax::BuildTextures()
 {
 	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), 15);
 	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "ice", L"Texture/ice.dds");
 }
 
-void D12TextureApp::BuildFrameResources()
+void D12D3Maaax::BuildFrameResources()
 {
 	for (int i = 0; i < gNumFrameResources; i++)
 	{
@@ -393,7 +393,7 @@ void D12TextureApp::BuildFrameResources()
 }
 
 
-void D12TextureApp::BuildMaterials()
+void D12D3Maaax::BuildMaterials()
 {
 	auto wirefence = make_unique<Material>();
 	wirefence->name = "wirefence";
@@ -416,7 +416,7 @@ void D12TextureApp::BuildMaterials()
 	m_Materials["icemirror"] = std::move(icemirror);
 }
 
-void D12TextureApp::BuildObjects()
+void D12D3Maaax::BuildObjects()
 {
 	m_UIObject.Build("UI");
 	m_UIObject.SetTexture(m_TextureHeap->GetTexture("ice"));
@@ -429,7 +429,7 @@ void D12TextureApp::BuildObjects()
 		m_Materials["wirefence"].get(), m_TextureHeap->GetTexture("ice"));
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12TextureApp::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()
 {
 	const CD3DX12_STATIC_SAMPLER_DESC pointWrap(
 		0, // shaderRegister

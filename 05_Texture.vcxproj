@@ -160,7 +160,7 @@
     <ClInclude Include="cTextureHeap.h" />
     <ClInclude Include="cUIObject.h" />
     <ClInclude Include="D12App.h" />
-    <ClInclude Include="D12TextureApp.h" />
+    <ClInclude Include="D12D3Maaax.h" />
     <ClInclude Include="D12Util.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
@@ -181,7 +181,7 @@
     <ClCompile Include="cTextureHeap.cpp" />
     <ClCompile Include="cUIObject.cpp" />
     <ClCompile Include="D12App.cpp" />
-    <ClCompile Include="D12TextureApp.cpp" />
+    <ClCompile Include="D12D3Maaax.cpp" />
     <ClCompile Include="D12Util.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />

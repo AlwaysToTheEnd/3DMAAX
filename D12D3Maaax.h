@@ -1,12 +1,12 @@
 #pragma once
 
-class D12TextureApp :public D12App
+class D12D3Maaax :public D12App
 {
 public:
-	D12TextureApp(HINSTANCE hInstance);
-	D12TextureApp(const D12TextureApp& rhs) = delete;
-	D12TextureApp& operator=(const D12TextureApp& rhs) = delete;
-	virtual ~D12TextureApp();
+	D12D3Maaax(HINSTANCE hInstance);
+	D12D3Maaax(const D12D3Maaax& rhs) = delete;
+	D12D3Maaax& operator=(const D12D3Maaax& rhs) = delete;
+	virtual ~D12D3Maaax();
 
 	virtual bool Initialize() override;
 

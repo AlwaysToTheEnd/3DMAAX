@@ -16,9 +16,6 @@
     <Filter Include="D12App">
       <UniqueIdentifier>{f1d175c1-594c-4e78-87b6-9cb83d0f6093}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OBJECTS">
-      <UniqueIdentifier>{b5fb56ba-0e4a-4c6c-a811-c774bb0ac8f7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="UI">
       <UniqueIdentifier>{3334d577-1f3b-44c1-90e5-e3b1a0ae70b2}</UniqueIdentifier>
     </Filter>
@@ -43,10 +40,13 @@
     <Filter Include="ManagedClass\D12Util">
       <UniqueIdentifier>{44675d16-ea4e-4a06-a938-4cdff2c794a8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OBJECTS\MeshObject">
+    <Filter Include="Objects">
+      <UniqueIdentifier>{b5fb56ba-0e4a-4c6c-a811-c774bb0ac8f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\MeshObject">
       <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OBJECTS\ElementObject">
+    <Filter Include="Objects\ElementObject">
       <UniqueIdentifier>{a48e8c07-d0ec-4ebd-b60f-eb44946d9f64}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -69,14 +69,11 @@
     <ClInclude Include="D12App.h">
       <Filter>D12App</Filter>
     </ClInclude>
-    <ClInclude Include="D12TextureApp.h">
-      <Filter>D12App\D12TextureApp</Filter>
-    </ClInclude>
     <ClInclude Include="cRenderItemMG.h">
       <Filter>ManagedClass\cRenderItemMG</Filter>
     </ClInclude>
     <ClInclude Include="cObejct.h">
-      <Filter>OBJECTS</Filter>
+      <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="cTextureHeap.h">
       <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
@@ -108,6 +105,9 @@
     <ClInclude Include="cPercentageValueSet.h">
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
+    <ClInclude Include="D12D3Maaax.h">
+      <Filter>D12App\D12TextureApp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -122,14 +122,11 @@
     <ClCompile Include="D12App.cpp">
       <Filter>D12App</Filter>
     </ClCompile>
-    <ClCompile Include="D12TextureApp.cpp">
-      <Filter>D12App\D12TextureApp</Filter>
-    </ClCompile>
     <ClCompile Include="cRenderItemMG.cpp">
       <Filter>ManagedClass\cRenderItemMG</Filter>
     </ClCompile>
     <ClCompile Include="cObejct.cpp">
-      <Filter>OBJECTS</Filter>
+      <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="cTextureHeap.cpp">
       <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
@@ -157,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="cPercentageValueSet.cpp">
       <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+    <ClCompile Include="D12D3Maaax.cpp">
+      <Filter>D12App\D12TextureApp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
