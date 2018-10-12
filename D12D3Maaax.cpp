@@ -250,6 +250,9 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 	m_Shaders["uiVS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "VS", "vs_5_0");
 	m_Shaders["uiPS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "PS", "ps_5_0");
 
+	m_Shaders["ColorVertexVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_0");
+	m_Shaders["ColorVertexPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_0");
+
 	m_NTVertexInputLayout =
 	{
 		{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
@@ -307,11 +310,6 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["opaque"])));
 
-	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
-
-	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["lines"])));
-
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
 	transparencyBlendDesc.BlendEnable = true;
@@ -324,10 +322,7 @@ void D12D3Maaax::BuildPSOs()
 	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
 	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
 	transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
-	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["transparent"])));
-
 	transparentPsoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(m_Shaders["uiVS"]->GetBufferPointer()),
@@ -341,6 +336,21 @@ void D12D3Maaax::BuildPSOs()
 	};
 
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["UI"])));
+
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	opaquePsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["ColorVertexVS"]->GetBufferPointer()),
+		m_Shaders["ColorVertexVS"]->GetBufferSize()
+	};
+	opaquePsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["ColorVertexPS"]->GetBufferPointer()),
+		m_Shaders["ColorVertexPS"]->GetBufferSize()
+	};
+	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
+
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["colorVertex"])));
 
 	RENDERITEMMG->AddRenderSet("opaque");
 	RENDERITEMMG->AddRenderSet("UI");

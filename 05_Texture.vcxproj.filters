@@ -191,5 +191,8 @@
     <FxCompile Include="ShadowShader.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\DrawElementSahder.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
