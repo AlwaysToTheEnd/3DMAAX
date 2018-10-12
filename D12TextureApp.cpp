@@ -542,17 +542,7 @@ void D12TextureApp::BuildPSOs()
 void D12TextureApp::BuildTextures()
 {
 	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), 15);
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "terrain", L"HeightMapData/terrain.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "body_woman_01_s.jpg", L"woman/body_woman_01_s.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "face_woman_02_s.jpg", L"woman/face_woman_02_s.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "foot_woman_01.jpg", L"woman/foot_woman_01.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "hair_woman_01.jpg", L"woman/hair_woman_01.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "hand_woman_01.jpg", L"woman/hand_woman_01.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "leg_woman_01_s.jpg", L"woman/leg_woman_01_s.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "rabbit.jpg", L"woman/rabbit.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "shield.jpg", L"woman/shield.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "sword_001.jpg", L"woman/sword_001.dds");
-	m_TextureHeap->AddTexture(m_CommandList.Get(), "ice", L"Texture/ice.dds");
+	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "ice", L"Texture/ice.dds");
 }
 
 void D12TextureApp::BuildFrameResources()
@@ -591,9 +581,9 @@ void D12TextureApp::BuildMaterials()
 void D12TextureApp::BuildObjects()
 {
 	m_UIObject.Build("UI");
-	m_UIObject.SetTexture(m_TextureHeap->GetTexture("shield.jpg"));
+	m_UIObject.SetTexture(m_TextureHeap->GetTexture("ice"));
 	m_UIObject.SetMaterial(m_Materials["wirefence"].get());
-	m_UIObject.SetSize({ 100,300 });
+	m_UIObject.SetSize({ 300,300 });
 	m_UIObject.SetPos({ 0,0,0 });
 
 	m_Mirror = make_unique<cMirror>();
@@ -604,7 +594,7 @@ void D12TextureApp::BuildObjects()
 
 	m_sphere= make_unique<cObject>();
 	m_sphere->Build("sphere", m_Geometries["sphere"].get(),
-		m_Materials["wirefence"].get(), m_TextureHeap->GetTexture("terrain"));
+		m_Materials["wirefence"].get(), m_TextureHeap->GetTexture("ice"));
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12TextureApp::GetStaticSamplers()

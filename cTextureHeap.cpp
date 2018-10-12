@@ -17,7 +17,7 @@ cTextureHeap::cTextureHeap(ID3D12Device * device, UINT maxTexture)
 	ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(m_SrvHeap.GetAddressOf())));
 }
 
-void cTextureHeap::AddTexture(ID3D12GraphicsCommandList* cmdList, string name, wstring filename)
+void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, string name, wstring filename)
 {
 	auto it = m_Textures.find(name);
 	assert(it == m_Textures.end() && "This name is overlapping name");
@@ -26,10 +26,15 @@ void cTextureHeap::AddTexture(ID3D12GraphicsCommandList* cmdList, string name, w
 	addTexture.num = m_Textures.size();
 	addTexture.tex.name = name;
 
+	ResourceUploadBatch resourceUpload(m_device);
+	resourceUpload.Begin();
+
 	ThrowIfFailed(CreateDDSTextureFromFile(m_device,
-		cmdList, filename.c_str(),
-		addTexture.tex.resource, addTexture.tex.uploadHeap));
+		resourceUpload, filename.c_str(), addTexture.tex.resource.GetAddressOf()));
 	m_Textures[name] = addTexture;
+
+	auto uploadResourceFinished = resourceUpload.End(cmdqueue);
+	uploadResourceFinished.wait();
 
 	auto srvHeapHandle = (CD3DX12_CPU_DESCRIPTOR_HANDLE)m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
 	srvHeapHandle.Offset(addTexture.num, m_SrvDescriptorSize);
