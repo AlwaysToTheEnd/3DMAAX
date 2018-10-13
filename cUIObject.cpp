@@ -3,7 +3,9 @@
 unique_ptr<MeshGeometry> cUIObject::m_uiGeo = nullptr;
 
 cUIObject::cUIObject()
-	:m_Pos(0,0,0)
+	: m_Pos(0,0,0)
+	, m_Size(0,0)
+	, m_renderItem(nullptr)
 {
 }
 
@@ -62,9 +64,9 @@ void cUIObject::Update(FXMMATRIX mat)
 	XMMATRIX scaleMat = XMMatrixScaling(m_Size.x, m_Size.y, 1);
 	XMMATRIX uiMat = scaleMat * translationMat*mat;
 
-	XMStoreFloat4x4(&m_RenderItem->world, uiMat);
+	XMStoreFloat4x4(&m_renderInstance->instanceData.World, uiMat);
 
-	m_RenderItem->numFramesDirty = gNumFrameResources;
+	m_renderInstance->numFramesDirty = gNumFrameResources;
 
 	for (auto& it : m_ChildObject)
 	{
@@ -72,21 +74,18 @@ void cUIObject::Update(FXMMATRIX mat)
 	}
 }
 
-void cUIObject::Build(string piplineName)
+void cUIObject::Build(shared_ptr<cRenderItem> renderItem)
 {
-	m_RenderItem = RENDERITEMMG->AddRenderItem(piplineName);
-	m_RenderItem->geo = m_uiGeo.get();
-	m_RenderItem->indexCount = m_RenderItem->geo->DrawArgs["UI"].indexCount;
-	m_RenderItem->baseVertexLocation = m_RenderItem->geo->DrawArgs["UI"].baseVertexLocation;
-	m_RenderItem->startIndexLocation = m_RenderItem->geo->DrawArgs["UI"].startIndexLocation;
+	renderItem->SetGeometry(m_uiGeo.get(), "UI");
+	m_renderItem = renderItem;
 }
 
 void cUIObject::RenderUI(bool value)
 {
-	m_RenderItem->isRenderOK = value;
+	m_renderItem->SetRenderOK(value);
 
 	for (auto& it : m_ChildObject)
 	{
-		it->m_RenderItem->isRenderOK = value;
+		it->RenderUI(value);
 	}
 }

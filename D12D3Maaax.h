@@ -1,4 +1,6 @@
 #pragma once
+#define MAXTEXTURENUM 1
+
 
 class D12D3Maaax :public D12App
 {
@@ -52,5 +54,6 @@ private:
 
 private:
 	RenderFont* m_font = nullptr;
-	cUIObject m_UIObject;
+	shared_ptr<cRenderItem> testRender;
+	vector<shared_ptr<RenderInstance>> testRenderlist;
 };

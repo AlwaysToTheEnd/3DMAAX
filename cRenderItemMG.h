@@ -1,41 +1,80 @@
 #pragma once
 
-#define RENDERITEMMG cRenderItemMG::Get()
+#define RENDERITEMMG RenderItemMG::Get()
+
+struct RenderInstance
+{
+	InstanceData instanceData;
+	int numFramesDirty = gNumFrameResources;
+};
+
+class cRenderItem
+{
+public:
+	static void SetDevice(ID3D12Device* device) { m_device = device; }
+
+	void SetUploadBufferSize(UINT numInstance);
+	void SetPrimitiveType(D3D12_PRIMITIVE_TOPOLOGY type) { m_primitiveType = type; }
+	void SetGeometry(const MeshGeometry* geometry, string submeshName);
+	void SetRenderOK(bool value) { m_isRenderOK = value; }
+
+	shared_ptr<RenderInstance> GetRenderIsntance();
+
+private:
+	friend class RenderItemMG;
+
+	void Update();
+	void Render(ID3D12GraphicsCommandList * cmdList);
+
+private:
+	static ID3D12Device* m_device;
+
+	unique_ptr<UploadBuffer<InstanceData>> m_objectCB[gNumFrameResources] = {};
+	UploadBuffer<InstanceData>* m_currFrameCB = nullptr;
+	UINT m_currFrameCBIndex = 0;
+	UINT m_currCBSize = 0;
+
+	bool m_isRenderOK = true;
+	const MeshGeometry* m_geo = nullptr;
+	D3D12_PRIMITIVE_TOPOLOGY m_primitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	UINT m_indexCount = 0;
+	UINT m_startIndexLocation = 0;
+	UINT m_baseVertexLocation = 0;
+
+	list<shared_ptr<RenderInstance>> m_instances;
+};
 
 struct RenderItemSet
 {
-	list<shared_ptr<RenderItem>> items;
+	list<shared_ptr<cRenderItem>> items;
 };
 
-class cRenderItemMG
+class RenderItemMG
 {
 public:
-	static cRenderItemMG * Get()
+	static RenderItemMG * Get()
 	{
 		if (instance == nullptr)
 		{
-			instance = new cRenderItemMG;
+			instance = new RenderItemMG;
 		}
 
 		return instance;
 	}
 
-	void Update(FrameResource* currFrameResource);
-	void Render(ID3D12GraphicsCommandList * cmdList, 
-		FrameResource* currFrameResource, string renderItemSetName);
+	void Update();
+	void Render(ID3D12GraphicsCommandList * cmdList, string renderItemSetName);
 	void AddRenderSet(string renderSetKeyName);
 	RenderItemSet* GetRenderItemSet(string key);
 
 public:
-	shared_ptr<RenderItem> AddRenderItem(string renderSetKeyName = "");
-	UINT GetNumRenderItems() { return RenderItemIndexCount; };
+	shared_ptr<cRenderItem> AddRenderItem(string renderSetKeyName = "");
 
 private:
-	cRenderItemMG() = default;
+	RenderItemMG() = default;
 
-	static cRenderItemMG* instance;
+	static RenderItemMG* instance;
 	string baseKey;
-	UINT RenderItemIndexCount=0;
 	concurrency::concurrent_unordered_map <string, RenderItemSet> m_RenderItemSets;
 };
 

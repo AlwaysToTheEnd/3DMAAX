@@ -21,6 +21,7 @@ bool D12D3Maaax::Initialize()
 	if (!D12App::Initialize())
 		return false;
 
+	cRenderItem::SetDevice(m_D3dDevice.Get());
 	ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
 	BuildTextures();
 	BuildRootSignature();
@@ -76,9 +77,7 @@ void D12D3Maaax::Update()
 		CloseHandle(eventHandle);
 	}
 
-	m_UIObject.Update(XMMatrixIdentity());
-
-	RENDERITEMMG->Update(m_CurrFrameResource);
+	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
 	UpdateMainPassCB();
 }
@@ -90,7 +89,7 @@ void D12D3Maaax::Draw()
 	ThrowIfFailed(cmdListAlloc->Reset());
 
 	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc,
-		m_PSOs["opaque"].Get()));
+		m_PSOs["base"].Get()));
 
 	m_CommandList->RSSetViewports(1, &m_ScreenViewport);
 	m_CommandList->RSSetScissorRects(1, &m_ScissorRect);
@@ -104,20 +103,21 @@ void D12D3Maaax::Draw()
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
 	/////////////////////////////
-
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_TextureHeap->GetHeap() };
 	m_CommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
 	m_CommandList->SetGraphicsRootSignature(m_RootSignature.Get());
+
+	auto matBuffer = m_CurrFrameResource->materialBuffer->Resource();
+	m_CommandList->SetGraphicsRootShaderResourceView(1, matBuffer->GetGPUVirtualAddress());
 
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
-	RENDERITEMMG->Render(m_CommandList.Get(), m_CurrFrameResource, "opaque");
 
-	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
-	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
+	m_CommandList->SetGraphicsRootDescriptorTable(3, 
+		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
 
-	m_CommandList->SetPipelineState(m_PSOs["UI"].Get());
-	RENDERITEMMG->Render(m_CommandList.Get(), m_CurrFrameResource, "UI");
+	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 
 	FONTMANAGER->Render(m_CommandList.Get());
 	FONTMANAGER->Commit(m_CommandQueue.Get());
@@ -141,7 +141,7 @@ void D12D3Maaax::Draw()
 
 void D12D3Maaax::UpdateMaterialCBs()
 {
-	auto currMaterialCB = m_CurrFrameResource->materialCB.get();
+	auto currMaterialCB = m_CurrFrameResource->materialBuffer.get();
 
 	for (auto& e : m_Materials)
 	{
@@ -154,6 +154,7 @@ void D12D3Maaax::UpdateMaterialCBs()
 			matConstants.diffuseAlbedo = mat->diffuseAlbedo;
 			matConstants.fresnel0 = mat->fresnel0;
 			matConstants.roughness = mat->roughness;
+			matConstants.diffuseMapIndex = mat->diffuseMapIndex;
 			XMStoreFloat4x4(&matConstants.matTransform, XMMatrixTranspose(matTransform));
 
 			currMaterialCB->CopyData(mat->matCBIndex, matConstants);
@@ -209,16 +210,17 @@ void D12D3Maaax::UpdateMainPassCB()
 }
 
 
+
 void D12D3Maaax::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE texTable;
-	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, MAXTEXTURENUM, 0);
 
 	CD3DX12_ROOT_PARAMETER slotRootParam[4];
-	slotRootParam[0].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
-	slotRootParam[1].InitAsConstantBufferView(0);
-	slotRootParam[2].InitAsConstantBufferView(1);
-	slotRootParam[3].InitAsConstantBufferView(2);
+	slotRootParam[0].InitAsShaderResourceView(0, 1);
+	slotRootParam[1].InitAsShaderResourceView(1, 1);
+	slotRootParam[2].InitAsConstantBufferView(0);
+	slotRootParam[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	auto staticSamplers = GetStaticSamplers();
 
@@ -244,14 +246,14 @@ void D12D3Maaax::BuildRootSignature()
 
 void D12D3Maaax::BuildShadersAndInputLayout()
 {
-	m_Shaders["standardVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_0");
-	m_Shaders["opaquePS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_0");
+	m_Shaders["baseVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_1");
+	m_Shaders["basePS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_1");
 
-	m_Shaders["uiVS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "VS", "vs_5_0");
-	m_Shaders["uiPS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "PS", "ps_5_0");
+	//m_Shaders["uiVS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "VS", "vs_5_1");
+	//m_Shaders["uiPS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "PS", "ps_5_1");
 
-	m_Shaders["ColorVertexVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_0");
-	m_Shaders["ColorVertexPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_0");
+	//m_Shaders["ColorVertexVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_0");
+	//m_Shaders["ColorVertexPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_0");
 
 	m_NTVertexInputLayout =
 	{
@@ -260,12 +262,11 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
-	D3D12_INPUT_ELEMENT_DESC decs;
-	m_CVertexInputLayout =
-	{
-		{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-		{ "COLOR" ,0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-	};
+	//m_CVertexInputLayout =
+	//{
+	//	{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
+	//	{ "COLOR" ,0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
+	//};
 }
 
 void D12D3Maaax::BuildGeometry()
@@ -273,10 +274,41 @@ void D12D3Maaax::BuildGeometry()
 	vector<NT_Vertex> vertices;
 	vector<UINT> indices;
 
+	auto sphereGeo = make_unique<MeshGeometry>();
+	sphereGeo->name = "sphere";
+
+	GeometryGenerator geoGen;
+	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.15f, 10, 10);
+	vertices.clear();
+	vertices.resize(sphere.Vertices.size());
+
+	const UINT sphereDataSize = sizeof(NT_Vertex)*vertices.size();
+	const UINT sphereIndexSize = sizeof(UINT32)*sphere.Indices32.size();
+
+	for (int i = 0; i < sphere.Vertices.size(); i++)
+	{
+		vertices[i].pos = sphere.Vertices[i].Position;
+		vertices[i].normal = sphere.Vertices[i].Normal;
+		vertices[i].uv = sphere.Vertices[i].TexC;
+	}
+
+	sphereGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
+		vertices.data(), sphereDataSize, sphereGeo->vertexUploadBuffer);
+
+	sphereGeo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
+		sphere.Indices32.data(), sphereIndexSize, sphereGeo->indexUploadBuffer);
+
+	sphereGeo->indexFormat = DXGI_FORMAT_R32_UINT;
+	sphereGeo->indexBufferByteSize = sphereIndexSize;
+	sphereGeo->vertexBufferByteSize = sphereDataSize;
+	sphereGeo->vertexByteStride = sizeof(NT_Vertex);
+
 	SubMeshGeometry subMesh;
 	subMesh.baseVertexLocation = 0;
 	subMesh.startIndexLocation = 0;
-	subMesh.indexCount = indices.size();
+	subMesh.indexCount = sphere.Indices32.size();
+	sphereGeo->DrawArgs["sphere"] = subMesh;
+	m_Geometries[sphereGeo->name] = move(sphereGeo);
 
 	cUIObject::UIMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
@@ -290,13 +322,13 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.pRootSignature = m_RootSignature.Get();
 	opaquePsoDesc.VS =
 	{
-		reinterpret_cast<BYTE*>(m_Shaders["standardVS"]->GetBufferPointer()),
-		m_Shaders["standardVS"]->GetBufferSize()
+		reinterpret_cast<BYTE*>(m_Shaders["baseVS"]->GetBufferPointer()),
+		m_Shaders["baseVS"]->GetBufferSize()
 	};
 	opaquePsoDesc.PS =
 	{
-		reinterpret_cast<BYTE*>(m_Shaders["opaquePS"]->GetBufferPointer()),
-		m_Shaders["opaquePS"]->GetBufferSize()
+		reinterpret_cast<BYTE*>(m_Shaders["basePS"]->GetBufferPointer()),
+		m_Shaders["basePS"]->GetBufferSize()
 	};
 	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -308,57 +340,57 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.SampleDesc.Count = m_4xMsaaState ? 4 : 1;
 	opaquePsoDesc.SampleDesc.Quality = m_4xMsaaState ? (m_4xmsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
-	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["opaque"])));
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["base"])));
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
-	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
-	transparencyBlendDesc.BlendEnable = true;
-	transparencyBlendDesc.LogicOpEnable = false;
-	transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-	transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
-	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
-	transparentPsoDesc.VS =
-	{
-		reinterpret_cast<BYTE*>(m_Shaders["uiVS"]->GetBufferPointer()),
-		m_Shaders["uiVS"]->GetBufferSize()
-	};
+	//D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
+	//D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
+	//transparencyBlendDesc.BlendEnable = true;
+	//transparencyBlendDesc.LogicOpEnable = false;
+	//transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	//transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	//transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	//transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	//transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	//transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	//transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	//transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	//transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
+	//transparentPsoDesc.VS =
+	//{
+	//	reinterpret_cast<BYTE*>(m_Shaders["uiVS"]->GetBufferPointer()),
+	//	m_Shaders["uiVS"]->GetBufferSize()
+	//};
 
-	transparentPsoDesc.PS =
-	{
-		reinterpret_cast<BYTE*>(m_Shaders["uiPS"]->GetBufferPointer()),
-		m_Shaders["uiPS"]->GetBufferSize()
-	};
+	//transparentPsoDesc.PS =
+	//{
+	//	reinterpret_cast<BYTE*>(m_Shaders["uiPS"]->GetBufferPointer()),
+	//	m_Shaders["uiPS"]->GetBufferSize()
+	//};
 
-	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["UI"])));
+	//ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["UI"])));
 
-	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	opaquePsoDesc.VS =
-	{
-		reinterpret_cast<BYTE*>(m_Shaders["ColorVertexVS"]->GetBufferPointer()),
-		m_Shaders["ColorVertexVS"]->GetBufferSize()
-	};
-	opaquePsoDesc.PS =
-	{
-		reinterpret_cast<BYTE*>(m_Shaders["ColorVertexPS"]->GetBufferPointer()),
-		m_Shaders["ColorVertexPS"]->GetBufferSize()
-	};
-	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
+	//opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	//opaquePsoDesc.VS =
+	//{
+	//	reinterpret_cast<BYTE*>(m_Shaders["ColorVertexVS"]->GetBufferPointer()),
+	//	m_Shaders["ColorVertexVS"]->GetBufferSize()
+	//};
+	//opaquePsoDesc.PS =
+	//{
+	//	reinterpret_cast<BYTE*>(m_Shaders["ColorVertexPS"]->GetBufferPointer()),
+	//	m_Shaders["ColorVertexPS"]->GetBufferSize()
+	//};
+	//opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
 
-	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["colorVertex"])));
+	//ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["colorVertex"])));
 
-	RENDERITEMMG->AddRenderSet("opaque");
-	RENDERITEMMG->AddRenderSet("UI");
+	RENDERITEMMG->AddRenderSet("base");
+	/*RENDERITEMMG->AddRenderSet("UI");*/
 }
 
 void D12D3Maaax::BuildTextures()
 {
-	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), 15);
+	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), MAXTEXTURENUM);
 	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "ice", L"Texture/ice.dds");
 }
 
@@ -367,7 +399,7 @@ void D12D3Maaax::BuildFrameResources()
 	for (int i = 0; i < gNumFrameResources; i++)
 	{
 		m_FrameResources.push_back(make_unique<FrameResource>(m_D3dDevice.Get(),
-			3, RENDERITEMMG->GetNumRenderItems(), (UINT)m_Materials.size()));
+			2, (UINT)m_Materials.size()));
 	}
 }
 
@@ -396,11 +428,16 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	m_UIObject.Build("UI");
-	m_UIObject.SetTexture(m_TextureHeap->GetTexture("ice"));
-	m_UIObject.SetMaterial(m_Materials["wirefence"].get());
-	m_UIObject.SetSize({ 30,30 });
-	m_UIObject.SetPos({ 10,10,0 });
+	testRender = RENDERITEMMG->AddRenderItem("base");
+
+	testRender->SetGeometry(m_Geometries["sphere"].get(),"sphere");
+	testRender->SetUploadBufferSize(100);
+
+	for (int i = 0; i < 100; i++)
+	{
+		testRenderlist.push_back(testRender->GetRenderIsntance());
+		testRenderlist.back()->instanceData.World._41 = -3 + i;
+	}
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()

@@ -80,6 +80,24 @@ public:
 		const string& target);
 };
 
+//2018.10.14 ver
+template<typename Iterator, typename _Function>
+static void ContainerSharedCountUseCheckAndForRoop(Iterator begin, Iterator end, const _Function& func)
+{
+	for (auto it = begin; it != end;)
+	{
+		if (it->use_count() == 1)
+		{
+			it = m_instances.erase(it);
+		}
+		else
+		{
+			func(it);
+			it++;
+		}
+	}
+}
+
 class DxException
 {
 public:
@@ -118,27 +136,29 @@ inline wstring AnsiToWString(const string& str)
 //------------------------------------user define Structers--------------------//
 struct Material
 {
-	string name;
+	string		name;
+	int			matCBIndex = -1;
+	int			diffuseSrvHeapIndex = -1;
 
-	int matCBIndex = -1;
-	int diffuseSrvHeapIndex = -1;
+	int			numFramesDirty = gNumFrameResources;
 
-	int numFramesDirty = gNumFrameResources;
-
-	XMFLOAT4 diffuseAlbedo = { 1,1,1,1 };
-	XMFLOAT3 fresnel0 = { 0.01f,0.01f,0.01f };
-
-	float roughness = 0.25f;
-	XMFLOAT4X4 matTransform = MathHelper::Identity4x4();
+	XMFLOAT4	diffuseAlbedo = { 1,1,1,1 };
+	XMFLOAT3	fresnel0 = { 0.01f,0.01f,0.01f };
+	float		roughness = 0.25f;
+	XMFLOAT4X4	matTransform = MathHelper::Identity4x4();
+	UINT		diffuseMapIndex = 0;
 };
 
 struct MaterialConstants
 {
-	XMFLOAT4 diffuseAlbedo = { 1,1,1,1 };
-	XMFLOAT3 fresnel0 = { 0.01f,0.01f,0.01f };
-
-	float roughness = 0.25f;
-	XMFLOAT4X4 matTransform = MathHelper::Identity4x4();
+	XMFLOAT4	diffuseAlbedo = { 1,1,1,1 };
+	XMFLOAT3	fresnel0 = { 0.01f,0.01f,0.01f };
+	float		roughness = 0.25f;
+	XMFLOAT4X4	matTransform = MathHelper::Identity4x4();
+	UINT		diffuseMapIndex = 0;
+	UINT		MaterialPad0;
+	UINT		MaterialPad1;
+	UINT		MaterialPad2;
 };
 
 struct SubMeshGeometry
@@ -171,7 +191,7 @@ struct MeshGeometry
 	unique_ptr<cOcTree> octree = nullptr;
 	unordered_map<string, SubMeshGeometry> DrawArgs;
 
-	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView()
+	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const
 	{
 		D3D12_VERTEX_BUFFER_VIEW vbv;
 		vbv.BufferLocation = vertexBufferGPU->GetGPUVirtualAddress();
@@ -181,7 +201,7 @@ struct MeshGeometry
 		return vbv;
 	}
 
-	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView()
+	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const
 	{
 		D3D12_INDEX_BUFFER_VIEW ibv;
 		ibv.BufferLocation = indexBufferGPU->GetGPUVirtualAddress();

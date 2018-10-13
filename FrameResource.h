@@ -2,10 +2,14 @@
 
 #define MAXLIGHTS 16
 
-struct ObjectConstants
+struct InstanceData
 {
-	XMFLOAT4X4 world = MathHelper::Identity4x4();
-	XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
+	XMFLOAT4X4	World = MathHelper::Identity4x4();
+	XMFLOAT4X4	TexTransform = MathHelper::Identity4x4();
+	UINT		MaterialIndex = 0;
+	UINT		InstancePad0;
+	UINT		InstancePad1;
+	UINT		InstancePad2;
 };
 
 struct PassConstants
@@ -45,15 +49,13 @@ struct C_Vertex
 
 struct FrameResource
 {
-	FrameResource(ID3D12Device* device, UINT passCount, UINT objectCount,
-		UINT materialCount)
+	FrameResource(ID3D12Device* device, UINT passCount, UINT materialCount)
 	{
 		ThrowIfFailed(device->CreateCommandAllocator(
 			D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(cmdListAlloc.GetAddressOf())));
 
 		passCB = make_unique<UploadBuffer<PassConstants>>(device, passCount, true);
-		materialCB = make_unique<UploadBuffer<MaterialConstants>>(device, materialCount, true);
-		objectCB = make_unique<UploadBuffer<ObjectConstants>>(device, objectCount, true);
+		materialBuffer = make_unique<UploadBuffer<MaterialConstants>>(device, materialCount, false);
 	}
 
 	FrameResource(const FrameResource& rhs) = delete;
@@ -62,42 +64,7 @@ struct FrameResource
 	ComPtr<ID3D12CommandAllocator> cmdListAlloc;
 
 	unique_ptr<UploadBuffer<PassConstants>> passCB = nullptr;
-	unique_ptr<UploadBuffer<MaterialConstants>> materialCB = nullptr;
-	unique_ptr<UploadBuffer<ObjectConstants>> objectCB = nullptr;
-
+	unique_ptr<UploadBuffer<MaterialConstants>> materialBuffer = nullptr;
 
 	UINT64 fence = 0;
-};
-
-struct RenderItem
-{
-	RenderItem()
-	{
-		texture.ptr = 0;
-	}
-
-	XMFLOAT4X4 world = MathHelper::Identity4x4();
-	XMFLOAT4X4 texTransform = MathHelper::Identity4x4();
-
-	int numFramesDirty = gNumFrameResources;
-	bool isIndexRender = true;
-	bool isRenderOK = true;
-
-	int objCBIndex = -1;
-
-	Material* mater = nullptr;
-	MeshGeometry* geo = nullptr;
-	D3D12_GPU_DESCRIPTOR_HANDLE texture;
-
-	D3D12_PRIMITIVE_TOPOLOGY primitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	UINT indexCount = 0;
-	UINT startIndexLocation = 0;
-	int baseVertexLocation = 0;
-};
-
-enum class RenderLayer :int
-{
-	Opaque=0,
-	Count
 };
