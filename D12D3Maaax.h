@@ -52,6 +52,6 @@ private:
 
 private:
 	RenderFont* m_font = nullptr;
-	cDrawLines m_drawLines;
-	cDrawPlane m_drawPlane;
+	vector<cDrawPlane> m_planes;
+	vector<cDrawLines> m_lines;
 };

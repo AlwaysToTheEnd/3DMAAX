@@ -20,7 +20,9 @@ public:
 	cDrawPlane();
 	virtual ~cDrawPlane();
 
+	virtual void Update() override;
+	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
 	bool XM_CALLCONV Picking(PICKRAY ray, float& distance, cPlane** ppPlane);
 private:
-
+	vector<cPlane> m_planes;
 };

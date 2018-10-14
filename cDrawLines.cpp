@@ -41,7 +41,6 @@ void cDrawLines::DisPosUploaders()
 
 cDrawLines::cDrawLines(cPlane * plane)
 	: m_drawPlane(plane)
-	, m_renderItem(nullptr)
 {
 
 }

@@ -10,7 +10,8 @@ public:
 	cDrawLines(cPlane* plane);
 	~cDrawLines();
 
-	void Update();
+	virtual void Update() override;
+	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
 
 private:
 	static unique_ptr<MeshGeometry> m_geo;
