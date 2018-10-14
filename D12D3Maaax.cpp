@@ -11,6 +11,7 @@ D12D3Maaax::~D12D3Maaax()
 {
 	delete RENDERITEMMG;
 	delete FONTMANAGER;
+	delete INPUTMG;
 
 	if (m_D3dDevice != nullptr)
 		FlushCommandQueue();
@@ -38,14 +39,8 @@ bool D12D3Maaax::Initialize()
 	FlushCommandQueue();
 	FONTMANAGER->Build(m_D3dDevice.Get(), m_CommandQueue.Get());
 
-	//m_font = FONTMANAGER->GetFont("baseFont");
-	//m_font->printString = L"sdalkfjaklsdf";
-	//m_font->color = Colors::White;
-	//m_font->pos = { 0,0,0 };
-	for (auto& it : m_Geometries)
-	{
-		it.second->DisPosUploaders();
-	}
+	cDrawLines::DisPosUploaders();
+	cUIObject::DisPosUploaders();
 	
 	OnResize();
 
@@ -77,9 +72,12 @@ void D12D3Maaax::Update()
 		CloseHandle(eventHandle);
 	}
 
-	RENDERITEMMG->Update();
-	UpdateMaterialCBs();
 	UpdateMainPassCB();
+	UpdateMaterialCBs();
+	INPUTMG->Update(m_MainPassCB.view, m_MainPassCB.proj, m_ClientWidth, m_ClientHeight);
+
+
+	RENDERITEMMG->Update();
 }
 
 void D12D3Maaax::Draw()
@@ -97,7 +95,7 @@ void D12D3Maaax::Draw()
 	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LightSteelBlue, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::Black, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -117,7 +115,8 @@ void D12D3Maaax::Draw()
 	m_CommandList->SetGraphicsRootDescriptorTable(3, 
 		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
 
-	RENDERITEMMG->Render(m_CommandList.Get(), "base");
+	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "drawElement");
 
 	FONTMANAGER->Render(m_CommandList.Get());
 	FONTMANAGER->Commit(m_CommandQueue.Get());
@@ -252,8 +251,8 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 	//m_Shaders["uiVS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "VS", "vs_5_1");
 	//m_Shaders["uiPS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "PS", "ps_5_1");
 
-	//m_Shaders["ColorVertexVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_0");
-	//m_Shaders["ColorVertexPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_0");
+	m_Shaders["drawElementVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_1");
+	m_Shaders["drawElementPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_1");
 
 	m_NTVertexInputLayout =
 	{
@@ -262,54 +261,16 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
-	//m_CVertexInputLayout =
-	//{
-	//	{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-	//	{ "COLOR" ,0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
-	//};
+	m_CVertexInputLayout =
+	{
+		{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
+		{ "COLOR" ,0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0 },
+	};
 }
 
 void D12D3Maaax::BuildGeometry()
 {
-	vector<NT_Vertex> vertices;
-	vector<UINT> indices;
-
-	auto sphereGeo = make_unique<MeshGeometry>();
-	sphereGeo->name = "sphere";
-
-	GeometryGenerator geoGen;
-	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.15f, 10, 10);
-	vertices.clear();
-	vertices.resize(sphere.Vertices.size());
-
-	const UINT sphereDataSize = sizeof(NT_Vertex)*vertices.size();
-	const UINT sphereIndexSize = sizeof(UINT32)*sphere.Indices32.size();
-
-	for (int i = 0; i < sphere.Vertices.size(); i++)
-	{
-		vertices[i].pos = sphere.Vertices[i].Position;
-		vertices[i].normal = sphere.Vertices[i].Normal;
-		vertices[i].uv = sphere.Vertices[i].TexC;
-	}
-
-	sphereGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		vertices.data(), sphereDataSize, sphereGeo->vertexUploadBuffer);
-
-	sphereGeo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_D3dDevice.Get(), m_CommandList.Get(),
-		sphere.Indices32.data(), sphereIndexSize, sphereGeo->indexUploadBuffer);
-
-	sphereGeo->indexFormat = DXGI_FORMAT_R32_UINT;
-	sphereGeo->indexBufferByteSize = sphereIndexSize;
-	sphereGeo->vertexBufferByteSize = sphereDataSize;
-	sphereGeo->vertexByteStride = sizeof(NT_Vertex);
-
-	SubMeshGeometry subMesh;
-	subMesh.baseVertexLocation = 0;
-	subMesh.startIndexLocation = 0;
-	subMesh.indexCount = sphere.Indices32.size();
-	sphereGeo->DrawArgs["sphere"] = subMesh;
-	m_Geometries[sphereGeo->name] = move(sphereGeo);
-
+	cDrawLines::LineMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 	cUIObject::UIMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
 
@@ -369,22 +330,24 @@ void D12D3Maaax::BuildPSOs()
 
 	//ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["UI"])));
 
-	//opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	//opaquePsoDesc.VS =
-	//{
-	//	reinterpret_cast<BYTE*>(m_Shaders["ColorVertexVS"]->GetBufferPointer()),
-	//	m_Shaders["ColorVertexVS"]->GetBufferSize()
-	//};
-	//opaquePsoDesc.PS =
-	//{
-	//	reinterpret_cast<BYTE*>(m_Shaders["ColorVertexPS"]->GetBufferPointer()),
-	//	m_Shaders["ColorVertexPS"]->GetBufferSize()
-	//};
-	//opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(), (UINT)m_CVertexInputLayout.size() };
+	opaquePsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["drawElementVS"]->GetBufferPointer()),
+		m_Shaders["drawElementVS"]->GetBufferSize()
+	};
+	opaquePsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["drawElementPS"]->GetBufferPointer()),
+		m_Shaders["drawElementPS"]->GetBufferSize()
+	};
+	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
 
-	//ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["colorVertex"])));
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawElement"])));
 
 	RENDERITEMMG->AddRenderSet("base");
+	RENDERITEMMG->AddRenderSet("drawElement");
 	/*RENDERITEMMG->AddRenderSet("UI");*/
 }
 
@@ -428,16 +391,7 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	testRender = RENDERITEMMG->AddRenderItem("base");
-
-	testRender->SetGeometry(m_Geometries["sphere"].get(),"sphere");
-	testRender->SetUploadBufferSize(100);
-
-	for (int i = 0; i < 100; i++)
-	{
-		testRenderlist.push_back(testRender->GetRenderIsntance());
-		testRenderlist.back()->instanceData.World._41 = -3 + i;
-	}
+	m_drawLines.
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()

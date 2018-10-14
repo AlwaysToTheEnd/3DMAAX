@@ -4,6 +4,7 @@ class cUIObject : public cObject
 {
 public:
 	static void UIMeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+	static void DisPosUploaders();
 
 public:
 	cUIObject();

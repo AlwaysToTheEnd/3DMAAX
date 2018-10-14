@@ -45,6 +45,18 @@ struct C_Vertex
 {
 	XMFLOAT3 pos;
 	XMFLOAT4 color;
+
+	C_Vertex(XMFLOAT3 _pos, XMFLOAT4 _color)
+	{
+		pos = _pos;
+		color = _color;
+	}
+
+	C_Vertex(XMFLOAT3 _pos, XMVECTOR _color)
+	{
+		pos = _pos;
+		XMStoreFloat4(&color, _color);
+	}
 };
 
 struct FrameResource

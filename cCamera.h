@@ -12,11 +12,9 @@ public:
 
 	const XMFLOAT4X4* GetViewMatrix() { return &m_View; }
 	const XMFLOAT3&	GetEyePos() { return m_eye; }
-	PICKRAY XM_CALLCONV GetMousePickLay(XMFLOAT4X4& projMat,float clientSizeX,float clientSizeY);
 
 private:
 	XMFLOAT3	m_eye;
-
 	XMFLOAT4X4	m_View;
 
 	float		m_Distance;

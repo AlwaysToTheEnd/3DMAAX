@@ -152,8 +152,11 @@
   <ItemGroup>
     <ClInclude Include="05_Texture.h" />
     <ClInclude Include="cCamera.h" />
+    <ClInclude Include="cDrawElement.h" />
+    <ClInclude Include="cDrawLines.h" />
     <ClInclude Include="cDrawPlane.h" />
     <ClInclude Include="cFontManager.h" />
+    <ClInclude Include="cInputDeviceMG.h" />
     <ClInclude Include="cObejct.h" />
     <ClInclude Include="cOcTree.h" />
     <ClInclude Include="cPercentageValueSet.h" />
@@ -174,8 +177,11 @@
   <ItemGroup>
     <ClCompile Include="05_Texture.cpp" />
     <ClCompile Include="cCamera.cpp" />
+    <ClCompile Include="cDrawElement.cpp" />
+    <ClCompile Include="cDrawLines.cpp" />
     <ClCompile Include="cDrawPlane.cpp" />
     <ClCompile Include="cFontManager.cpp" />
+    <ClCompile Include="cInputDeviceMG.cpp" />
     <ClCompile Include="cObejct.cpp" />
     <ClCompile Include="cOcTree.cpp" />
     <ClCompile Include="cPercentageValueSet.cpp" />
@@ -203,9 +209,13 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shaders\Common.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shaders\DrawElementSahder.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="ShadowShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

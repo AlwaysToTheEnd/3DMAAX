@@ -57,6 +57,11 @@ void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * c
 	}
 }
 
+void cUIObject::DisPosUploaders()
+{
+	m_uiGeo->DisPosUploaders();
+}
+
 void cUIObject::Update(FXMMATRIX mat)
 {
 	UIUpdate();
