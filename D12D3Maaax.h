@@ -16,6 +16,7 @@ private:
 	virtual void Update() override;
 	virtual void Draw() override;
 
+	void UpdateDrawElement();
 	void UpdateOperation();
 	void UpdateMaterialCBs();
 	void UpdateMainPassCB();
@@ -26,6 +27,7 @@ private:
 	void BuildShadersAndInputLayout();
 	void BuildGeometry();
 	void BuildPSOs();
+	void BuildOperator();
 	void BuildObjects();
 	void BuildFrameResources();
 

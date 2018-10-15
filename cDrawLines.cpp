@@ -48,3 +48,8 @@ void cDrawLines::Update()
 {
 
 }
+
+void cDrawLines::SetRenderItem(shared_ptr<cRenderItem> renderItem)
+{
+
+}

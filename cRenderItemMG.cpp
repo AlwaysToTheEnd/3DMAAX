@@ -91,7 +91,7 @@ void RenderItemMG::Update()
 {
 	for (auto& it : m_RenderItemSets)
 	{
-		for (auto&it2 : it.second.items)
+		for (auto& it2 : it.second.items)
 		{
 			it2->Update();
 		}
@@ -124,7 +124,10 @@ void RenderItemMG::Render(ID3D12GraphicsCommandList * cmdList, string renderItem
 
 	for (auto& it2 : it->second.items)
 	{
-		it2->Render(cmdList);
+		if (it2->m_instances.size())
+		{
+			it2->Render(cmdList);
+		}
 	}
 }
 

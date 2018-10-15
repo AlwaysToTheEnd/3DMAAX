@@ -31,6 +31,7 @@ bool D12D3Maaax::Initialize()
 	BuildGeometry();
 	BuildMaterials();
 	BuildObjects();
+	BuildOperator();
 	BuildFrameResources();
 
 	ThrowIfFailed(m_CommandList->Close());
@@ -40,6 +41,7 @@ bool D12D3Maaax::Initialize()
 	FONTMANAGER->Build(m_D3dDevice.Get(), m_CommandQueue.Get());
 
 	cDrawLines::DisPosUploaders();
+	cDrawPlane::DisPosUploaders();
 	cUIObject::DisPosUploaders();
 	
 	OnResize();
@@ -76,7 +78,14 @@ void D12D3Maaax::Update()
 	UpdateMaterialCBs();
 	INPUTMG->Update(m_MainPassCB.view, m_MainPassCB.proj, m_ClientWidth, m_ClientHeight);
 
+	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
+	{
+		m_currOperation = m_operations[0].get();
+		m_currOperation->StartOperation();
+	}
+
 	UpdateOperation();
+	UpdateDrawElement();
 	RENDERITEMMG->Update();
 }
 
@@ -114,9 +123,9 @@ void D12D3Maaax::Draw()
 
 	m_CommandList->SetGraphicsRootDescriptorTable(3, 
 		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
+	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 
 	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
-	RENDERITEMMG->Render(m_CommandList.Get(), "drawElement");
 
 	FONTMANAGER->Render(m_CommandList.Get());
 	FONTMANAGER->Commit(m_CommandQueue.Get());
@@ -137,6 +146,19 @@ void D12D3Maaax::Draw()
 	m_CommandQueue->Signal(m_Fence.Get(), m_CurrentFence);
 }
 
+
+void D12D3Maaax::UpdateDrawElement()
+{
+	for (auto& it : m_planes)
+	{
+		it->Update();
+	}
+
+	for (auto& it : m_lines)
+	{
+		it->Update();
+	}
+}
 
 void D12D3Maaax::UpdateOperation()
 {
@@ -293,6 +315,7 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 void D12D3Maaax::BuildGeometry()
 {
 	cDrawLines::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cDrawPlane::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 	cUIObject::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
 
@@ -314,6 +337,7 @@ void D12D3Maaax::BuildPSOs()
 		m_Shaders["basePS"]->GetBufferSize()
 	};
 	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	opaquePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.SampleMask = UINT_MAX;
@@ -411,9 +435,15 @@ void D12D3Maaax::BuildMaterials()
 	m_Materials["icemirror"] = std::move(icemirror);
 }
 
+void D12D3Maaax::BuildOperator()
+{
+	m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Plane));
+}
+
 void D12D3Maaax::BuildObjects()
 {
-	m_drawLines.
+	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
+	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("base"));
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()
