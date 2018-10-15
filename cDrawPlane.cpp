@@ -1,12 +1,13 @@
 #include "stdafx.h"
 
-cDrawPlane::cDrawPlane()
-	: m_plane(Xmfloat4Zero())
+unique_ptr<MeshGeometry> cDrawPlane::m_geo = nullptr;
+
+void cDrawPlane::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
 {
+
 }
 
-cDrawPlane::cDrawPlane(XMFLOAT4 plane)
-	: m_plane(plane)
+cDrawPlane::cDrawPlane()
 {
 }
 
@@ -15,14 +16,3 @@ cDrawPlane::~cDrawPlane()
 
 }
 
-void cDrawPlane::SetPlane(XMVECTOR plane)
-{
-
-}
-
-bool XM_CALLCONV cDrawPlane::Picking(PICKRAY ray, float & distance)
-{
-
-
-	return false;
-}

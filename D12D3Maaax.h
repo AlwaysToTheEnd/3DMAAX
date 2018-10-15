@@ -1,4 +1,5 @@
 #pragma once
+#define MAXTEXTURENUM 7
 
 class D12D3Maaax :public D12App
 {
@@ -15,6 +16,7 @@ private:
 	virtual void Update() override;
 	virtual void Draw() override;
 
+	void UpdateOperation();
 	void UpdateMaterialCBs();
 	void UpdateMainPassCB();
 
@@ -39,7 +41,6 @@ private:
 	unique_ptr<cTextureHeap> m_TextureHeap;
 	unordered_map<string, unique_ptr<Material>> m_Materials;
 	unordered_map<string, ComPtr<ID3DBlob>> m_Shaders;
-	unordered_map<string, unique_ptr<MeshGeometry>> m_Geometries;
 	unordered_map<string, ComPtr<ID3D12PipelineState>> m_PSOs;
 
 	vector<D3D12_INPUT_ELEMENT_DESC> m_NTVertexInputLayout;
@@ -52,5 +53,8 @@ private:
 
 private:
 	RenderFont* m_font = nullptr;
-	cUIObject m_UIObject;
+	vector<unique_ptr<cDrawElement>> m_planes;
+	vector<unique_ptr<cDrawElement>> m_lines;
+	cOperation* m_currOperation;
+	vector<unique_ptr<cOperation>> m_operations;
 };

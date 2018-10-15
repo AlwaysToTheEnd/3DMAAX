@@ -6,13 +6,12 @@ public:
 	cObject();
 	virtual ~cObject();
 
-	virtual void Build(string piplineName = "");
-	virtual void Build(string subMeshName, MeshGeometry* geo, Material* mater, D3D12_GPU_DESCRIPTOR_HANDLE tex, string piplineName="");
-	virtual void Update(FXMMATRIX mat);
+	virtual void Build(shared_ptr<cRenderItem> renderItem);
+	virtual void Update(FXMMATRIX mat) {}
 	virtual void Update() {}
 
-	shared_ptr<RenderItem> GetRenderItem() { return m_RenderItem; }
+	void SetMatrialIndex(UINT index) { m_renderInstance->instanceData.MaterialIndex = index; }
 
 protected:
-	shared_ptr<RenderItem>			m_RenderItem;
+	shared_ptr<RenderInstance> m_renderInstance;
 };

@@ -216,6 +216,7 @@ bool D12App::Initialize()
 LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	m_Camera.WndProc(hwnd, msg, wParam, lParam);
+	INPUTMG->WndProc(hwnd, msg, wParam, lParam);
 
 	switch (msg)
 	{

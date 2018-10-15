@@ -19,6 +19,7 @@ public:
 	static D12App* GetApp();
 	static double GetDeltaTime() { return m_DeltaTime; }
 	static POINT GetMousePos() { return m_MousePos; }
+
 	HINSTANCE AppInst()const;
 	HWND      MainWnd()const;
 	float     AspectRatio()const;

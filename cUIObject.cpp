@@ -1,9 +1,11 @@
 #include "stdafx.h"
 
-unique_ptr<MeshGeometry> cUIObject::m_uiGeo = nullptr;
+unique_ptr<MeshGeometry> cUIObject::m_geo = nullptr;
 
 cUIObject::cUIObject()
-	:m_Pos(0,0,0)
+	: m_Pos(0,0,0)
+	, m_Size(0,0)
+	, m_renderItem(nullptr)
 {
 }
 
@@ -12,12 +14,12 @@ cUIObject::~cUIObject()
 {
 }
 
-void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
+void cUIObject::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
 {
-	if (m_uiGeo == nullptr)
+	if (m_geo == nullptr)
 	{
-		m_uiGeo = make_unique<MeshGeometry>();
-		m_uiGeo->name = "UI";
+		m_geo = make_unique<MeshGeometry>();
+		m_geo->name = "UI";
 		vector<NT_Vertex> vertices(4);
 
 		vertices[0] = { {0,0,0},{0,0,1},{0,0} };
@@ -36,23 +38,28 @@ void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * c
 		const UINT uiGeoDataSize = sizeof(NT_Vertex)*vertices.size();
 		const UINT uiGeoIndexSize = sizeof(UINT16)*Indices.size();
 
-		m_uiGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
-			vertices.data(), uiGeoDataSize, m_uiGeo->vertexUploadBuffer);
+		m_geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
+			vertices.data(), uiGeoDataSize, m_geo->vertexUploadBuffer);
 
-		m_uiGeo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
-			Indices.data(), uiGeoIndexSize, m_uiGeo->indexUploadBuffer);
+		m_geo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
+			Indices.data(), uiGeoIndexSize, m_geo->indexUploadBuffer);
 
-		m_uiGeo->indexFormat = DXGI_FORMAT_R16_UINT;
-		m_uiGeo->indexBufferByteSize = uiGeoIndexSize;
-		m_uiGeo->vertexBufferByteSize = uiGeoDataSize;
-		m_uiGeo->vertexByteStride = sizeof(NT_Vertex);
+		m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
+		m_geo->indexBufferByteSize = uiGeoIndexSize;
+		m_geo->vertexBufferByteSize = uiGeoDataSize;
+		m_geo->vertexByteStride = sizeof(NT_Vertex);
 
 		SubMeshGeometry subMesh;
 		subMesh.baseVertexLocation = 0;
 		subMesh.startIndexLocation = 0;
 		subMesh.indexCount = Indices.size();
-		m_uiGeo->DrawArgs["UI"] = subMesh;
+		m_geo->DrawArgs["UI"] = subMesh;
 	}
+}
+
+void cUIObject::DisPosUploaders()
+{
+	m_geo->DisPosUploaders();
 }
 
 void cUIObject::Update(FXMMATRIX mat)
@@ -62,9 +69,9 @@ void cUIObject::Update(FXMMATRIX mat)
 	XMMATRIX scaleMat = XMMatrixScaling(m_Size.x, m_Size.y, 1);
 	XMMATRIX uiMat = scaleMat * translationMat*mat;
 
-	XMStoreFloat4x4(&m_RenderItem->world, uiMat);
+	XMStoreFloat4x4(&m_renderInstance->instanceData.World, uiMat);
 
-	m_RenderItem->numFramesDirty = gNumFrameResources;
+	m_renderInstance->numFramesDirty = gNumFrameResources;
 
 	for (auto& it : m_ChildObject)
 	{
@@ -72,21 +79,18 @@ void cUIObject::Update(FXMMATRIX mat)
 	}
 }
 
-void cUIObject::Build(string piplineName)
+void cUIObject::Build(shared_ptr<cRenderItem> renderItem)
 {
-	m_RenderItem = RENDERITEMMG->AddRenderItem(piplineName);
-	m_RenderItem->geo = m_uiGeo.get();
-	m_RenderItem->indexCount = m_RenderItem->geo->DrawArgs["UI"].indexCount;
-	m_RenderItem->baseVertexLocation = m_RenderItem->geo->DrawArgs["UI"].baseVertexLocation;
-	m_RenderItem->startIndexLocation = m_RenderItem->geo->DrawArgs["UI"].startIndexLocation;
+	renderItem->SetGeometry(m_geo.get(), "UI");
+	m_renderItem = renderItem;
 }
 
 void cUIObject::RenderUI(bool value)
 {
-	m_RenderItem->isRenderOK = value;
+	m_renderItem->SetRenderOK(value);
 
 	for (auto& it : m_ChildObject)
 	{
-		it->m_RenderItem->isRenderOK = value;
+		it->RenderUI(value);
 	}
 }

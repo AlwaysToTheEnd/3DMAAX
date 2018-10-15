@@ -49,6 +49,12 @@
     <Filter Include="Objects\ElementObject">
       <UniqueIdentifier>{a48e8c07-d0ec-4ebd-b60f-eb44946d9f64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ManagedClass\cInputDeviceMG">
+      <UniqueIdentifier>{3e4a0b16-91bb-4d7b-833b-f67734f2cfee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cOperation">
+      <UniqueIdentifier>{b3364ae8-48ae-493f-889b-d5de058b2465}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -111,6 +117,21 @@
     <ClInclude Include="cDrawPlane.h">
       <Filter>Objects\ElementObject</Filter>
     </ClInclude>
+    <ClInclude Include="cDrawLines.h">
+      <Filter>Objects\ElementObject</Filter>
+    </ClInclude>
+    <ClInclude Include="cInputDeviceMG.h">
+      <Filter>ManagedClass\cInputDeviceMG</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawElement.h">
+      <Filter>Objects\ElementObject</Filter>
+    </ClInclude>
+    <ClInclude Include="cOperation.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Plane.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -162,7 +183,22 @@
       <Filter>D12App\D12TextureApp</Filter>
     </ClCompile>
     <ClCompile Include="cDrawPlane.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Objects\ElementObject</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawLines.cpp">
+      <Filter>Objects\ElementObject</Filter>
+    </ClCompile>
+    <ClCompile Include="cInputDeviceMG.cpp">
+      <Filter>ManagedClass\cInputDeviceMG</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawElement.cpp">
+      <Filter>Objects\ElementObject</Filter>
+    </ClCompile>
+    <ClCompile Include="cOperation.cpp">
+      <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Plane.cpp">
+      <Filter>cOperation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +225,12 @@
       <Filter>리소스 파일</Filter>
     </FxCompile>
     <FxCompile Include="ShadowShader.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DrawElementSahder.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Common.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
   </ItemGroup>

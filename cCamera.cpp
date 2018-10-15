@@ -84,16 +84,3 @@ void cCamera::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
 	}
 }
-
-PICKRAY XM_CALLCONV cCamera::GetMousePickLay(XMFLOAT4X4& projMat, float clientSizeX, float clientSizeY)
-{
-	XMVECTOR origin = XMLoadFloat3(&m_eye);
-	XMVECTOR ray = XMVectorSet((2.0f*m_CurrMouse.x / clientSizeX - 1.0f) / projMat._11,
-		(-2.0f*m_CurrMouse.y / clientSizeY + 1.0f) / projMat._22, 1.0f, 0);
-
-	XMMATRIX invViewMat = XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_View));
-	ray = XMVector3TransformNormal(ray, invViewMat);
-	ray = XMVector3Normalize(ray);
-
-	return { origin ,ray };
-}
