@@ -52,6 +52,9 @@
     <Filter Include="ManagedClass\cInputDeviceMG">
       <UniqueIdentifier>{3e4a0b16-91bb-4d7b-833b-f67734f2cfee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cOperation">
+      <UniqueIdentifier>{b3364ae8-48ae-493f-889b-d5de058b2465}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -123,6 +126,9 @@
     <ClInclude Include="cDrawElement.h">
       <Filter>Objects\ElementObject</Filter>
     </ClInclude>
+    <ClInclude Include="cOperation.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -184,6 +190,9 @@
     </ClCompile>
     <ClCompile Include="cDrawElement.cpp">
       <Filter>Objects\ElementObject</Filter>
+    </ClCompile>
+    <ClCompile Include="cOperation.cpp">
+      <Filter>cOperation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

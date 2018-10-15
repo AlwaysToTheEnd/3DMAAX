@@ -76,7 +76,7 @@ void D12D3Maaax::Update()
 	UpdateMaterialCBs();
 	INPUTMG->Update(m_MainPassCB.view, m_MainPassCB.proj, m_ClientWidth, m_ClientHeight);
 
-
+	UpdateOperation();
 	RENDERITEMMG->Update();
 }
 
@@ -137,6 +137,31 @@ void D12D3Maaax::Draw()
 	m_CommandQueue->Signal(m_Fence.Get(), m_CurrentFence);
 }
 
+
+void D12D3Maaax::UpdateOperation()
+{
+	if (m_currOperation == nullptr) return;
+	if (m_currOperation->GetOperState() == false)
+	{
+		m_currOperation = nullptr;
+		return;
+	}
+
+	switch (m_currOperation->GetOperType())
+	{
+	case OPER_NONE:
+		assert(false && "this operation has not defined type");
+		break;
+	case OPER_PLANE:
+		m_currOperation->DrawOperation(m_planes);
+		break;
+	case OPER_LINE:
+		m_currOperation->DrawOperation(m_lines);
+		break;
+	default:
+		break;
+	}
+}
 
 void D12D3Maaax::UpdateMaterialCBs()
 {

@@ -16,6 +16,7 @@ private:
 	virtual void Update() override;
 	virtual void Draw() override;
 
+	void UpdateOperation();
 	void UpdateMaterialCBs();
 	void UpdateMainPassCB();
 
@@ -52,6 +53,8 @@ private:
 
 private:
 	RenderFont* m_font = nullptr;
-	vector<cDrawPlane> m_planes;
-	vector<cDrawLines> m_lines;
+	vector<unique_ptr<cDrawElement>> m_planes;
+	vector<unique_ptr<cDrawElement>> m_lines;
+	cOperation* m_currOperation;
+	vector<unique_ptr<cOperation>> m_operations;
 };
