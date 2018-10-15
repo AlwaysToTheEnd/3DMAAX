@@ -151,6 +151,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="05_Texture.h" />
+    <ClInclude Include="cButtonCollector.h" />
     <ClInclude Include="cCamera.h" />
     <ClInclude Include="cDrawElement.h" />
     <ClInclude Include="cDrawLines.h" />
@@ -160,10 +161,12 @@
     <ClInclude Include="cObejct.h" />
     <ClInclude Include="cOcTree.h" />
     <ClInclude Include="cOperation.h" />
+    <ClInclude Include="cOperator.h" />
     <ClInclude Include="cOper_Add_Plane.h" />
     <ClInclude Include="cPercentageValueSet.h" />
     <ClInclude Include="cRenderItemMG.h" />
     <ClInclude Include="cTextureHeap.h" />
+    <ClInclude Include="cUIButton.h" />
     <ClInclude Include="cUIObject.h" />
     <ClInclude Include="D12App.h" />
     <ClInclude Include="D12D3Maaax.h" />
@@ -178,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="05_Texture.cpp" />
+    <ClCompile Include="cButtonCollector.cpp" />
     <ClCompile Include="cCamera.cpp" />
     <ClCompile Include="cDrawElement.cpp" />
     <ClCompile Include="cDrawLines.cpp" />
@@ -187,10 +191,12 @@
     <ClCompile Include="cObejct.cpp" />
     <ClCompile Include="cOcTree.cpp" />
     <ClCompile Include="cOperation.cpp" />
+    <ClCompile Include="cOperator.cpp" />
     <ClCompile Include="cOper_Add_Plane.cpp" />
     <ClCompile Include="cPercentageValueSet.cpp" />
     <ClCompile Include="cRenderItemMG.cpp" />
     <ClCompile Include="cTextureHeap.cpp" />
+    <ClCompile Include="cUIButton.cpp" />
     <ClCompile Include="cUIObject.cpp" />
     <ClCompile Include="D12App.cpp" />
     <ClCompile Include="D12D3Maaax.cpp" />

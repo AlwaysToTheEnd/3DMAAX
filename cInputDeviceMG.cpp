@@ -12,8 +12,10 @@ cInputDeviceMG::cInputDeviceMG()
 	, m_origin(0, 0, 0)
 	, m_isLButtonDownStay(false)
 	, m_isLButtonOneDown(0)
+	, m_isLButtonUp(0)
 	, m_isRButtonDownStay(false)
 	, m_isRButtonOneDown(0)
+	, m_isRButtonUp(0)
 {
 }
 
@@ -51,6 +53,16 @@ void cInputDeviceMG::Update(XMFLOAT4X4 & view, XMFLOAT4X4 & proj, float clientSi
 	{
 		m_isLButtonOneDown--;
 	}
+
+	if (m_isLButtonUp > 0)
+	{
+		m_isLButtonUp--;
+	}
+
+	if (m_isRButtonUp > 0)
+	{
+		m_isRButtonUp--;
+	}
 }
 
 void cInputDeviceMG::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -66,6 +78,7 @@ void cInputDeviceMG::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	case WM_LBUTTONUP:
 	{
 		m_isLButtonDownStay = false;
+		m_isLButtonUp = 2;
 	}
 	break;
 	case WM_RBUTTONDOWN:
@@ -77,6 +90,7 @@ void cInputDeviceMG::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	case WM_POINTERUP:
 	{
 		m_isRButtonDownStay = false;
+		m_isRButtonUp = 2;
 	}
 	break;
 	case WM_MOUSEMOVE:
@@ -120,6 +134,24 @@ bool cInputDeviceMG::GetMouseDownStay(int vKey)
 		break;
 	case VK_RBUTTON:
 		return m_isRButtonDownStay;
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	return false;
+}
+
+bool cInputDeviceMG::GetMouseUp(int vKey)
+{
+	switch (vKey)
+	{
+	case VK_LBUTTON:
+		return m_isLButtonUp == 1;
+		break;
+	case VK_RBUTTON:
+		return m_isRButtonUp == 1;
 		break;
 	default:
 		assert(false);

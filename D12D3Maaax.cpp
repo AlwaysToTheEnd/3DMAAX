@@ -80,8 +80,7 @@ void D12D3Maaax::Update()
 
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
-		m_currOperation = m_operations[0].get();
-		m_currOperation->StartOperation();
+		m_currOperation = m_operations[0]->StartOperation();
 	}
 
 	UpdateOperation();

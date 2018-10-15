@@ -24,4 +24,5 @@ void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& dra
 
 void cOper_Add_Plane::CancleOperation()
 {
+
 }

@@ -55,6 +55,9 @@
     <Filter Include="cOperation">
       <UniqueIdentifier>{b3364ae8-48ae-493f-889b-d5de058b2465}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cOperation\cOperator">
+      <UniqueIdentifier>{6d30d187-8d9c-46a8-ac4e-57aabe59dc80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -132,6 +135,15 @@
     <ClInclude Include="cOper_Add_Plane.h">
       <Filter>cOperation</Filter>
     </ClInclude>
+    <ClInclude Include="cUIButton.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="cButtonCollector.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="cOperator.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -199,6 +211,15 @@
     </ClCompile>
     <ClCompile Include="cOper_Add_Plane.cpp">
       <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cUIButton.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="cButtonCollector.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="cOperator.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
