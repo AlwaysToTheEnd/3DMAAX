@@ -3,8 +3,11 @@
 class cUIObject : public cObject
 {
 public:
-	static void UIMeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-	static void DisPosUploaders();
+	static void MeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+	static void DisPosUploaders() { m_geo->DisPosUploaders(); }
+
+protected:
+	static unique_ptr<MeshGeometry> m_geo;
 
 public:
 	cUIObject();
@@ -20,7 +23,6 @@ public:
 	void RenderUI(bool value);
 
 protected:
-	static unique_ptr<MeshGeometry> m_uiGeo;
 	XMFLOAT3 m_Pos;
 	XMFLOAT2 m_Size;
 	shared_ptr<cRenderItem> m_renderItem;

@@ -2,7 +2,7 @@
 
 unique_ptr<MeshGeometry> cDrawLines::m_geo = nullptr;
 
-void cDrawLines::LineMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
+void cDrawLines::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
 {
 	vector<C_Vertex> colorVertex;
 	vector<UINT> indices;
@@ -32,12 +32,6 @@ void cDrawLines::LineMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList 
 	lineGeo->DrawArgs["line"] = subMesh;
 	m_geo = move(lineGeo);
 }
-
-void cDrawLines::DisPosUploaders()
-{
-	m_geo->DisPosUploaders();
-}
-
 
 cDrawLines::cDrawLines(cPlane * plane)
 	: m_drawPlane(plane)

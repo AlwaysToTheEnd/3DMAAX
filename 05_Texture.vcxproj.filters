@@ -129,6 +129,9 @@
     <ClInclude Include="cOperation.h">
       <Filter>cOperation</Filter>
     </ClInclude>
+    <ClInclude Include="cOper_Add_Plane.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -192,6 +195,9 @@
       <Filter>Objects\ElementObject</Filter>
     </ClCompile>
     <ClCompile Include="cOperation.cpp">
+      <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Plane.cpp">
       <Filter>cOperation</Filter>
     </ClCompile>
   </ItemGroup>

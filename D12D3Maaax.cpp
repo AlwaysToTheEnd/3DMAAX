@@ -149,14 +149,11 @@ void D12D3Maaax::UpdateOperation()
 
 	switch (m_currOperation->GetOperType())
 	{
-	case OPER_NONE:
-		assert(false && "this operation has not defined type");
+	case OPER_ADD_PLANE:
+		m_currOperation->DrawElementOperation(m_planes);
 		break;
-	case OPER_PLANE:
-		m_currOperation->DrawOperation(m_planes);
-		break;
-	case OPER_LINE:
-		m_currOperation->DrawOperation(m_lines);
+	case OPER_ADD_LINE:
+		m_currOperation->DrawElementOperation(m_lines);
 		break;
 	default:
 		break;
@@ -295,8 +292,8 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 
 void D12D3Maaax::BuildGeometry()
 {
-	cDrawLines::LineMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cUIObject::UIMeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cDrawLines::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cUIObject::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
 
 void D12D3Maaax::BuildPSOs()
