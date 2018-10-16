@@ -31,7 +31,6 @@ bool D12D3Maaax::Initialize()
 	BuildGeometry();
 	BuildMaterials();
 	BuildObjects();
-	BuildOperator();
 	BuildFrameResources();
 
 	ThrowIfFailed(m_CommandList->Close());
@@ -77,13 +76,9 @@ void D12D3Maaax::Update()
 	UpdateMainPassCB();
 	UpdateMaterialCBs();
 	INPUTMG->Update(m_MainPassCB.view, m_MainPassCB.proj, m_ClientWidth, m_ClientHeight);
+	
+	m_operator.Update(m_planes);
 
-	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
-	{
-		m_currOperation = m_operations[0]->StartOperation();
-	}
-
-	UpdateOperation();
 	UpdateDrawElement();
 	RENDERITEMMG->Update();
 }
@@ -151,33 +146,6 @@ void D12D3Maaax::UpdateDrawElement()
 	for (auto& it : m_planes)
 	{
 		it->Update();
-	}
-
-	for (auto& it : m_lines)
-	{
-		it->Update();
-	}
-}
-
-void D12D3Maaax::UpdateOperation()
-{
-	if (m_currOperation == nullptr) return;
-	if (m_currOperation->GetOperState() == false)
-	{
-		m_currOperation = nullptr;
-		return;
-	}
-
-	switch (m_currOperation->GetOperType())
-	{
-	case OPER_ADD_PLANE:
-		m_currOperation->DrawElementOperation(m_planes);
-		break;
-	case OPER_ADD_LINE:
-		m_currOperation->DrawElementOperation(m_lines);
-		break;
-	default:
-		break;
 	}
 }
 
@@ -434,15 +402,12 @@ void D12D3Maaax::BuildMaterials()
 	m_Materials["icemirror"] = std::move(icemirror);
 }
 
-void D12D3Maaax::BuildOperator()
-{
-	m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Plane));
-}
-
 void D12D3Maaax::BuildObjects()
 {
 	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
 	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("base"));
+
+	m_operator.SetUp();
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()

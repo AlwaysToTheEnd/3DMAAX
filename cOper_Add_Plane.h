@@ -6,8 +6,7 @@ public:
 	cOper_Add_Plane();
 	virtual ~cOper_Add_Plane();
 
-	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw);
-	virtual void CancleOperation();
+	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 
 private:
 

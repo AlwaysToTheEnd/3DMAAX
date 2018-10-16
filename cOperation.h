@@ -5,6 +5,7 @@ enum OPERATIONTYPE
 	OPER_ADD_PLANE,
 	OPER_ADD_LINE,
 	OPER_DRAWOPER_COUNT,
+	OPER_PUSH_MESH,
 	OPER_MESHOPER_COUNT,
 };
 
@@ -18,8 +19,8 @@ public:
 
 	}
 	virtual ~cOperation() {}
-	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) {};
-	virtual void CancleOperation() = 0;
+	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
+	virtual void CancleOperation() { m_operState = false; }
 
 public:
 	void StartOperation() { m_operState = true; }

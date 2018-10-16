@@ -21,8 +21,3 @@ void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& dra
 	static_cast<cDrawPlane*>(draw[0].get())->AddPlanes();
 	m_operState = false;
 }
-
-void cOper_Add_Plane::CancleOperation()
-{
-
-}

@@ -30,7 +30,7 @@ void cButtonCollector::Update()
 	}
 }
 
-void cButtonCollector::AddButton(UINT materTexIndex, function<void()> func)
+void cButtonCollector::AddButton(UINT materTexIndex, function<void(int)> func)
 {
 	assert(m_renderItem && "It had not Setup");
 

@@ -2,7 +2,10 @@
 
 
 cUIButton::cUIButton()
+	: m_Param(0)
+	, m_ActiveFunc(nullptr)
 {
+
 }
 
 
@@ -22,7 +25,7 @@ void cUIButton::UIUpdate()
 	{
 		if (INPUTMG->GetMouseUp(VK_LBUTTON))
 		{
-			m_ActiveFunc();
+			m_ActiveFunc(m_Param);
 		}
 	}
 }

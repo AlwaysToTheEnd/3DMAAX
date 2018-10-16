@@ -16,6 +16,7 @@ public:
 private:
 	XMFLOAT4 m_plane;
 	XMFLOAT2 m_viewSize;
+	cDrawLines m_lines;
 };
 
 class cDrawPlane : public cDrawElement

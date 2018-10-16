@@ -142,7 +142,7 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="cOperator.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>cOperation\cOperator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -219,7 +219,7 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="cOperator.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>cOperation\cOperator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

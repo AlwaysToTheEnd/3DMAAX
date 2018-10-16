@@ -5,11 +5,16 @@ unique_ptr<MeshGeometry> cDrawPlane::m_geo = nullptr;
 cPlane::cPlane()
 	: m_plane(0,0,-1,0)
 	, m_viewSize(1,1)
+	, m_lines(this)
 {
 }
 
 cPlane::cPlane(XMFLOAT4 plane)
+	: m_plane(plane)
+	, m_viewSize(1, 1)
+	, m_lines(this)
 {
+
 }
 
 cPlane::~cPlane()

@@ -6,12 +6,13 @@ public:
 	cUIButton();
 	virtual ~cUIButton();
 
-	virtual void SetActiveFunc(function<void()> func) { m_ActiveFunc = func; }
+	virtual void SetActiveFunc(function<void(int)> func) { m_ActiveFunc = func; }
 
 private:
 	virtual void UIUpdate() override;
 
 private:
-	function<void()> m_ActiveFunc;
+	function<void(int)> m_ActiveFunc;
+	int m_Param;
 };
 

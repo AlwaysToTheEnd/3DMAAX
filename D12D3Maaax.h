@@ -17,7 +17,6 @@ private:
 	virtual void Draw() override;
 
 	void UpdateDrawElement();
-	void UpdateOperation();
 	void UpdateMaterialCBs();
 	void UpdateMainPassCB();
 
@@ -27,7 +26,6 @@ private:
 	void BuildShadersAndInputLayout();
 	void BuildGeometry();
 	void BuildPSOs();
-	void BuildOperator();
 	void BuildObjects();
 	void BuildFrameResources();
 
@@ -56,7 +54,6 @@ private:
 private:
 	RenderFont* m_font = nullptr;
 	vector<unique_ptr<cDrawElement>> m_planes;
-	vector<unique_ptr<cDrawElement>> m_lines;
-	cOperation* m_currOperation;
-	vector<unique_ptr<cOperation>> m_operations;
+
+	cOperator m_operator;
 };

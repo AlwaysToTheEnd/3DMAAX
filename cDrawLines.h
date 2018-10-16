@@ -1,5 +1,7 @@
 #pragma once
 
+class cPlane;
+
 class cDrawLines : public cDrawElement
 {
 public:
