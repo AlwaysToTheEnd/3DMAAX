@@ -112,14 +112,18 @@ void D12D3Maaax::Draw()
 	auto matBuffer = m_CurrFrameResource->materialBuffer->Resource();
 	m_CommandList->SetGraphicsRootShaderResourceView(1, matBuffer->GetGPUVirtualAddress());
 
+	m_CommandList->SetGraphicsRootDescriptorTable(3,
+		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
+
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 
-	m_CommandList->SetGraphicsRootDescriptorTable(3, 
-		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 
-	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
+	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
+	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
+
+	m_CommandList->SetPipelineState(m_PSOs["ui"].Get());
 
 	FONTMANAGER->Render(m_CommandList.Get());
 	FONTMANAGER->Commit(m_CommandQueue.Get());
@@ -219,8 +223,6 @@ void D12D3Maaax::UpdateMainPassCB()
 	currPassCB->CopyData(1, m_MainPassCB);
 }
 
-
-
 void D12D3Maaax::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE texTable;
@@ -259,8 +261,8 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 	m_Shaders["baseVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_1");
 	m_Shaders["basePS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_1");
 
-	//m_Shaders["uiVS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "VS", "vs_5_1");
-	//m_Shaders["uiPS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "PS", "ps_5_1");
+	m_Shaders["uiVS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "VS", "vs_5_1");
+	m_Shaders["uiPS"] = d3dUtil::CompileShader(L"Shaders\\UIShader.hlsl", nullptr, "PS", "ps_5_1");
 
 	m_Shaders["drawElementVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_1");
 	m_Shaders["drawElementPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_1");
@@ -316,32 +318,32 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["base"])));
 
-	//D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
-	//D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
-	//transparencyBlendDesc.BlendEnable = true;
-	//transparencyBlendDesc.LogicOpEnable = false;
-	//transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	//transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	//transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
-	//transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-	//transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-	//transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	//transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
-	//transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	//transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
-	//transparentPsoDesc.VS =
-	//{
-	//	reinterpret_cast<BYTE*>(m_Shaders["uiVS"]->GetBufferPointer()),
-	//	m_Shaders["uiVS"]->GetBufferSize()
-	//};
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
+	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
+	transparencyBlendDesc.BlendEnable = true;
+	transparencyBlendDesc.LogicOpEnable = false;
+	transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
+	transparentPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["uiVS"]->GetBufferPointer()),
+		m_Shaders["uiVS"]->GetBufferSize()
+	};
 
-	//transparentPsoDesc.PS =
-	//{
-	//	reinterpret_cast<BYTE*>(m_Shaders["uiPS"]->GetBufferPointer()),
-	//	m_Shaders["uiPS"]->GetBufferSize()
-	//};
+	transparentPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["uiPS"]->GetBufferPointer()),
+		m_Shaders["uiPS"]->GetBufferSize()
+	};
 
-	//ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["UI"])));
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["ui"])));
 
 	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(), (UINT)m_CVertexInputLayout.size() };
@@ -361,7 +363,7 @@ void D12D3Maaax::BuildPSOs()
 
 	RENDERITEMMG->AddRenderSet("base");
 	RENDERITEMMG->AddRenderSet("drawElement");
-	/*RENDERITEMMG->AddRenderSet("UI");*/
+	RENDERITEMMG->AddRenderSet("ui");
 }
 
 void D12D3Maaax::BuildTextures()
@@ -407,7 +409,7 @@ void D12D3Maaax::BuildObjects()
 	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
 	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("base"));
 
-	m_operator.SetUp();
+	m_operator.SetUp(RENDERITEMMG->AddRenderItem("ui"));
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()

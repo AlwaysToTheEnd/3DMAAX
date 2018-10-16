@@ -15,7 +15,7 @@ public:
 	virtual ~cUIObject();
 
 	virtual void Update(FXMMATRIX mat) override;
-	virtual void SetActiveFunc(function<void()> func) {};
+	virtual void SetActiveFunc(function<void(int)> func) {};
 
 	void SetPos(XMFLOAT3 pos);
 	void SetSize(XMFLOAT2 size);

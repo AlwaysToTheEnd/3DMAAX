@@ -26,21 +26,22 @@ void cButtonCollector::Update()
 
 	for (auto& it : m_buttons)
 	{
-		it.Update(Tmat);
+		it->Update(Tmat);
 	}
 }
 
-void cButtonCollector::AddButton(UINT materTexIndex, function<void(int)> func)
+void cButtonCollector::AddButton(UINT materTexIndex, function<void(int)> func, UINT parameterValue)
 {
 	assert(m_renderItem && "It had not Setup");
 
 	XMFLOAT2 pos = {0,0};
 	pos.x += m_buttons.size()*m_buttonSize.x;
 
-	m_buttons.push_back({});
-	m_buttons.back().Build(m_renderItem);
-	m_buttons.back().SetActiveFunc(func);
-	m_buttons.back().SetMatrialIndex(materTexIndex);
-	m_buttons.back().SetSize(m_buttonSize);
-	m_buttons.back().SetPos({ pos.x,pos.y,m_pos.z });
+	m_buttons.push_back(make_unique<cUIButton>());
+	m_buttons.back()->Build(m_renderItem);
+	m_buttons.back()->SetActiveFunc(func);
+	m_buttons.back()->SetParameter(parameterValue);
+	m_buttons.back()->SetMatrialIndex(materTexIndex);
+	m_buttons.back()->SetSize(m_buttonSize);
+	m_buttons.back()->SetPos({ pos.x,pos.y,m_pos.z });
 }

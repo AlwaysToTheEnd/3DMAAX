@@ -12,8 +12,10 @@ cOperator::~cOperator()
 {
 }
 
-void cOperator::SetUp()
+void cOperator::SetUp(shared_ptr<cRenderItem> buttonRenderItem)
 {
+	m_buttonRenderItem = buttonRenderItem;
+
 	m_drawButtonCollector.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
 	m_drawButtonCollector.SetPos({ 0,0,0 });
 	m_meshButtonCollector.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
@@ -29,6 +31,9 @@ void cOperator::SetUp()
 		case OPER_ADD_LINE:
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Plane));
 			break;
+		case OPER_PUSH_MESH:
+			continue;
+			break;
 		case OPER_DRAWOPER_COUNT:
 			continue;
 			break;
@@ -38,7 +43,7 @@ void cOperator::SetUp()
 		}
 
 		m_drawButtonCollector.AddButton(m_ButtonMtlTexBaseIndex + i,
-			bind(&cOperator::OperationStart, this, placeholders::_1));
+			bind(&cOperator::OperationStart, this, placeholders::_1), i);
 	}
 }
 

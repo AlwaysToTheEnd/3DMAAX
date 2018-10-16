@@ -7,7 +7,7 @@ public:
 	cOperator();
 	~cOperator();
 
-	void SetUp();
+	void SetUp(shared_ptr<cRenderItem> buttonRenderItem);
 	void Update(vector<unique_ptr<cDrawElement>>& planes);
 
 private:

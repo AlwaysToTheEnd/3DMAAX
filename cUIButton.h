@@ -6,7 +6,8 @@ public:
 	cUIButton();
 	virtual ~cUIButton();
 
-	virtual void SetActiveFunc(function<void(int)> func) { m_ActiveFunc = func; }
+	virtual void SetActiveFunc(function<void(int)> func) override { m_ActiveFunc = func; }
+	void SetParameter(UINT value) { assert(value <= (UINT)INT_MAX); m_Param = value; }
 
 private:
 	virtual void UIUpdate() override;

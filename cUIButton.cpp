@@ -2,7 +2,7 @@
 
 
 cUIButton::cUIButton()
-	: m_Param(0)
+	: m_Param(-1)
 	, m_ActiveFunc(nullptr)
 {
 
@@ -15,6 +15,8 @@ cUIButton::~cUIButton()
 
 void cUIButton::UIUpdate()
 {
+	assert(m_Param != -1);
+
 	RECT buttonRect;
 	buttonRect.left = m_renderInstance->instanceData.World._41;
 	buttonRect.top = m_renderInstance->instanceData.World._42;
