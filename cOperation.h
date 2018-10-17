@@ -1,4 +1,6 @@
 #pragma once
+#include "cUIObject.h"
+#include "cUIOperWindow.h"
 
 enum OPERATIONTYPE
 {
@@ -12,6 +14,9 @@ enum OPERATIONTYPE
 class cOperation
 {
 public:
+	static void SetOperatorUIRender(shared_ptr<cRenderItem> renderItem);
+
+public:
 	cOperation(OPERATIONTYPE type)
 		: m_operType(type)
 		, m_operState(false)
@@ -20,16 +25,22 @@ public:
 	}
 
 	virtual ~cOperation() {}
+	virtual void SetUp() = 0;
 	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
-	virtual void CancleOperation() { m_operState = false; }
+	virtual void CancleOperation() = 0;
 
 public:
-	void StartOperation() { m_operState = true; }
+	void StartOperation() { m_operState = true; m_operControl.IsRenderState(true); }
 
 	bool GetOperState() const { return m_operState; }
 	OPERATIONTYPE GetOperType() const { return m_operType; }
 
 protected:
-	const OPERATIONTYPE m_operType;
-	bool m_operState;
+	void EndOperation() { m_operState = false; m_operControl.IsRenderState(false); }
+
+protected:
+	static shared_ptr<cRenderItem> m_OperatorUi;
+	const OPERATIONTYPE	m_operType;
+	cUIOperWindow		m_operControl;
+	bool				m_operState;
 };

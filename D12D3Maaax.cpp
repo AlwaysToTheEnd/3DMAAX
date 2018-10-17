@@ -23,6 +23,7 @@ bool D12D3Maaax::Initialize()
 
 	cRenderItem::SetDevice(m_D3dDevice.Get());
 
+	FONTMANAGER->Build(m_D3dDevice.Get(), m_CommandQueue.Get());
 	ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
 	BuildTextures();
 	BuildRootSignature();
@@ -36,8 +37,6 @@ bool D12D3Maaax::Initialize()
 	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
-
-	FONTMANAGER->Build(m_D3dDevice.Get(), m_CommandQueue.Get());
 
 	cDrawLines::DisPosUploaders();
 	cDrawPlane::DisPosUploaders();
@@ -414,6 +413,7 @@ void D12D3Maaax::BuildObjects()
 	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
 	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("base"));
 
+	cOperation::SetOperatorUIRender(RENDERITEMMG->AddRenderItem("ui"));
 	m_operator.SetUp(RENDERITEMMG->AddRenderItem("ui"));
 }
 

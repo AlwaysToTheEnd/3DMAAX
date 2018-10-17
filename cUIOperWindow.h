@@ -6,7 +6,7 @@ class cUIOperWindow : public cUIObject
 public:
 	struct OperParameter
 	{
-		string dataName;
+		wstring dataName;
 		DXGI_FORMAT dataFormat;
 		void* data;
 	};
@@ -16,8 +16,9 @@ public:
 	virtual ~cUIOperWindow();
 
 	virtual void Build(shared_ptr<cRenderItem> renderItem) override;
+	virtual void IsRenderState(bool value) override;
 	 
-	void AddParameter(string dataName, DXGI_FORMAT format,void* pData);
+	void AddParameter(wstring dataName, DXGI_FORMAT format,void* pData);
 	void ClearParameters() { m_operParameters.clear(); }
 
 	void SetFontSize(int size) { m_fontSize = size; }
@@ -25,9 +26,9 @@ private:
 	virtual void UIUpdate() override;
 
 private:
-	shared_ptr<cRenderItem>			m_renderItem;
 	vector<OperParameter>			m_operParameters;
 	vector<shared_ptr<RenderFont>>	m_operFonts;
-	int								m_fontSize;
+	wstring							m_currInputData;
 	int								m_currParameterIndex;
+	int								m_fontSize;
 };

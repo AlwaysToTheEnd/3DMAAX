@@ -117,3 +117,11 @@ void cDrawPlane::AddPlanes()
 	m_planes.back().Build(m_renderItem);
 }
 
+void cDrawPlane::DeletePlane()
+{
+	if (m_planes.size())
+	{
+		m_planes.pop_back();
+	}
+}
+

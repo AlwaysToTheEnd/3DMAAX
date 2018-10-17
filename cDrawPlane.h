@@ -37,6 +37,7 @@ public:
 
 public:
 	void AddPlanes();
+	void DeletePlane();
 	bool XM_CALLCONV Picking(PICKRAY ray, float& distance, cPlane** ppPlane);
 private:
 	vector<cPlane> m_planes;

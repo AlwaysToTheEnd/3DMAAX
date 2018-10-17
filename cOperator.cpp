@@ -42,6 +42,7 @@ void cOperator::SetUp(shared_ptr<cRenderItem> buttonRenderItem)
 			break;
 		}
 
+		m_operations.back()->SetUp();
 		m_drawButtonCollector.AddButton(m_ButtonMtlTexBaseIndex + i,
 			bind(&cOperator::OperationStart, this, placeholders::_1), i);
 	}

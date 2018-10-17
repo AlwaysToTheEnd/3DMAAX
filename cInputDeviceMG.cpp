@@ -87,7 +87,7 @@ void cInputDeviceMG::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 		m_isRButtonOneDown = 2;
 	}
 	break;
-	case WM_POINTERUP:
+	case WM_RBUTTONUP:
 	{
 		m_isRButtonDownStay = false;
 		m_isRButtonUp = 2;
