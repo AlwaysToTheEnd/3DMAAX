@@ -109,7 +109,6 @@ void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 	m_renderItem = renderItem;
 	m_renderItem->SetGeometry(m_geo.get(), "Plane");
 	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_renderItem->SetUploadBufferSize(32);
 }
 
 void cDrawPlane::AddPlanes()

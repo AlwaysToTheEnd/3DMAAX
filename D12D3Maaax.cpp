@@ -2,16 +2,15 @@
 
 D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 	:D12App(hInstance)
-	, m_random(10)
 {
 
 }
 
 D12D3Maaax::~D12D3Maaax()
 {
+	delete INPUTMG;
 	delete RENDERITEMMG;
 	delete FONTMANAGER;
-	delete INPUTMG;
 
 	if (m_D3dDevice != nullptr)
 		FlushCommandQueue();
@@ -23,6 +22,7 @@ bool D12D3Maaax::Initialize()
 		return false;
 
 	cRenderItem::SetDevice(m_D3dDevice.Get());
+
 	ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
 	BuildTextures();
 	BuildRootSignature();
@@ -32,11 +32,11 @@ bool D12D3Maaax::Initialize()
 	BuildMaterials();
 	BuildObjects();
 	BuildFrameResources();
-
 	ThrowIfFailed(m_CommandList->Close());
 	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
+
 	FONTMANAGER->Build(m_D3dDevice.Get(), m_CommandQueue.Get());
 
 	cDrawLines::DisPosUploaders();
@@ -53,15 +53,15 @@ void D12D3Maaax::OnResize()
 	D12App::OnResize();
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
-	XMStoreFloat4x4(&m_UIProj, P);
+	XMStoreFloat4x4(&m_3DProj, P);
+	P = XMMatrixOrthographicOffCenterLH(0, m_ClientWidth, m_ClientHeight, 0, -1, 1);
+	XMStoreFloat4x4(&m_2DProj, P);
 
 	FONTMANAGER->Resize(m_ClientWidth, m_ClientHeight);
 }
 
 void D12D3Maaax::Update()
 {
-	m_Camera.Update();
-
 	m_CurrFrameResourceIndex = (m_CurrFrameResourceIndex + 1) % gNumFrameResources;
 	m_CurrFrameResource = m_FrameResources[m_CurrFrameResourceIndex].get();
 
@@ -73,14 +73,15 @@ void D12D3Maaax::Update()
 		CloseHandle(eventHandle);
 	}
 
+	m_Camera.Update();
 	UpdateMainPassCB();
-	UpdateMaterialCBs();
 	INPUTMG->Update(m_MainPassCB.view, m_MainPassCB.proj, m_ClientWidth, m_ClientHeight);
 	
 	m_operator.Update(m_planes);
 
 	UpdateDrawElement();
 	RENDERITEMMG->Update();
+	UpdateMaterialCBs();
 }
 
 void D12D3Maaax::Draw()
@@ -114,23 +115,25 @@ void D12D3Maaax::Draw()
 
 	m_CommandList->SetGraphicsRootDescriptorTable(3,
 		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
+	/////////////////////////////
 
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
-
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 
 	m_CommandList->SetPipelineState(m_PSOs["ui"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "ui");
+
+	////////////////////////////////
 
 	FONTMANAGER->Render(m_CommandList.Get());
 	FONTMANAGER->Commit(m_CommandQueue.Get());
 
 	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-
 	ThrowIfFailed(m_CommandList->Close());
 
 	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
@@ -180,8 +183,10 @@ void D12D3Maaax::UpdateMaterialCBs()
 
 void D12D3Maaax::UpdateMainPassCB()
 {
+	auto currPassCB = m_CurrFrameResource->passCB.get();
+
 	XMMATRIX view = XMLoadFloat4x4(m_Camera.GetViewMatrix());
-	XMMATRIX proj = XMLoadFloat4x4(&m_UIProj);
+	XMMATRIX proj = XMLoadFloat4x4(&m_3DProj);
 
 	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
@@ -209,15 +214,14 @@ void D12D3Maaax::UpdateMainPassCB()
 	m_MainPassCB.Lights[2].direction = { 0.0f, -0.707f, -0.707f };
 	m_MainPassCB.Lights[2].strength = { 0.2f, 0.2f, 0.2f };
 
-	auto currPassCB = m_CurrFrameResource->passCB.get();
 	currPassCB->CopyData(0, m_MainPassCB);
 
+	proj = XMLoadFloat4x4(&m_2DProj);
+	XMStoreFloat4x4(&m_MainPassCB.proj, XMMatrixTranspose(proj));
 	m_MainPassCB.view = MathHelper::Identity4x4();
 	m_MainPassCB.invView = MathHelper::Identity4x4();
-	proj = XMMatrixOrthographicOffCenterLH(0, m_ClientWidth, m_ClientHeight, 0, -1, 1);
-	XMStoreFloat4x4(&m_MainPassCB.proj, XMMatrixTranspose(proj));
 	m_MainPassCB.invProj = MathHelper::Identity4x4();
-	m_MainPassCB.viewProj = MathHelper::Identity4x4();
+	m_MainPassCB.viewProj = m_MainPassCB.proj;
 	m_MainPassCB.invViewProj = MathHelper::Identity4x4();
 
 	currPassCB->CopyData(1, m_MainPassCB);
@@ -331,6 +335,7 @@ void D12D3Maaax::BuildPSOs()
 	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
 	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
+	transparentPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 	transparentPsoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(m_Shaders["uiVS"]->GetBufferPointer()),

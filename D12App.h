@@ -1,6 +1,5 @@
 #pragma once
 #define DELTATIME D12App::GetDeltaTime()
-#define MOUSEPOS D12App::GetMousePos()
 
 class D12App
 {
@@ -16,9 +15,9 @@ protected:
 	virtual void OnResize();
 
 public:
-	static D12App* GetApp();
-	static double GetDeltaTime() { return m_DeltaTime; }
-	static POINT GetMousePos() { return m_MousePos; }
+	static D12App*	GetApp();
+	static double	GetDeltaTime() { return m_DeltaTime; }
+	static UINT		GetRandom() { return m_random(); }
 
 	HINSTANCE AppInst()const;
 	HWND      MainWnd()const;
@@ -54,8 +53,8 @@ protected:
 	static D12App*	m_Instance;
 	static double	m_DeltaTime;
 	static POINT	m_MousePos;
+	static mt19937	m_random;
 
-	//this variable is for CreateWindow
 	HINSTANCE		mhInstance = nullptr;
 	HWND			mhMainWnd = nullptr;
 	bool			mAppPaused = false;
@@ -69,7 +68,7 @@ protected:
 
 	D3D12_VIEWPORT	m_ScreenViewport;
 	D3D12_RECT		m_ScissorRect;
-	wstring			m_MainWndCaption = L"Texture Study";
+	wstring			m_MainWndCaption = L"DX12 CGH 3DMAAAAX";
 	D3D_DRIVER_TYPE	m_D3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 
 	GameTimer		m_Timer;

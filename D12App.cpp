@@ -4,6 +4,7 @@
 
 double D12App::m_DeltaTime = 0;
 POINT D12App::m_MousePos = { 0,0 };
+mt19937 D12App::m_random(42);
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)

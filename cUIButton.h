@@ -13,7 +13,7 @@ private:
 	virtual void UIUpdate() override;
 
 private:
-	function<void(int)> m_ActiveFunc;
-	int m_Param;
+	int					m_Param;
+	function<void(int)>	m_ActiveFunc;
 };
 

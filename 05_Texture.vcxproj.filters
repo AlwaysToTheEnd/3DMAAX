@@ -58,6 +58,9 @@
     <Filter Include="cOperation\cOperator">
       <UniqueIdentifier>{6d30d187-8d9c-46a8-ac4e-57aabe59dc80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\cButtonCollector">
+      <UniqueIdentifier>{4a72d741-81e4-4a35-9d4f-d4b15d2d3e45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -138,11 +141,14 @@
     <ClInclude Include="cUIButton.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="cButtonCollector.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="cOperator.h">
       <Filter>cOperation\cOperator</Filter>
+    </ClInclude>
+    <ClInclude Include="cUIOperWindow.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="cButtonCollector.h">
+      <Filter>UI\cButtonCollector</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -215,11 +221,14 @@
     <ClCompile Include="cUIButton.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="cButtonCollector.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="cOperator.cpp">
       <Filter>cOperation\cOperator</Filter>
+    </ClCompile>
+    <ClCompile Include="cUIOperWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="cButtonCollector.cpp">
+      <Filter>UI\cButtonCollector</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

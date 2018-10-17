@@ -1,5 +1,5 @@
 #pragma once
-#define NOMALBUTTONSIZE 10
+#define NOMALBUTTONSIZE 30
 
 class cOperator
 {

@@ -6,6 +6,7 @@ struct RenderInstance
 {
 	InstanceData instanceData;
 	int numFramesDirty = gNumFrameResources;
+	bool m_isRenderOK = true;
 };
 
 class cRenderItem
@@ -13,7 +14,6 @@ class cRenderItem
 public:
 	static void SetDevice(ID3D12Device* device) { m_device = device; }
 
-	void SetUploadBufferSize(UINT numInstance);
 	void SetPrimitiveType(D3D12_PRIMITIVE_TOPOLOGY type) { m_primitiveType = type; }
 	void SetGeometry(const MeshGeometry* geometry, string submeshName);
 	void SetRenderOK(bool value) { m_isRenderOK = value; }
@@ -25,6 +25,7 @@ private:
 
 	void Update();
 	void Render(ID3D12GraphicsCommandList * cmdList);
+	void SetUploadBufferSize(UINT numInstance);
 
 private:
 	static ID3D12Device* m_device;
@@ -32,9 +33,12 @@ private:
 	unique_ptr<UploadBuffer<InstanceData>> m_objectCB[gNumFrameResources] = {};
 	UploadBuffer<InstanceData>* m_currFrameCB = nullptr;
 	UINT m_currFrameCBIndex = 0;
-	UINT m_currCBSize = 0;
+	UINT m_currBufferSize = 4;
+	int m_numFrameDirty = gNumFrameResources;
 
 	bool m_isRenderOK = true;
+	UINT m_renderInstanceCount = 0;
+
 	const MeshGeometry* m_geo = nullptr;
 	D3D12_PRIMITIVE_TOPOLOGY m_primitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT m_indexCount = 0;

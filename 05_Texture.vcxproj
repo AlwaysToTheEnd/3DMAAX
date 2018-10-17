@@ -168,6 +168,7 @@
     <ClInclude Include="cTextureHeap.h" />
     <ClInclude Include="cUIButton.h" />
     <ClInclude Include="cUIObject.h" />
+    <ClInclude Include="cUIOperWindow.h" />
     <ClInclude Include="D12App.h" />
     <ClInclude Include="D12D3Maaax.h" />
     <ClInclude Include="D12Util.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="cTextureHeap.cpp" />
     <ClCompile Include="cUIButton.cpp" />
     <ClCompile Include="cUIObject.cpp" />
+    <ClCompile Include="cUIOperWindow.cpp" />
     <ClCompile Include="D12App.cpp" />
     <ClCompile Include="D12D3Maaax.cpp" />
     <ClCompile Include="D12Util.cpp" />

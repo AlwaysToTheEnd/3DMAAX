@@ -5,15 +5,40 @@ ID3D12Device* cRenderItem::m_device = nullptr;
 
 void cRenderItem::Update()
 {
-	m_currFrameCB = m_objectCB[m_currFrameCBIndex].get();
+	if (!m_isRenderOK) return;
 
-	UINT instanceIndex = 0;
+	if (m_numFrameDirty > 0)
+	{
+		SetUploadBufferSize(m_currBufferSize);
+		m_numFrameDirty--;
+	}
+
+	m_currFrameCB = m_objectCB[m_currFrameCBIndex].get();
 
 	for (auto it = m_instances.begin(); it != m_instances.end();)
 	{
 		if (it->use_count() == 1)
 		{
 			it = m_instances.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+
+	m_renderInstanceCount = 0;
+	UINT nonRenderCount = 0;
+
+	for (auto it = m_instances.begin(); it != m_instances.end();)
+	{
+		if (m_instances.size() == nonRenderCount + m_renderInstanceCount) break;
+
+		if ((*it)->m_isRenderOK == false)
+		{
+			m_instances.push_back(*it);
+			it = m_instances.erase(it);
+			nonRenderCount++;
 		}
 		else
 		{
@@ -26,12 +51,12 @@ void cRenderItem::Update()
 				XMStoreFloat4x4(&data.World, XMMatrixTranspose(world));
 				XMStoreFloat4x4(&data.TexTransform, XMMatrixTranspose(texTransform));
 
-				m_currFrameCB->CopyData(instanceIndex, data);
+				m_currFrameCB->CopyData(m_renderInstanceCount, data);
 				(*it)->numFramesDirty = gNumFrameResources;
 			}
 
 			it++;
-			instanceIndex++;
+			m_renderInstanceCount++;
 		}
 	}
 
@@ -49,20 +74,15 @@ void cRenderItem::Render(ID3D12GraphicsCommandList * cmdList)
 		cmdList->SetGraphicsRootShaderResourceView(0,
 			m_currFrameCB->Resource()->GetGPUVirtualAddress());
 
-		cmdList->DrawIndexedInstanced(m_indexCount, m_instances.size(), m_startIndexLocation,
+		cmdList->DrawIndexedInstanced(m_indexCount, m_renderInstanceCount, m_startIndexLocation,
 			m_baseVertexLocation, 0);
 	}
 }
 
 void cRenderItem::SetUploadBufferSize(UINT numInstance)
 {
-	for (int i = 0; i < gNumFrameResources; i++)
-	{
-		m_objectCB[i] = nullptr;
-		m_objectCB[i] = make_unique<UploadBuffer<InstanceData>>(m_device, numInstance, false);
-	}
-
-	m_currCBSize = numInstance;
+	m_objectCB[m_currFrameCBIndex] = nullptr;
+	m_objectCB[m_currFrameCBIndex] = make_unique<UploadBuffer<InstanceData>>(m_device, numInstance, false);
 }
 
 void cRenderItem::SetGeometry(const MeshGeometry * geometry, string submeshName)
@@ -78,9 +98,10 @@ shared_ptr<RenderInstance> cRenderItem::GetRenderIsntance()
 {
 	m_instances.push_back(make_shared<RenderInstance>());
 
-	if (m_instances.size() > m_currCBSize)
+	if (m_instances.size() > m_currBufferSize)
 	{
-		SetUploadBufferSize(m_instances.size() * 2);
+		m_numFrameDirty = gNumFrameResources;
+		m_currBufferSize = m_instances.size() * 2;
 	}
 
 	return m_instances.back();
