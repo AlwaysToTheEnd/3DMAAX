@@ -20,6 +20,7 @@ public:
 	void AddParameter(string dataName, DXGI_FORMAT format,void* pData);
 	void ClearParameters() { m_operParameters.clear(); }
 
+	void SetFontSize(int size) { m_fontSize = size; }
 private:
 	virtual void UIUpdate() override;
 
@@ -27,4 +28,6 @@ private:
 	shared_ptr<cRenderItem>			m_renderItem;
 	vector<OperParameter>			m_operParameters;
 	vector<shared_ptr<RenderFont>>	m_operFonts;
+	int								m_fontSize;
+	int								m_currParameterIndex;
 };

@@ -18,6 +18,7 @@ public:
 	{
 
 	}
+
 	virtual ~cOperation() {}
 	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
 	virtual void CancleOperation() { m_operState = false; }
