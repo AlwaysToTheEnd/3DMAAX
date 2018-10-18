@@ -24,21 +24,15 @@ cPlane::~cPlane()
 
 void cPlane::Update()
 {
-	if (GetAsyncKeyState('1'))
-	{
-		m_viewSize.x += 2*DELTATIME;
-		m_viewSize.y += 2*DELTATIME;
-	}
 
 	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
 	XMVECTOR normal = XMLoadFloat4(&m_plane);
 	XMVECTOR origin;
 	normal.m128_f32[3] = 0;
-	float distance = m_plane.z;
+	float distance = m_plane.w;
 	origin = normal * distance;
 
-	XMMATRIX scaleMat = XMMatrixScaling(m_viewSize.x, m_viewSize.y, 1);
-	XMStoreFloat4x4(&m_renderInstance->instanceData.World, scaleMat* XMMatrixLookAtLH(origin, normal, up));
+	XMStoreFloat4x4(&m_renderInstance->instanceData.World, XMMatrixLookAtLH(origin, normal, up));
 }
 
 
@@ -122,6 +116,14 @@ void cDrawPlane::DeletePlane()
 	if (m_planes.size())
 	{
 		m_planes.pop_back();
+	}
+}
+
+void XM_CALLCONV cDrawPlane::SetPlaneInfo(XMVECTOR plane)
+{
+	if (!m_planes.empty())
+	{
+		m_planes.back().SetPlane(plane);
 	}
 }
 

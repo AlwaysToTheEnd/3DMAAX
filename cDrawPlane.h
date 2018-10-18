@@ -10,7 +10,7 @@ public:
 	virtual void Update() override;
 
 public:
-	void SetPlane(XMVECTOR plane) { XMStoreFloat4(&m_plane, plane); }
+	void XM_CALLCONV SetPlane(XMVECTOR plane) { XMStoreFloat4(&m_plane, plane); }
 	bool XM_CALLCONV Picking(PICKRAY ray, float& distance);
 
 private:
@@ -38,6 +38,7 @@ public:
 public:
 	void AddPlanes();
 	void DeletePlane();
+	void XM_CALLCONV SetPlaneInfo(XMVECTOR plane);
 	bool XM_CALLCONV Picking(PICKRAY ray, float& distance, cPlane** ppPlane);
 private:
 	vector<cPlane> m_planes;

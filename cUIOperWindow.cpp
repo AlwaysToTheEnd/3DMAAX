@@ -79,9 +79,6 @@ void cUIOperWindow::UIUpdate()
 		case DXGI_FORMAT_R32_FLOAT:
 			dataStr = to_wstring(*((float*)m_operParameters[i].data));
 			break;
-		case DXGI_FORMAT_R32_UINT:
-			dataStr = to_wstring(*((UINT*)m_operParameters[i].data));
-			break;
 		case DXGI_FORMAT_R32_SINT:
 			dataStr = to_wstring(*((int*)m_operParameters[i].data));
 			break;
@@ -92,16 +89,50 @@ void cUIOperWindow::UIUpdate()
 
 		if (m_currParameterIndex == i)
 		{
-			for (char i = '.'; i <= '9'; i++)
+			for (char i = '0'; i <= '9'; i++)
 			{
-				if (GetAsyncKeyState(i))
+				if (GetAsyncKeyState(i) & 0x0001)
 				{
-					if (i != '/')
-					{
-						m_currInputData += i;
-						break;
-					}
+					m_currInputData += i;
+					break;
 				}
+			}
+
+			if (GetAsyncKeyState(VK_OEM_MINUS) & 0x0001)
+			{
+				if (m_currInputData.size() == 0)
+				{
+					m_currInputData += '-';
+				}
+			}
+
+			if (GetAsyncKeyState(VK_OEM_PERIOD) & 0x0001)
+			{
+				m_currInputData += '.';
+			}
+
+			if (GetAsyncKeyState(VK_BACK) & 0x0001)
+			{
+				m_currInputData.pop_back();
+			}
+
+			if (GetAsyncKeyState(VK_RETURN) & 0x0001)
+			{
+				switch (m_operParameters[i].dataFormat)
+				{
+				case DXGI_FORMAT_D32_FLOAT:
+					*(float*)(m_operParameters[i].data) = _wtof(m_currInputData.c_str());
+					break;
+				case DXGI_FORMAT_R32_FLOAT:
+					*(float*)(m_operParameters[i].data) = _wtof(m_currInputData.c_str());
+					break;
+				case DXGI_FORMAT_R32_SINT:
+					*(int*)(m_operParameters[i].data) = _wtoi(m_currInputData.c_str());
+					break;
+				}
+			
+				m_currInputData.clear();
+				m_currParameterIndex = -1;
 			}
 
 			m_operFonts[i]->color = Colors::Red;

@@ -330,17 +330,6 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
 		return 0;
-	case WM_KEYUP:
-		if (wParam == VK_ESCAPE)
-		{
-			PostQuitMessage(0);
-		}
-		else if ((int)wParam == VK_F2)
-		{
-			Set4xMsaaState(!m_4xMsaaState);
-		}
-
-		return 0;
 	}
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);

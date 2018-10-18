@@ -19,6 +19,7 @@ public:
 	virtual void CancleOperation() override { m_operState = false; m_operControl.IsRenderState(false); }
 
 private:
-	XMFLOAT3	m_planePos;
+	XMFLOAT3	m_planeNormal;
+	float		m_distance;
 };
 

@@ -19,7 +19,7 @@ public:
 	virtual void IsRenderState(bool value) override;
 	 
 	void AddParameter(wstring dataName, DXGI_FORMAT format,void* pData);
-	void ClearParameters() { m_operParameters.clear(); }
+	void ClearParameters() { m_operParameters.clear(); m_currParameterIndex = -1; }
 
 	void SetFontSize(int size) { m_fontSize = size; }
 private:
