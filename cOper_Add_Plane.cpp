@@ -27,7 +27,7 @@ void cOper_Add_Plane::SetUp()
 void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
 {
 	assert(!draw.empty() && typeid(*draw[0].get()) == typeid(cDrawPlane) &&
-		"this Container don`t had DrawPlane Element at first slot");
+		"this Container didn`t have DrawPlane Element at first slot");
 
 	switch (m_worksSate)
 	{

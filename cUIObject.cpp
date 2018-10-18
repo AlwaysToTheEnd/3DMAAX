@@ -57,7 +57,7 @@ void cUIObject::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmd
 
 void cUIObject::SetGeoAtRenderItem(shared_ptr<cRenderItem> renderItem)
 {
-	assert(m_geo.get() && "UIObject Geo don`t had Setup");
+	assert(m_geo.get() && "UIObject Geo didn`t have Setup");
 
 	renderItem->SetGeometry(m_geo.get(), "UI");
 }
