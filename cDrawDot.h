@@ -1,8 +1,14 @@
 #pragma once
 
-class cPlane;
+class cDot :public cObject
+{
+public:
 
-class cDrawLines : public cDrawElement
+private:
+
+};
+
+class cDrawDot : public cDrawElement
 {
 public:
 	static void MeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
@@ -12,12 +18,13 @@ private:
 	static unique_ptr<MeshGeometry> m_geo;
 
 public:
-	cDrawLines();
-	~cDrawLines();
+	cDrawDot();
+	virtual ~cDrawDot();
 
 	virtual void Update() override;
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
 
 private:
-	cPlane*	m_drawPlane;
+
 };
+

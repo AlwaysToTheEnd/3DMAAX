@@ -17,9 +17,10 @@ public:
 	virtual void SetUp() override;
 	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 	virtual void CancleOperation() override { m_operState = false; m_operControl.IsRenderState(false); }
+	virtual void EndOperation() override;
 
 private:
 	XMFLOAT3	m_planeNormal;
-	float		m_distance;
+	XMFLOAT3	m_position;
 };
 

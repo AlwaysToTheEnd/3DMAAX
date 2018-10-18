@@ -33,8 +33,7 @@ void cDrawLines::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cm
 	m_geo = move(lineGeo);
 }
 
-cDrawLines::cDrawLines(cPlane * plane)
-	: m_drawPlane(plane)
+cDrawLines::cDrawLines()
 {
 
 }

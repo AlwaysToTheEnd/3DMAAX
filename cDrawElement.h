@@ -1,4 +1,13 @@
 #pragma once
+
+enum DRAWELEMNTPLACE
+{
+	DRAW_PLNAES,
+	DRAW_LINES,
+	DRAW_DOTS,
+	DRAW_COUNT,
+};
+
 class cDrawElement
 {
 public:

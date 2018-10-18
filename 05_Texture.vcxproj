@@ -156,6 +156,7 @@
     <ClInclude Include="cDrawElement.h" />
     <ClInclude Include="cDrawLines.h" />
     <ClInclude Include="cDrawPlane.h" />
+    <ClInclude Include="cDrawDot.h" />
     <ClInclude Include="cFontManager.h" />
     <ClInclude Include="cInputDeviceMG.h" />
     <ClInclude Include="cObejct.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="cDrawElement.cpp" />
     <ClCompile Include="cDrawLines.cpp" />
     <ClCompile Include="cDrawPlane.cpp" />
+    <ClCompile Include="cDrawDot.cpp" />
     <ClCompile Include="cFontManager.cpp" />
     <ClCompile Include="cInputDeviceMG.cpp" />
     <ClCompile Include="cObejct.cpp" />

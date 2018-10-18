@@ -113,7 +113,10 @@ void cUIOperWindow::UIUpdate()
 
 			if (GetAsyncKeyState(VK_BACK) & 0x0001)
 			{
-				m_currInputData.pop_back();
+				if (m_currInputData.size())
+				{
+					m_currInputData.pop_back();
+				}
 			}
 
 			if (GetAsyncKeyState(VK_RETURN) & 0x0001)
@@ -140,7 +143,7 @@ void cUIOperWindow::UIUpdate()
 		}
 		else
 		{
-			m_operFonts[i]->color = Colors::Blue;
+			m_operFonts[i]->color = Colors::Black;
 			m_operFonts[i]->printString = m_operParameters[i].dataName + dataStr;
 		}
 

@@ -28,15 +28,6 @@
     <Filter Include="ManagedClass\cFontMG">
       <UniqueIdentifier>{5d038177-4056-4fcb-88fd-aed99b4518eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="D12App\D12TextureApp">
-      <UniqueIdentifier>{eb152862-70fb-4054-9644-bb43ce0d9057}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="D12App\D12TextureApp\cTextureHeap">
-      <UniqueIdentifier>{39fe9927-055d-4dfd-8544-b5e7e745c8ef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="D12App\D12TextureApp\cCamera">
-      <UniqueIdentifier>{39310a70-d4d4-4197-92f1-423419117506}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ManagedClass\D12Util">
       <UniqueIdentifier>{44675d16-ea4e-4a06-a938-4cdff2c794a8}</UniqueIdentifier>
     </Filter>
@@ -60,6 +51,15 @@
     </Filter>
     <Filter Include="UI\cButtonCollector">
       <UniqueIdentifier>{4a72d741-81e4-4a35-9d4f-d4b15d2d3e45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12D3Maaax">
+      <UniqueIdentifier>{eb152862-70fb-4054-9644-bb43ce0d9057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12D3Maaax\cTextureHeap">
+      <UniqueIdentifier>{39fe9927-055d-4dfd-8544-b5e7e745c8ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12D3Maaax\cCamera">
+      <UniqueIdentifier>{39310a70-d4d4-4197-92f1-423419117506}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -88,7 +88,7 @@
       <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="cTextureHeap.h">
-      <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
+      <Filter>D12App\D12D3Maaax\cTextureHeap</Filter>
     </ClInclude>
     <ClInclude Include="GameTimer.h">
       <Filter>ManagedClass\D12Util</Filter>
@@ -100,7 +100,7 @@
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
     <ClInclude Include="cCamera.h">
-      <Filter>D12App\D12TextureApp\cCamera</Filter>
+      <Filter>D12App\D12D3Maaax\cCamera</Filter>
     </ClInclude>
     <ClInclude Include="UploadBuffer.h">
       <Filter>ManagedClass\D12Util</Filter>
@@ -118,7 +118,7 @@
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
     <ClInclude Include="D12D3Maaax.h">
-      <Filter>D12App\D12TextureApp</Filter>
+      <Filter>D12App\D12D3Maaax</Filter>
     </ClInclude>
     <ClInclude Include="cDrawPlane.h">
       <Filter>Objects\ElementObject</Filter>
@@ -150,6 +150,9 @@
     <ClInclude Include="cButtonCollector.h">
       <Filter>UI\cButtonCollector</Filter>
     </ClInclude>
+    <ClInclude Include="cDrawDot.h">
+      <Filter>Objects\ElementObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -171,7 +174,7 @@
       <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="cTextureHeap.cpp">
-      <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
+      <Filter>D12App\D12D3Maaax\cTextureHeap</Filter>
     </ClCompile>
     <ClCompile Include="GeometryGenerator.cpp">
       <Filter>ManagedClass\D12Util</Filter>
@@ -183,7 +186,7 @@
       <Filter>ManagedClass\D12Util</Filter>
     </ClCompile>
     <ClCompile Include="cCamera.cpp">
-      <Filter>D12App\D12TextureApp\cCamera</Filter>
+      <Filter>D12App\D12D3Maaax\cCamera</Filter>
     </ClCompile>
     <ClCompile Include="cUIObject.cpp">
       <Filter>UI</Filter>
@@ -198,7 +201,7 @@
       <Filter>ManagedClass\D12Util</Filter>
     </ClCompile>
     <ClCompile Include="D12D3Maaax.cpp">
-      <Filter>D12App\D12TextureApp</Filter>
+      <Filter>D12App\D12D3Maaax</Filter>
     </ClCompile>
     <ClCompile Include="cDrawPlane.cpp">
       <Filter>Objects\ElementObject</Filter>
@@ -229,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="cButtonCollector.cpp">
       <Filter>UI\cButtonCollector</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawDot.cpp">
+      <Filter>Objects\ElementObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

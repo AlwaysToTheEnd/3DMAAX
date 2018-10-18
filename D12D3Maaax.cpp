@@ -39,6 +39,7 @@ bool D12D3Maaax::Initialize()
 	FlushCommandQueue();
 
 	cDrawLines::DisPosUploaders();
+	cDrawDot::DisPosUploaders();
 	cDrawPlane::DisPosUploaders();
 	cUIObject::DisPosUploaders();
 	
@@ -119,6 +120,7 @@ void D12D3Maaax::Draw()
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
+	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
 
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
@@ -286,8 +288,9 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 
 void D12D3Maaax::BuildGeometry()
 {
-	cDrawLines::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 	cDrawPlane::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cDrawLines::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cDrawDot::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 	cUIObject::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
 
@@ -366,7 +369,9 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawElement"])));
 
 	RENDERITEMMG->AddRenderSet("base");
-	RENDERITEMMG->AddRenderSet("drawElement");
+	RENDERITEMMG->AddRenderSet("plane");
+	RENDERITEMMG->AddRenderSet("line");
+	RENDERITEMMG->AddRenderSet("dot");
 	RENDERITEMMG->AddRenderSet("ui");
 }
 
@@ -411,7 +416,11 @@ void D12D3Maaax::BuildMaterials()
 void D12D3Maaax::BuildObjects()
 {
 	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
-	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("base"));
+	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
+	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawLines));
+	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("line"));
+	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawDot));
+	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("dot"));
 
 	cOperation::SetOperatorUIRender(RENDERITEMMG->AddRenderItem("ui"));
 	m_operator.SetUp(RENDERITEMMG->AddRenderItem("ui"));

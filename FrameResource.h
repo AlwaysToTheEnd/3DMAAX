@@ -46,6 +46,8 @@ struct C_Vertex
 	XMFLOAT3 pos;
 	XMFLOAT4 color;
 
+	C_Vertex() {}
+
 	C_Vertex(XMFLOAT3 _pos, XMFLOAT4 _color)
 	{
 		pos = _pos;
