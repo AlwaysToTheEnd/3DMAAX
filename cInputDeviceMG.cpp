@@ -24,16 +24,14 @@ cInputDeviceMG::~cInputDeviceMG()
 {
 }
 
-void cInputDeviceMG::Update(XMFLOAT4X4 & view, XMFLOAT4X4 & proj, float clientSizeX, float clientSizeY)
+void cInputDeviceMG::Update(const XMFLOAT3& cameraPos, const XMFLOAT4X4 & view,const XMFLOAT4X4 & proj, float clientSizeX, float clientSizeY)
 {
 	m_view = view;
 	m_proj = proj;
 	m_clientSizeX = clientSizeX;
 	m_clientSizeY = clientSizeY;
 
-	m_origin.x = view._41;
-	m_origin.y = view._42;
-	m_origin.z = view._43;
+	m_origin = cameraPos;
 
 	XMVECTOR ray = XMVectorSet((2.0f*m_mousePos.x / m_clientSizeX - 1.0f) / proj._11,
 		(-2.0f*m_mousePos.y / m_clientSizeY + 1.0f) / proj._22, 1.0f, 0);

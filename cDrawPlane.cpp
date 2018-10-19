@@ -11,10 +11,6 @@ cPlane::~cPlane()
 
 }
 
-void XM_CALLCONV cPlane::Update(XMMATRIX mat)
-{
-}
-
 bool XM_CALLCONV cPlane::Picking(PICKRAY ray, float & distance)
 {
 

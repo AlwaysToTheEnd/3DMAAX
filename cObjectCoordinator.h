@@ -1,5 +1,7 @@
 #pragma once
 
+#define OBJCOORD cObjectCoordinator::Get()
+
 class cObjectCoordinator
 {
 public:

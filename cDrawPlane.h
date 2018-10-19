@@ -6,7 +6,6 @@ public:
 	cPlane();
 	virtual ~cPlane();
 
-	virtual void XM_CALLCONV Update(XMMATRIX mat) override;
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
 
 private:

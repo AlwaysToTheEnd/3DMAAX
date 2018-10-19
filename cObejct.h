@@ -17,7 +17,7 @@ public:
 	friend class cObjectCoordinator;
 protected:
 	XMFLOAT3					m_pos;
-	XMFLOAT4					m_quaternion;
+	XMFLOAT3					m_rotation;
 	XMFLOAT3					m_scale;
 	shared_ptr<RenderInstance>	m_renderInstance;
 };

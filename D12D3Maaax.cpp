@@ -42,6 +42,7 @@ bool D12D3Maaax::Initialize()
 	cDrawDot::DisPosUploaders();
 	cDrawPlane::DisPosUploaders();
 	cUIObject::DisPosUploaders();
+	cObjectCoordinator::DisPosUploaders();
 	
 	OnResize();
 
@@ -75,11 +76,12 @@ void D12D3Maaax::Update()
 
 	m_Camera.Update();
 	UpdateMainPassCB();
-	INPUTMG->Update(m_MainPassCB.view, m_MainPassCB.proj, m_ClientWidth, m_ClientHeight);
+	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, m_ClientWidth, m_ClientHeight);
 	
-	m_operator.Update(m_planes);
-
+	m_operator.Update(m_drawElements);
+	OBJCOORD->Update();
 	UpdateDrawElement();
+
 	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
 }
@@ -121,6 +123,9 @@ void D12D3Maaax::Draw()
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
+	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
+
+	//m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
 
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
@@ -151,7 +156,7 @@ void D12D3Maaax::Draw()
 
 void D12D3Maaax::UpdateDrawElement()
 {
-	for (auto& it : m_planes)
+	for (auto& it : m_drawElements)
 	{
 		it->Update();
 	}
@@ -292,6 +297,7 @@ void D12D3Maaax::BuildGeometry()
 	cDrawLines::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 	cDrawDot::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 	cUIObject::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cObjectCoordinator::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
 }
 
 void D12D3Maaax::BuildPSOs()
@@ -352,7 +358,7 @@ void D12D3Maaax::BuildPSOs()
 
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["ui"])));
 
-	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(), (UINT)m_CVertexInputLayout.size() };
 	opaquePsoDesc.VS =
 	{
@@ -416,15 +422,17 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
-	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
-	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawLines));
-	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("line"));
-	m_planes.push_back(unique_ptr<cDrawElement>(new cDrawDot));
-	m_planes.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("dot"));
+	m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
+	m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
+	m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawLines));
+	m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("line"));
+	m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawDot));
+	m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("dot"));
 
 	cOperation::SetOperatorUIRender(RENDERITEMMG->AddRenderItem("ui"));
 	m_operator.SetUp(RENDERITEMMG->AddRenderItem("ui"));
+
+	OBJCOORD->SetUp();
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()

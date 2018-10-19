@@ -51,5 +51,5 @@ private:
 
 private:
 	cOperator							m_operator;
-	vector<unique_ptr<cDrawElement>>	m_planes;
+	vector<unique_ptr<cDrawElement>>	m_drawElements;
 };

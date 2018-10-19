@@ -35,7 +35,7 @@ void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& dra
 	switch (m_worksSate)
 	{
 	case cOper_Add_Plane::ADD_PLANE:
-		static_cast<cDrawPlane*>(draw[0].get())->AddElement();
+		OBJCOORD->ObjectRegistration(static_cast<cDrawPlane*>(draw[0].get())->AddElement());
 		m_worksSate = cOper_Add_Plane::PLANE_ATTRIBUTE_SET;
 		break;
 	case cOper_Add_Plane::PLANE_ATTRIBUTE_SET:
@@ -48,6 +48,7 @@ void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& dra
 		break;
 	case cOper_Add_Plane::OPER_END:
 		EndOperation();
+		OBJCOORD->ObjectRegistration(nullptr);
 		break;
 	default:
 		break;

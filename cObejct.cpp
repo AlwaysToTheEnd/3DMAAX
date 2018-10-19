@@ -3,7 +3,7 @@
 cObject::cObject()
 	: m_renderInstance(nullptr)
 	, m_pos(0,0,0)
-	, m_quaternion(0,0,0,0)
+	, m_rotation(0,0,0)
 	, m_scale(1,1,1)
 {
 }
@@ -21,7 +21,7 @@ void cObject::Build(shared_ptr<cRenderItem> renderItem)
 void cObject::Update(FXMMATRIX mat)
 {
 	XMMATRIX localMat = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) * 
-		XMMatrixRotationQuaternion(XMQuaternionNormalize(XMLoadFloat4(&m_quaternion))) *
+		XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&m_rotation)) *
 		XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
 	XMMATRIX worldMat = localMat * mat;
 

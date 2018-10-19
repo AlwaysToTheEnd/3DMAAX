@@ -16,7 +16,7 @@ public:
 
 	~cInputDeviceMG();
 
-	void Update(XMFLOAT4X4& view, XMFLOAT4X4& proj, float clientSizeX, float clientSizeY);
+	void Update(const XMFLOAT3& cameraPos ,const XMFLOAT4X4& view,const XMFLOAT4X4& proj, float clientSizeX, float clientSizeY);
 	void WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	bool GetMouseOneDown(int vKey);
 	bool GetMouseDownStay(int vKey);
