@@ -3,7 +3,6 @@
 unique_ptr<MeshGeometry> cUIObject::m_geo = nullptr;
 
 cUIObject::cUIObject()
-	: m_localMat(MathHelper::Identity4x4())
 {
 }
 
@@ -62,10 +61,10 @@ void cUIObject::SetGeoAtRenderItem(shared_ptr<cRenderItem> renderItem)
 	renderItem->SetGeometry(m_geo.get(), "UI");
 }
 
-void cUIObject::Update(FXMMATRIX mat)
+void XM_CALLCONV cUIObject::Update(FXMMATRIX mat)
 {
 	UIUpdate();
-	XMMATRIX localMat = XMLoadFloat4x4(&m_localMat);
+	XMMATRIX localMat = XMMatrixScaling(m_scale.x, m_scale.y, 1)* XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
 	XMMATRIX worldMat = localMat * mat;
 
 	XMStoreFloat4x4(&m_renderInstance->instanceData.World, worldMat);
@@ -79,23 +78,11 @@ void cUIObject::Update(FXMMATRIX mat)
 
 void cUIObject::SetPos(XMFLOAT3 pos)
 {
-	m_localMat._41 = pos.x;
-	m_localMat._42 = pos.y;
-	m_localMat._43 = pos.z;
+	m_pos = pos;
 }
 
 void cUIObject::SetSize(XMFLOAT2 size)
 {
-	m_localMat._11 = size.x;
-	m_localMat._22 = size.y;
+	m_scale.x = size.x;
+	m_scale.y = size.y;
 }
-//
-//void cUIObject::RenderUI(bool value)
-//{
-//	m_renderItem->SetRenderOK(value);
-//
-//	for (auto& it : m_ChildObject)
-//	{
-//		it->RenderUI(value);
-//	}
-//}

@@ -63,3 +63,13 @@ void cDrawDot::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 	m_renderItem->SetGeometry(m_geo.get(), "dot");
 	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
+
+bool cDrawDot::Picking(cObject ** ppObject)
+{
+	return false;
+}
+
+cObject * cDrawDot::AddElement()
+{
+	return nullptr;
+}

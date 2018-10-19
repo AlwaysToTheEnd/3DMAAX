@@ -72,7 +72,7 @@ public:
 	RenderItemSet* GetRenderItemSet(string key);
 
 public:
-	shared_ptr<cRenderItem> AddRenderItem(string renderSetKeyName = "");
+	shared_ptr<cRenderItem> AddRenderItem(string renderSetKeyName);
 
 private:
 	RenderItemMG() = default;

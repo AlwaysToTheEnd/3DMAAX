@@ -14,7 +14,7 @@ public:
 	cUIObject();
 	virtual ~cUIObject();
 
-	virtual void Update(FXMMATRIX mat) override;
+	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
 	virtual void SetActiveFunc(function<void(int)> func) {};
 
 	void SetPos(XMFLOAT3 pos);
@@ -23,9 +23,8 @@ public:
 	vector<unique_ptr<cUIObject>>& GetChilds() { return m_ChildObject; }
 
 protected:
-	virtual void UIUpdate() {}
+	virtual void UIUpdate() = 0;
 
 protected:
-	XMFLOAT4X4 m_localMat;
 	vector<unique_ptr<cUIObject>> m_ChildObject;
 };

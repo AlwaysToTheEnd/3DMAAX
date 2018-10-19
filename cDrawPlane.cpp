@@ -3,16 +3,7 @@
 unique_ptr<MeshGeometry> cDrawPlane::m_geo = nullptr;
 
 cPlane::cPlane()
-	: m_plane(0,0,-1,0)
-	, m_viewSize(1,1)
 {
-}
-
-cPlane::cPlane(XMFLOAT4 plane)
-	: m_plane(plane)
-	, m_viewSize(1, 1)
-{
-
 }
 
 cPlane::~cPlane()
@@ -20,17 +11,14 @@ cPlane::~cPlane()
 
 }
 
-void cPlane::Update()
+void XM_CALLCONV cPlane::Update(XMMATRIX mat)
+{
+}
+
+bool XM_CALLCONV cPlane::Picking(PICKRAY ray, float & distance)
 {
 
-	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
-	XMVECTOR normal = XMLoadFloat4(&m_plane);
-	XMVECTOR origin;
-	normal.m128_f32[3] = 0;
-	float distance = m_plane.w;
-	origin = normal * distance;
-
-	XMStoreFloat4x4(&m_renderInstance->instanceData.World, XMMatrixLookAtLH(origin, normal, up));
+	return false;
 }
 
 
@@ -89,10 +77,9 @@ cDrawPlane::~cDrawPlane()
 
 void cDrawPlane::Update()
 {
-
 	for (auto& it : m_planes)
 	{
-		it.Update();
+		it.Update(XMMatrixIdentity());
 	}
 }
 
@@ -103,10 +90,17 @@ void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void cDrawPlane::AddPlanes()
+bool cDrawPlane::Picking(cObject ** ppPlane)
+{
+
+	return false;
+}
+
+cObject * cDrawPlane::AddElement()
 {
 	m_planes.push_back({});
 	m_planes.back().Build(m_renderItem);
+	return &m_planes.back();
 }
 
 void cDrawPlane::DeletePlane()
@@ -121,7 +115,7 @@ void XM_CALLCONV cDrawPlane::SetPlaneInfo(XMVECTOR plane)
 {
 	if (!m_planes.empty())
 	{
-		m_planes.back().SetPlane(plane);
+		m_planes.back();
 	}
 }
 

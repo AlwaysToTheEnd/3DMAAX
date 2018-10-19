@@ -160,6 +160,7 @@
     <ClInclude Include="cFontManager.h" />
     <ClInclude Include="cInputDeviceMG.h" />
     <ClInclude Include="cObejct.h" />
+    <ClInclude Include="cObjectCoordinator.h" />
     <ClInclude Include="cOcTree.h" />
     <ClInclude Include="cOperation.h" />
     <ClInclude Include="cOperator.h" />
@@ -192,6 +193,7 @@
     <ClCompile Include="cFontManager.cpp" />
     <ClCompile Include="cInputDeviceMG.cpp" />
     <ClCompile Include="cObejct.cpp" />
+    <ClCompile Include="cObjectCoordinator.cpp" />
     <ClCompile Include="cOcTree.cpp" />
     <ClCompile Include="cOperation.cpp" />
     <ClCompile Include="cOperator.cpp" />

@@ -16,6 +16,8 @@ public:
 
 	virtual void Update() = 0;
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) = 0;
+	virtual bool Picking(cObject** ppObject) = 0;
+	virtual cObject* AddElement() = 0;
 
 protected:
 	shared_ptr<cRenderItem> m_renderItem;

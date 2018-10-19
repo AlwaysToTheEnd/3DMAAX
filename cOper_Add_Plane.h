@@ -20,7 +20,8 @@ public:
 	virtual void EndOperation() override;
 
 private:
-	XMFLOAT3	m_planeNormal;
 	XMFLOAT3	m_position;
+	XMFLOAT3	m_rotation;
+	XMFLOAT3	m_scale;
 };
 

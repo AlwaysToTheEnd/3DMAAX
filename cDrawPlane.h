@@ -4,18 +4,12 @@ class cPlane :public cObject
 {
 public:
 	cPlane();
-	cPlane(XMFLOAT4 plane);
 	virtual ~cPlane();
 
-	virtual void Update() override;
-
-public:
-	void XM_CALLCONV SetPlane(XMVECTOR plane) { XMStoreFloat4(&m_plane, plane); }
-	bool XM_CALLCONV Picking(PICKRAY ray, float& distance);
+	virtual void XM_CALLCONV Update(XMMATRIX mat) override;
+	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
 
 private:
-	XMFLOAT4 m_plane;
-	XMFLOAT2 m_viewSize;
 };
 
 class cDrawPlane : public cDrawElement
@@ -33,12 +27,13 @@ public:
 
 	virtual void Update() override;
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
+	virtual bool Picking(cObject** ppObject) override;
+	virtual cObject* AddElement() override;
 
 public:
-	void AddPlanes();
 	void DeletePlane();
 	void XM_CALLCONV SetPlaneInfo(XMVECTOR plane);
-	bool XM_CALLCONV Picking(PICKRAY ray, float& distance, cPlane** ppPlane);
+
 private:
 	vector<cPlane> m_planes;
 };

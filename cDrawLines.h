@@ -17,6 +17,8 @@ public:
 
 	virtual void Update() override;
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
+	virtual bool Picking(cObject** ppObject) override;
+	virtual cObject* AddElement() override;
 
 private:
 	cPlane*	m_drawPlane;

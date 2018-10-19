@@ -166,8 +166,6 @@ struct SubMeshGeometry
 	UINT indexCount = 0;
 	UINT startIndexLocation = 0;
 	UINT baseVertexLocation = 0;
-
-	BoundingBox bounds;
 };
 
 struct MeshGeometry

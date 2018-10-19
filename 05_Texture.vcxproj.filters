@@ -153,6 +153,9 @@
     <ClInclude Include="cDrawDot.h">
       <Filter>Objects\ElementObject</Filter>
     </ClInclude>
+    <ClInclude Include="cObjectCoordinator.h">
+      <Filter>ManagedClass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -235,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="cDrawDot.cpp">
       <Filter>Objects\ElementObject</Filter>
+    </ClCompile>
+    <ClCompile Include="cObjectCoordinator.cpp">
+      <Filter>ManagedClass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

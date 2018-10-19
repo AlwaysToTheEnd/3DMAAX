@@ -52,3 +52,13 @@ void cDrawLines::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 {
 
 }
+
+bool cDrawLines::Picking(cObject ** ppObject)
+{
+	return false;
+}
+
+cObject * cDrawLines::AddElement()
+{
+	return nullptr;
+}

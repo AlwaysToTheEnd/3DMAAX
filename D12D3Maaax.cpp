@@ -369,6 +369,7 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawElement"])));
 
 	RENDERITEMMG->AddRenderSet("base");
+	RENDERITEMMG->AddRenderSet("objectCoordinator");
 	RENDERITEMMG->AddRenderSet("plane");
 	RENDERITEMMG->AddRenderSet("line");
 	RENDERITEMMG->AddRenderSet("dot");
