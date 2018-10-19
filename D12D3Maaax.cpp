@@ -8,6 +8,7 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 
 D12D3Maaax::~D12D3Maaax()
 {
+	delete OBJCOORD;
 	delete INPUTMG;
 	delete RENDERITEMMG;
 	delete FONTMANAGER;
