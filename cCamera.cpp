@@ -6,8 +6,8 @@ cCamera::cCamera()
 	, m_isButtonDown(false)
 	, m_PrevMouse{ 0,0 }
 	, m_CurrMouse{ 0,0 }
-	, m_RotX(XM_PIDIV4)
-	, m_RotY()
+	, m_RotX(0)
+	, m_RotY(0)
 	, m_View(MathHelper::Identity4x4())
 {
 

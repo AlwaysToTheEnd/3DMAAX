@@ -3,7 +3,7 @@
 
 cOper_Add_Plane::cOper_Add_Plane()
 	: cOperation(OPER_ADD_PLANE)
-	, m_rotation(0,0,0)
+	, m_quater(0,0,0,1)
 	, m_position(0,0,0)
 	, m_scale(1,1,1)
 	, m_worksSate(ADD_PLANE)
@@ -20,9 +20,10 @@ cOper_Add_Plane::~cOper_Add_Plane()
 void cOper_Add_Plane::SetUp()
 {
 	m_operControl.Build(m_OperatorUi);
-	m_operControl.AddParameter(L"rot    X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_rotation.x);
-	m_operControl.AddParameter(L"rot    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_rotation.y);
-	m_operControl.AddParameter(L"rot    Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_rotation.z);
+	m_operControl.AddParameter(L"quater X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.x);
+	m_operControl.AddParameter(L"quater Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.y);
+	m_operControl.AddParameter(L"quater Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.z);
+	m_operControl.AddParameter(L"quater W : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.w);
 	m_operControl.AddParameter(L"pos    X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_position.x);
 	m_operControl.AddParameter(L"pos    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_position.y);
 	m_operControl.AddParameter(L"pos    Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_position.z);
@@ -44,6 +45,8 @@ void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& dra
 		static_cast<cDrawPlane*>(draw[0].get())->SetPlaneInfo(
 			XMPlaneFromPointNormal(XMLoadFloat3(&m_position) , normal));*/
 		m_operControl.Update(XMMatrixIdentity());
+		m_quater = OBJCOORD->GetCurrObject()->GetQuaternion();
+		m_position = OBJCOORD->GetCurrObject()->GetPos();
 	}
 		break;
 	case cOper_Add_Plane::OPER_END:
@@ -71,6 +74,6 @@ void cOper_Add_Plane::EndOperation()
 	cOperation::EndOperation();
 	m_worksSate = cOper_Add_Plane::ADD_PLANE;
 	m_position = { 0,0,0 };
-	m_rotation = { 0,0,0 };
+	m_quater = { 0,0,0,1 };
 	m_scale = { 1,1,1 };
 }

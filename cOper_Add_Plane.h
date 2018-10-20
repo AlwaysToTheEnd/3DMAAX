@@ -21,7 +21,7 @@ public:
 
 private:
 	XMFLOAT3	m_position;
-	XMFLOAT3	m_rotation;
+	XMFLOAT4	m_quater;
 	XMFLOAT3	m_scale;
 };
 
