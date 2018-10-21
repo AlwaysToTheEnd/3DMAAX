@@ -23,7 +23,7 @@ void cObjectCoordinator::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandL
 	m_geo = make_unique<MeshGeometry>();
 	m_geo->name = "objectCoordinator";
 
-	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.2f, 15, 15);
+	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.2f, 35, 35);
 
 	vertices.resize(sphere.Vertices.size());
 
@@ -128,14 +128,13 @@ void cObjectCoordinator::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandL
 	arrowSubmesh.indexCount = arrowindices.size();
 	m_geo->DrawArgs["arrow"] = arrowSubmesh;
 
-	m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
-	m_geo->indexBufferByteSize = indices.size()*arrowindices.size() * sizeof(UINT16);
-	m_geo->vertexBufferByteSize = vertices.size()*arrowVertex.size() * sizeof(C_Vertex);
-	m_geo->vertexByteStride = sizeof(C_Vertex);
-
 	vertices.insert(vertices.end(), arrowVertex.begin(), arrowVertex.end());
 	indices.insert(indices.end(), arrowindices.begin(), arrowindices.end());
 
+	m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
+	m_geo->indexBufferByteSize = indices.size() * sizeof(UINT16);
+	m_geo->vertexBufferByteSize = vertices.size() * sizeof(C_Vertex);
+	
 	m_geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
 		vertices.data(), m_geo->vertexBufferByteSize, m_geo->vertexUploadBuffer);
 

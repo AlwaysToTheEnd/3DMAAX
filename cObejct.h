@@ -12,6 +12,8 @@ public:
 	virtual void IsRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
 
 	void SetMatrialIndex(UINT index) { m_renderInstance->instanceData.MaterialIndex = index; }
+	void SetSizeScale(float scale) { m_renderInstance->instanceData.sizeScale = scale; }
+
 	XMFLOAT4X4 GetMatrix() const { return m_renderInstance->instanceData.World; }
 	XMFLOAT3& GetPos() { return m_pos; }
 	XMFLOAT4& GetQuaternion() { return m_quaternion; }

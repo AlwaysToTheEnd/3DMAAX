@@ -38,6 +38,9 @@ void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw
 		}
 		break;
 	case cOper_Add_Line::FIRST_DOT_PICK:
+	{
+
+	}
 		break;
 	case cOper_Add_Line::SECEND_DOT_PICK:
 		break;

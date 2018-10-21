@@ -11,12 +11,35 @@ cPlane::~cPlane()
 
 }
 
+
 bool XM_CALLCONV cPlane::Picking(PICKRAY ray, float & distance)
 {
+	XMMATRIX world = XMLoadFloat4x4(&m_renderInstance->instanceData.World);
+	XMMATRIX invWorld = XMMatrixInverse(&XMVECTOR(), world);
+	
+	PICKRAY planeLocalRay;
+	planeLocalRay.ray = XMVector3TransformNormal(ray.ray, invWorld);
+	planeLocalRay.origin = XMVector3TransformCoord(ray.origin, invWorld);
+
+	XMVECTOR plane = XMPlaneFromPointNormal(XMVectorSet(0, 0, 0, 1), XMVectorSet(0, 0, 1, 0));
+	float normalDot = XMVector3Dot(plane, planeLocalRay.ray).m128_f32[0];
+
+	if (normalDot <= 0) return false;
+
+	distance = (XMVector3Dot(-plane, planeLocalRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
+	XMVECTOR pos = planeLocalRay.origin + planeLocalRay.ray*distance;
+
+	const float sizeScale = m_renderInstance->instanceData.sizeScale;
+	if (pos.m128_f32[0] > -0.5f*sizeScale &&pos.m128_f32[0] < 0.5f*sizeScale)
+	{
+		if (pos.m128_f32[1] > -0.5f*sizeScale &&pos.m128_f32[1] < 0.5f*sizeScale)
+		{
+			return true;
+		}
+	}
 
 	return false;
 }
-
 
 void cDrawPlane::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
 {
@@ -61,6 +84,7 @@ void cDrawPlane::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cm
 	}
 }
 
+
 cDrawPlane::cDrawPlane()
 {
 
@@ -68,7 +92,7 @@ cDrawPlane::cDrawPlane()
 
 cDrawPlane::~cDrawPlane()
 {
-	
+
 }
 
 void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
@@ -80,13 +104,29 @@ void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 
 bool cDrawPlane::Picking(cObject ** ppObject)
 {
+	float dist = FLT_MAX;
+	PICKRAY mouseRay = INPUTMG->GetMousePickLay();
 
-	return false;
+	for (auto& it : m_objects)
+	{
+		float currObjectDist;
+		if (it->Picking(mouseRay, currObjectDist))
+		{
+			if (currObjectDist < dist)
+			{
+				*ppObject = it.get();
+				dist = currObjectDist;
+			}
+		}
+	}
+
+	return dist != FLT_MAX;
 }
 
 cObject * cDrawPlane::AddElement()
 {
 	m_objects.push_back(make_unique<cPlane>());
 	m_objects.back()->Build(m_renderItem);
+	m_objects.back()->SetSizeScale(1.5f);
 	return m_objects.back().get();
 }

@@ -6,8 +6,8 @@ struct InstanceData
 {
 	XMFLOAT4X4	World = MathHelper::Identity4x4();
 	XMFLOAT4X4	TexTransform = MathHelper::Identity4x4();
+	float		sizeScale = 1;
 	UINT		MaterialIndex = 0;
-	UINT		InstancePad0;
 	UINT		InstancePad1;
 	UINT		InstancePad2;
 };

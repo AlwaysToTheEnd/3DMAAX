@@ -33,7 +33,7 @@ VertexOut VS(VertexIn vin, uint instanceID : SV_InstanceID)
     InstanceData instData = gInstanceData[instanceID];
     float4x4 world = instData.World;
 
-    vout.PosH = mul(float4(vin.PosL, 0.5f), world);
+    vout.PosH = mul(float4(vin.PosL*instData.SizeScale, 0.5f), world);
 	vout.PosH = mul(vout.PosH, gViewProj);
 	vout.Color = vin.Color;
 	return vout;

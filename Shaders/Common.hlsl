@@ -4,8 +4,8 @@ struct InstanceData
 {
     float4x4 World;
     float4x4 TexTransform;
+    float SizeScale;
     uint MaterialIndex;
-    uint InstPad0;
     uint InstPad1;
     uint InstPad2;
 };

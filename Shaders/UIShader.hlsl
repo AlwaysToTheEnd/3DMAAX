@@ -42,7 +42,7 @@ VertexOut VS(VertexIn vin, uint instanceID : SV_InstanceID)
 	
     MaterialData matData = gMaterialData[matIndex];
 	
-    vout.PosH = mul(float4(vin.PosL, 1.0f), world);
+    vout.PosH = mul(float4(vin.PosL*instData.SizeScale, 1.0f), world);
     vout.PosH = mul(vout.PosH, gViewProj);
 	
     float4 texC = mul(float4(vin.TexC, 0.0f, 1.0f), texTransform);
