@@ -24,15 +24,9 @@ public:
 	cDrawPlane();
 	virtual ~cDrawPlane();
 
-	virtual void Update() override;
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
 	virtual bool Picking(cObject** ppObject) override;
 	virtual cObject* AddElement() override;
 
-public:
-	void DeletePlane();
-	void XM_CALLCONV SetPlaneInfo(XMVECTOR plane);
-
 private:
-	vector<cPlane> m_planes;
 };

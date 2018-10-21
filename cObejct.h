@@ -13,9 +13,14 @@ public:
 
 	void SetMatrialIndex(UINT index) { m_renderInstance->instanceData.MaterialIndex = index; }
 	const XMFLOAT4X4& GetMatrix() { return m_renderInstance->instanceData.World; }
-	const XMFLOAT3& GetPos() { return m_pos; }
-	const XMFLOAT4& GetQuaternion() { return m_quaternion; }
-	const XMFLOAT3& GetScale() { return m_scale; }
+	XMFLOAT3& GetPos() { return m_pos; }
+	XMFLOAT4& GetQuaternion() { return m_quaternion; }
+	XMFLOAT3& GetScale() { return m_scale; }
+	XMFLOAT3 GetWorldPos() 
+	{ 
+		return { m_renderInstance->instanceData.World._41,
+			m_renderInstance->instanceData.World._42, m_renderInstance->instanceData.World._43 };
+	}
 
 	friend class cObjectCoordinator;
 protected:

@@ -3,8 +3,8 @@
 #include <windowsx.h>
 
 double D12App::m_DeltaTime = 0;
-POINT D12App::m_MousePos = { 0,0 };
 mt19937 D12App::m_random(42);
+cCamera D12App::m_Camera;
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -221,13 +221,6 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	switch (msg)
 	{
-		// WM_ACTIVATE is sent when the window is activated or deactivated.  
-		// We pause the game when the window is deactivated and unpause it 
-		// when it becomes active. 
-	case WM_MOUSEMOVE:
-		m_MousePos.x = LOWORD(lParam);
-		m_MousePos.y = HIWORD(lParam);
-		break;
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
@@ -240,10 +233,8 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			m_Timer.Start();
 		}
 		return 0;
-
-		// WM_SIZE is sent when the user resizes the window.  
+ 
 	case WM_SIZE:
-		// Save the new client area dimensions.
 		m_ClientWidth = LOWORD(lParam);
 		m_ClientHeight = HIWORD(lParam);
 		if (m_D3dDevice)
@@ -263,8 +254,6 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			else if (wParam == SIZE_RESTORED)
 			{
-
-				// Restoring from minimized state?
 				if (mMinimized)
 				{
 					mAppPaused = false;
@@ -272,7 +261,6 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					OnResize();
 				}
 
-				// Restoring from maximized state?
 				else if (mMaximized)
 				{
 					mAppPaused = false;
@@ -290,7 +278,7 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					// done resizing the window and releases the resize bars, which 
 					// sends a WM_EXITSIZEMOVE message.
 				}
-				else // API call such as SetWindowPos or mSwapChain->SetFullscreenState.
+				else
 				{
 					OnResize();
 				}
@@ -298,15 +286,12 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
-		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
 	case WM_ENTERSIZEMOVE:
 		mAppPaused = true;
 		mResizing = true;
 		m_Timer.Stop();
 		return 0;
 
-		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
-		// Here we reset everything based on the new window dimensions.
 	case WM_EXITSIZEMOVE:
 		mAppPaused = false;
 		mResizing = false;
@@ -314,18 +299,13 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		OnResize();
 		return 0;
 
-		// WM_DESTROY is sent when the window is being destroyed.
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
 
-		// The WM_MENUCHAR message is sent when a menu is active and the user presses 
-		// a key that does not correspond to any mnemonic or accelerator key. 
 	case WM_MENUCHAR:
-		// Don't beep when we alt-enter.
 		return MAKELRESULT(0, MNC_CLOSE);
 
-		// Catch this message so to prevent the window from becoming too small.
 	case WM_GETMINMAXINFO:
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;

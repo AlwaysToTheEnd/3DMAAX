@@ -164,6 +164,7 @@
     <ClInclude Include="cOcTree.h" />
     <ClInclude Include="cOperation.h" />
     <ClInclude Include="cOperator.h" />
+    <ClInclude Include="cOper_Add_Line.h" />
     <ClInclude Include="cOper_Add_Plane.h" />
     <ClInclude Include="cPercentageValueSet.h" />
     <ClInclude Include="cRenderItemMG.h" />
@@ -197,6 +198,7 @@
     <ClCompile Include="cOcTree.cpp" />
     <ClCompile Include="cOperation.cpp" />
     <ClCompile Include="cOperator.cpp" />
+    <ClCompile Include="cOper_Add_Line.cpp" />
     <ClCompile Include="cOper_Add_Plane.cpp" />
     <ClCompile Include="cPercentageValueSet.cpp" />
     <ClCompile Include="cRenderItemMG.cpp" />

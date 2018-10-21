@@ -3,10 +3,6 @@
 
 cOper_Add_Plane::cOper_Add_Plane()
 	: cOperation(OPER_ADD_PLANE)
-	, m_quater(0,0,0,1)
-	, m_position(0,0,0)
-	, m_scale(1,1,1)
-	, m_worksSate(ADD_PLANE)
 {
 
 }
@@ -20,60 +16,40 @@ cOper_Add_Plane::~cOper_Add_Plane()
 void cOper_Add_Plane::SetUp()
 {
 	m_operControl.Build(m_OperatorUi);
-	m_operControl.AddParameter(L"quater X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.x);
-	m_operControl.AddParameter(L"quater Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.y);
-	m_operControl.AddParameter(L"quater Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.z);
-	m_operControl.AddParameter(L"quater W : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_quater.w);
-	m_operControl.AddParameter(L"pos    X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_position.x);
-	m_operControl.AddParameter(L"pos    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_position.y);
-	m_operControl.AddParameter(L"pos    Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_position.z);
 }
 
 void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
 {
 	assert(!draw.empty() && typeid(*draw[DRAW_PLNAES].get()) == typeid(cDrawPlane) &&
 		"this Container didn`t have DrawPlane Element at first slot");
+
 	switch (m_worksSate)
 	{
 	case cOper_Add_Plane::ADD_PLANE:
-		OBJCOORD->ObjectRegistration(static_cast<cDrawPlane*>(draw[0].get())->AddElement());
-		m_worksSate = cOper_Add_Plane::PLANE_ATTRIBUTE_SET;
-		break;
-	case cOper_Add_Plane::PLANE_ATTRIBUTE_SET:
 	{
-	/*	XMVECTOR normal = XMVector3Normalize(XMLoadFloat3(&m_planeNormal));
-		static_cast<cDrawPlane*>(draw[0].get())->SetPlaneInfo(
-			XMPlaneFromPointNormal(XMLoadFloat3(&m_position) , normal));*/
-		m_operControl.Update(XMMatrixIdentity());
-		m_quater = OBJCOORD->GetCurrObject()->GetQuaternion();
-		m_position = OBJCOORD->GetCurrObject()->GetPos();
+		cObject* element = draw[0].get()->AddElement();
+		OBJCOORD->ObjectRegistration(element);
+		m_operControl.AddParameter(L"quater X : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().x);
+		m_operControl.AddParameter(L"quater Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().y);
+		m_operControl.AddParameter(L"quater Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().z);
+		m_operControl.AddParameter(L"quater W : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().w);
+		m_operControl.AddParameter(L"pos    X : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetPos().x);
+		m_operControl.AddParameter(L"pos    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetPos().y);
+		m_operControl.AddParameter(L"pos    Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetPos().z);
+		m_operControl.IsRenderState(true);
+		m_worksSate = cOper_Add_Plane::PLANE_ATTRIBUTE_SET;
 	}
-		break;
-	case cOper_Add_Plane::OPER_END:
-		EndOperation();
-		OBJCOORD->ObjectRegistration(nullptr);
+	break;
+	case cOper_Add_Plane::PLANE_ATTRIBUTE_SET:
+		m_operControl.Update(XMMatrixIdentity());
 		break;
 	default:
 		break;
 	}
-
-	if (GetAsyncKeyState(VK_SPACE)&0x0001)
-	{
-		m_worksSate = cOper_Add_Plane::OPER_END;
-	}
-
-	if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
-	{
-		static_cast<cDrawPlane*>(draw[0].get())->DeletePlane();
-		m_worksSate = cOper_Add_Plane::OPER_END;
-	}
 }
 
-void cOper_Add_Plane::EndOperation()
+void cOper_Add_Plane::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 {
-	cOperation::EndOperation();
-	m_worksSate = cOper_Add_Plane::ADD_PLANE;
-	m_position = { 0,0,0 };
-	m_quater = { 0,0,0,1 };
-	m_scale = { 1,1,1 };
+	draw[DRAW_PLNAES].get()->DeleteBackObject();
+	EndOperation();
 }

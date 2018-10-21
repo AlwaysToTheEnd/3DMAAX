@@ -4,6 +4,7 @@
 cOperator::cOperator()
 	: m_currOperation(nullptr)
 	, m_buttonRenderItem(nullptr)
+	, m_draws(nullptr)
 {
 }
 
@@ -29,7 +30,7 @@ void cOperator::SetUp(shared_ptr<cRenderItem> buttonRenderItem)
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Plane));
 			break;
 		case OPER_ADD_LINE:
-			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Plane));
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Line));
 			break;
 		case OPER_PUSH_MESH:
 			continue;
@@ -48,13 +49,28 @@ void cOperator::SetUp(shared_ptr<cRenderItem> buttonRenderItem)
 	}
 }
 
-void cOperator::Update(vector<unique_ptr<cDrawElement>>& planes)
+void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws)
 {
+	m_draws = &draws;
+
 	if (m_currOperation)
 	{
 		if (!m_currOperation->GetOperState())
 		{
 			m_currOperation = nullptr;
+		}
+		else
+		{
+			if (GetAsyncKeyState(VK_SPACE)&0x0001)
+			{
+				m_currOperation->EndOperation();
+				m_currOperation = nullptr;
+			}
+			else if(GetAsyncKeyState(VK_ESCAPE) & 0x0001)
+			{
+				m_currOperation->CancleOperation(draws);
+				m_currOperation = nullptr;
+			}
 		}
 	}
 
@@ -74,10 +90,8 @@ void cOperator::Update(vector<unique_ptr<cDrawElement>>& planes)
 		switch (m_currOperation->GetOperType())
 		{
 		case OPER_ADD_PLANE:
-			m_currOperation->DrawElementOperation(planes);
-			break;
 		case OPER_ADD_LINE:
-			m_currOperation->DrawElementOperation(planes);
+			m_currOperation->DrawElementOperation(draws);
 			break;
 		default:
 			break;
@@ -94,25 +108,19 @@ void cOperator::OperationStart(int type)
 {
 	assert(m_operations.size() && "It had not Setup");
 
-	switch (type)
+	int index = type;
+	
+	if (type >= OPER_DRAWOPER_COUNT)
 	{
-	case OPER_ADD_PLANE:
-	case OPER_ADD_LINE:
-		m_operations[type]->StartOperation();
-
-		if (m_currOperation)
-		{
-			m_currOperation->CancleOperation();
-		}
-
-		m_currOperation = m_operations[type].get();
-		break;
-	case OPER_PUSH_MESH:
-		m_operations[type-1]->StartOperation();
-		m_currOperation = m_operations[type-1].get();
-		break;
-	default:
-		assert(false);
-		break;
+		index--;
 	}
+
+	m_operations[index]->StartOperation();
+
+	if (m_currOperation)
+	{
+		m_currOperation->CancleOperation(*m_draws);
+	}
+
+	m_currOperation = m_operations[index].get();
 }

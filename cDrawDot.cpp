@@ -2,6 +2,34 @@
 
 unique_ptr<MeshGeometry> cDrawDot::m_geo = nullptr;
 
+cDot::cDot()
+	:m_hostObject(nullptr)
+{
+}
+
+cDot::~cDot()
+{
+
+}
+
+void XM_CALLCONV cDot::Update(FXMMATRIX mat)
+{
+	assert(m_hostObject);
+
+	XMMATRIX localMat = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) *
+		XMMatrixRotationQuaternion(XMLoadFloat4(&m_quaternion))*
+		XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+	XMMATRIX worldMat = localMat * mat * XMLoadFloat4x4(&m_hostObject->GetMatrix());
+
+	XMStoreFloat4x4(&m_renderInstance->instanceData.World, worldMat);
+	m_renderInstance->numFramesDirty = gNumFrameResources;
+}
+
+bool XM_CALLCONV cDot::Picking(PICKRAY ray, float & distance)
+{
+	return false;
+}
+
 void cDrawDot::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
 {
 	GeometryGenerator gen;
@@ -52,11 +80,6 @@ cDrawDot::~cDrawDot()
 
 }
 
-void cDrawDot::Update()
-{
-
-}
-
 void cDrawDot::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 {
 	m_renderItem = renderItem;
@@ -71,5 +94,8 @@ bool cDrawDot::Picking(cObject ** ppObject)
 
 cObject * cDrawDot::AddElement()
 {
-	return nullptr;
+	m_objects.push_back(make_unique<cDot>());
+	m_objects.back()->Build(m_renderItem);
+	return m_objects.back().get();
 }
+

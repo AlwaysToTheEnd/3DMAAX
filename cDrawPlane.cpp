@@ -68,15 +68,7 @@ cDrawPlane::cDrawPlane()
 
 cDrawPlane::~cDrawPlane()
 {
-
-}
-
-void cDrawPlane::Update()
-{
-	for (auto& it : m_planes)
-	{
-		it.Update(XMMatrixIdentity());
-	}
+	
 }
 
 void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
@@ -94,24 +86,7 @@ bool cDrawPlane::Picking(cObject ** ppPlane)
 
 cObject * cDrawPlane::AddElement()
 {
-	m_planes.push_back({});
-	m_planes.back().Build(m_renderItem);
-	return &m_planes.back();
+	m_objects.push_back(make_unique<cPlane>());
+	m_objects.back()->Build(m_renderItem);
+	return m_objects.back().get();
 }
-
-void cDrawPlane::DeletePlane()
-{
-	if (m_planes.size())
-	{
-		m_planes.pop_back();
-	}
-}
-
-void XM_CALLCONV cDrawPlane::SetPlaneInfo(XMVECTOR plane)
-{
-	if (!m_planes.empty())
-	{
-		m_planes.back();
-	}
-}
-

@@ -43,14 +43,11 @@ cDrawLines::~cDrawLines()
 
 }
 
-void cDrawLines::Update()
-{
-
-}
-
 void cDrawLines::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 {
-
+	m_renderItem = renderItem;
+	m_renderItem->SetGeometry(m_geo.get(), "line");
+	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
 bool cDrawLines::Picking(cObject ** ppObject)
@@ -60,5 +57,7 @@ bool cDrawLines::Picking(cObject ** ppObject)
 
 cObject * cDrawLines::AddElement()
 {
-	return nullptr;
+	m_objects.push_back(make_unique<cPlane>());
+	m_objects.back()->Build(m_renderItem);
+	return m_objects.back().get();
 }

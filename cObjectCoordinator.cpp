@@ -208,10 +208,11 @@ void cObjectCoordinator::Update()
 	}
 	else
 	{
-		XMVECTOR objCenter = XMLoadFloat3(&m_controlObject->m_pos);
-		XMVECTOR objRotation = XMLoadFloat4(&m_controlObject->m_quaternion);
-		XMMATRIX objectMat = XMLoadFloat4x4(&m_controlObject->GetMatrix());
+		XMFLOAT4X4 objectMatF = m_controlObject->GetMatrix();
+		XMMATRIX objectMat = XMLoadFloat4x4(&objectMatF);
 		XMMATRIX invObjMat = XMMatrixInverse(&XMVECTOR(), objectMat);
+		XMVECTOR objCenter = XMVectorSet(objectMatF._41, objectMatF._42, objectMatF._43, 1);
+		XMVECTOR objRotation = XMQuaternionRotationMatrix(objectMat);
 
 		PICKRAY mouseRay = INPUTMG->GetMousePickLay();
 		PICKRAY objectLocalRay;
@@ -223,7 +224,7 @@ void cObjectCoordinator::Update()
 
 		if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 		{
-			XMVECTOR arrowBoundRayOrigin = mouseRay.origin + objCenter;
+			XMVECTOR arrowBoundRayOrigin = mouseRay.origin - objCenter;
 			for (int i = 0; i < AXIS_NONE; i++)
 			{
 				float dist;
@@ -253,9 +254,9 @@ void cObjectCoordinator::Update()
 				switch (m_controlState)
 				{
 				case cObjectCoordinator::AXIS_X:
-					plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 1, 0, 0));
+					plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 0, 1, 0));
 					normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
-					if (normalDot > 0)
+					if (normalDot != 0)
 					{
 						t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
 						XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
@@ -263,9 +264,9 @@ void cObjectCoordinator::Update()
 					}
 					break;
 				case cObjectCoordinator::AXIS_Y:
-					plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(1, 0, 0, 0));
+					plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 0, 1, 0));
 					normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
-					if (normalDot > 0)
+					if (normalDot != 0)
 					{
 						t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
 						XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
@@ -275,7 +276,7 @@ void cObjectCoordinator::Update()
 				case cObjectCoordinator::AXIS_Z:
 					plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 1, 0, 0));
 					normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
-					if (normalDot > 0)
+					if (normalDot != 0)
 					{
 						t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
 						XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
@@ -284,7 +285,7 @@ void cObjectCoordinator::Update()
 					break;
 				}
 
-				if (normalDot <= 0)
+				if (normalDot == 0)
 				{
 					m_controlState = AXIS_NONE;
 				}
@@ -327,32 +328,41 @@ void cObjectCoordinator::ObjectTranslation()
 	switch (m_controlState)
 	{
 	case cObjectCoordinator::AXIS_X:
-		plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 1, 0, 0));
+		plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 0, 1, 0));
 		normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
-		if (normalDot > 0)
+		if (normalDot != 0)
 		{
 			t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
 			XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+
+			float translationValue = pos.m128_f32[0]- m_prevTranslationValue;
+			m_controlObject->m_pos.x += translationValue;
 			m_prevTranslationValue = pos.m128_f32[0];
 		}
 		break;
 	case cObjectCoordinator::AXIS_Y:
-		plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(1, 0, 0, 0));
+		plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 0, 1, 0));
 		normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
-		if (normalDot > 0)
+		if (normalDot != 0)
 		{
 			t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
 			XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+			
+			float translationValue = pos.m128_f32[1] - m_prevTranslationValue;
+			m_controlObject->m_pos.y += translationValue;
 			m_prevTranslationValue = pos.m128_f32[1];
 		}
 		break;
 	case cObjectCoordinator::AXIS_Z:
 		plane = XMPlaneFromPointNormal(objCenter, XMVectorSet(0, 1, 0, 0));
 		normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
-		if (normalDot > 0)
+		if (normalDot != 0)
 		{
 			t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
 			XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+			
+			float translationValue = pos.m128_f32[2] - m_prevTranslationValue;
+			m_controlObject->m_pos.z += translationValue;
 			m_prevTranslationValue = pos.m128_f32[2];
 		}
 		break;

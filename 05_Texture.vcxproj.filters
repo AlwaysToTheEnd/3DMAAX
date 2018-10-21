@@ -61,6 +61,9 @@
     <Filter Include="D12App\D12D3Maaax\cCamera">
       <UniqueIdentifier>{39310a70-d4d4-4197-92f1-423419117506}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Objects\ElementObject\Childs">
+      <UniqueIdentifier>{74b12965-073b-4868-b2f8-eb3f5436c60c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -120,12 +123,6 @@
     <ClInclude Include="D12D3Maaax.h">
       <Filter>D12App\D12D3Maaax</Filter>
     </ClInclude>
-    <ClInclude Include="cDrawPlane.h">
-      <Filter>Objects\ElementObject</Filter>
-    </ClInclude>
-    <ClInclude Include="cDrawLines.h">
-      <Filter>Objects\ElementObject</Filter>
-    </ClInclude>
     <ClInclude Include="cInputDeviceMG.h">
       <Filter>ManagedClass\cInputDeviceMG</Filter>
     </ClInclude>
@@ -150,11 +147,20 @@
     <ClInclude Include="cButtonCollector.h">
       <Filter>UI\cButtonCollector</Filter>
     </ClInclude>
-    <ClInclude Include="cDrawDot.h">
-      <Filter>Objects\ElementObject</Filter>
-    </ClInclude>
     <ClInclude Include="cObjectCoordinator.h">
       <Filter>ManagedClass</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Line.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawDot.h">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawLines.h">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawPlane.h">
+      <Filter>Objects\ElementObject\Childs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -206,12 +212,6 @@
     <ClCompile Include="D12D3Maaax.cpp">
       <Filter>D12App\D12D3Maaax</Filter>
     </ClCompile>
-    <ClCompile Include="cDrawPlane.cpp">
-      <Filter>Objects\ElementObject</Filter>
-    </ClCompile>
-    <ClCompile Include="cDrawLines.cpp">
-      <Filter>Objects\ElementObject</Filter>
-    </ClCompile>
     <ClCompile Include="cInputDeviceMG.cpp">
       <Filter>ManagedClass\cInputDeviceMG</Filter>
     </ClCompile>
@@ -236,11 +236,20 @@
     <ClCompile Include="cButtonCollector.cpp">
       <Filter>UI\cButtonCollector</Filter>
     </ClCompile>
-    <ClCompile Include="cDrawDot.cpp">
-      <Filter>Objects\ElementObject</Filter>
-    </ClCompile>
     <ClCompile Include="cObjectCoordinator.cpp">
       <Filter>ManagedClass</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Line.cpp">
+      <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawDot.cpp">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawLines.cpp">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawPlane.cpp">
+      <Filter>Objects\ElementObject\Childs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,7 @@ protected:
 public:
 	static D12App*	GetApp();
 	static double	GetDeltaTime() { return m_DeltaTime; }
+	static cCamera& GetCamera() { return m_Camera; }
 	static UINT		GetRandom() { return m_random(); }
 
 	HINSTANCE AppInst()const;
@@ -52,8 +53,8 @@ protected:
 protected:
 	static D12App*	m_Instance;
 	static double	m_DeltaTime;
-	static POINT	m_MousePos;
 	static mt19937	m_random;
+	static cCamera	m_Camera;
 
 	HINSTANCE		mhInstance = nullptr;
 	HWND			mhMainWnd = nullptr;
@@ -72,7 +73,6 @@ protected:
 	D3D_DRIVER_TYPE	m_D3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 
 	GameTimer		m_Timer;
-	cCamera			m_Camera;
 
 	ComPtr<IDXGIFactory4>	m_DxgiFactory;
 	ComPtr<IDXGISwapChain>	m_SwapChain;
