@@ -4,6 +4,7 @@
 cOper_Add_Line::cOper_Add_Line()
 	:cOperation(OPER_ADD_LINE)
 	, m_operationText(nullptr)
+	, m_currPlane(nullptr)
 {
 }
 
@@ -25,6 +26,16 @@ void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw
 	switch (m_worksSate)
 	{
 	case cOper_Add_Line::SELECT_PLANE:
+		if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
+		{
+			cObject* pickPlane = nullptr;
+
+			if (draw[DRAW_PLNAES].get()->Picking(&pickPlane))
+			{
+				m_currPlane = static_cast<cPlane*>(pickPlane);
+				m_worksSate = FIRST_DOT_PICK;
+			}
+		}
 		break;
 	case cOper_Add_Line::FIRST_DOT_PICK:
 		break;

@@ -20,6 +20,7 @@ public:
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 
 private:
-	shared_ptr<RenderFont> m_operationText;
+	shared_ptr<RenderFont>	m_operationText;
+	cPlane*					m_currPlane;
 };
 

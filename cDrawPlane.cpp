@@ -78,7 +78,7 @@ void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-bool cDrawPlane::Picking(cObject ** ppPlane)
+bool cDrawPlane::Picking(cObject ** ppObject)
 {
 
 	return false;
