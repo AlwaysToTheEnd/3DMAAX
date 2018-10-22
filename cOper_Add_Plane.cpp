@@ -27,7 +27,7 @@ void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& dra
 	{
 	case cOper_Add_Plane::ADD_PLANE:
 	{
-		cObject* element = draw[0].get()->AddElement();
+		cObject* element = draw[DRAW_PLNAES].get()->AddElement();
 		OBJCOORD->ObjectRegistration(element);
 		m_operControl.AddParameter(L"quater X : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().x);
 		m_operControl.AddParameter(L"quater Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().y);

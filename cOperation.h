@@ -6,6 +6,7 @@ enum OPERATIONTYPE
 {
 	OPER_ADD_PLANE,
 	OPER_ADD_LINE,
+	OPER_ADD_DOT,
 	OPER_DRAWOPER_COUNT,
 	OPER_PUSH_MESH,
 	OPER_MESHOPER_COUNT,
@@ -19,6 +20,7 @@ public:
 public:
 	cOperation(OPERATIONTYPE type)
 		: m_operType(type)
+		, m_operationText(nullptr)
 		, m_operState(false)
 		, m_worksSate(0)
 	{
@@ -38,9 +40,17 @@ public:
 	OPERATIONTYPE GetOperType() const { return m_operType; }
 
 protected:
+	cDot* AddDot(vector<unique_ptr<cDrawElement>>& draw);
+	cLine* AddLine(vector<unique_ptr<cDrawElement>>& draw);
+	bool PickPlane(vector<unique_ptr<cDrawElement>>& draw, cPlane** plane);
+	cDot * AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw, cPlane* currPlane);
+
+protected:
 	static shared_ptr<cRenderItem> m_OperatorUi;
-	const OPERATIONTYPE	m_operType;
-	cUIOperWindow		m_operControl;
-	bool				m_operState;
-	UINT				m_worksSate;
+
+	shared_ptr<RenderFont>	m_operationText;
+	const OPERATIONTYPE		m_operType;
+	cUIOperWindow			m_operControl;
+	bool					m_operState;
+	UINT					m_worksSate;
 };

@@ -162,6 +162,9 @@
     <ClInclude Include="cDrawPlane.h">
       <Filter>Objects\ElementObject\Childs</Filter>
     </ClInclude>
+    <ClInclude Include="cOper_Add_Dot.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -250,6 +253,9 @@
     </ClCompile>
     <ClCompile Include="cDrawPlane.cpp">
       <Filter>Objects\ElementObject\Childs</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Dot.cpp">
+      <Filter>cOperation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

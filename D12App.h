@@ -1,5 +1,6 @@
 #pragma once
 #define DELTATIME D12App::GetDeltaTime()
+#define CAMERA D12App::GetCamera()
 
 class D12App
 {

@@ -32,6 +32,9 @@ void cOperator::SetUp(shared_ptr<cRenderItem> buttonRenderItem)
 		case OPER_ADD_LINE:
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Line));
 			break;
+		case OPER_ADD_DOT:
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Dot));
+			break;
 		case OPER_PUSH_MESH:
 			continue;
 			break;
@@ -91,9 +94,11 @@ void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws)
 		{
 		case OPER_ADD_PLANE:
 		case OPER_ADD_LINE:
+		case OPER_ADD_DOT:
 			m_currOperation->DrawElementOperation(draws);
 			break;
 		default:
+			assert(false);
 			break;
 		}
 	}

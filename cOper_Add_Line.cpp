@@ -3,7 +3,6 @@
 
 cOper_Add_Line::cOper_Add_Line()
 	:cOperation(OPER_ADD_LINE)
-	, m_operationText(nullptr)
 	, m_currPlane(nullptr)
 	, m_firstDot(nullptr)
 {
@@ -32,22 +31,19 @@ void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw
 	case cOper_Add_Line::SELECT_PLANE:
 	{
 		m_operationText->isRender = true;
-		if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
-		{
-			cObject* pickPlane = nullptr;
 
-			if (draw[DRAW_PLNAES]->Picking(&pickPlane))
-			{
-				m_currPlane = static_cast<cPlane*>(pickPlane);
-				m_worksSate = FIRST_DOT_PICK;
-				m_operationText->printString = L"Select First dot";
-			}
+		if (PickPlane(draw, &m_currPlane))
+		{
+			m_worksSate = FIRST_DOT_PICK;
+			m_operationText->printString = L"Select First dot";
+
+			CAMERA.SetTargetAndSettingAngle(m_currPlane);
 		}
 	}
-		break;
+	break;
 	case cOper_Add_Line::FIRST_DOT_PICK:
 	{
-		m_firstDot = AddDotAtCurrPlane(draw);
+		m_firstDot = AddDotAtCurrPlane(draw, m_currPlane);
 
 		if (m_firstDot)
 		{
@@ -55,25 +51,23 @@ void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw
 			m_operationText->printString = L"Select Secend dot";
 		}
 	}
-		break;
+	break;
 	case cOper_Add_Line::SECEND_DOT_PICK:
 	{
-		cDot* secendDot = AddDotAtCurrPlane(draw);
+		cDot* secendDot = AddDotAtCurrPlane(draw,m_currPlane);
 
 		if (secendDot)
 		{
-			cLine* line=static_cast<cLine*>(draw[DRAW_LINES]->AddElement());
+			cLine* line = AddLine(draw);
 			line->SetFirstDot(m_firstDot);
 			line->SetSecendDot(secendDot);
 			m_firstDot = nullptr;
-			m_operationText->isRender=false;
+			m_operationText->isRender = false;
 			m_operationText->printString = L"Select Plane";
 			EndOperation();
 		}
 	}
-		break;
-	default:
-		break;
+	break;
 	}
 }
 
@@ -85,8 +79,8 @@ void cOper_Add_Line::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 	{
 		draw[DRAW_DOTS]->DeleteBackObject();
 	}
+
 	m_firstDot = nullptr;
-	m_operationText->isRender = false;
 	m_operationText->printString = L"Select Plane";
 	EndOperation();
 }
@@ -95,39 +89,6 @@ void cOper_Add_Line::EndOperation()
 {
 	cOperation::EndOperation();
 	m_firstDot = nullptr;
-	m_operationText->isRender = false;
 	m_operationText->printString = L"Select Plane";
-}
-
-cDot * cOper_Add_Line::AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw)
-{
-	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
-	{
-		float distance;
-		PICKRAY ray = INPUTMG->GetMousePickLay();
-		if (m_currPlane->Picking(ray, distance))
-		{
-			cObject* pickDot = nullptr;
-			if (draw[DRAW_DOTS]->Picking(&pickDot))
-			{
-				cDot* resultDot = static_cast<cDot*>(pickDot);
-				if (resultDot->GetHostObject() == m_currPlane)
-				{
-					return resultDot;
-				}
-			}
-
-			XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), m_currPlane->GetXMMatrix());
-			XMVECTOR pos = ray.origin + ray.ray*distance;
-			pos = XMVector3TransformCoord(pos, planeInvMat);
-			pos.m128_f32[2] = 0;
-			cDot* dot = static_cast<cDot*>(draw[DRAW_DOTS]->AddElement());
-			XMStoreFloat3(&dot->GetPos(), pos);
-			dot->SetHostObject(m_currPlane);
-
-			return dot;
-		}
-	}
-
-	return nullptr;
+	CAMERA.SetTarget(nullptr);
 }

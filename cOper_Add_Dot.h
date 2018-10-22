@@ -1,18 +1,17 @@
 #pragma once
 
-class cOper_Add_Line : public cOperation
+class cOper_Add_Dot :public cOperation
 {
 private:
 	enum STATE
 	{
 		SELECT_PLANE,
-		FIRST_DOT_PICK,
-		SECEND_DOT_PICK,
+		SET_DOTS,
 	};
 
 public:
-	cOper_Add_Line();
-	virtual ~cOper_Add_Line();
+	cOper_Add_Dot();
+	virtual ~cOper_Add_Dot();
 
 	virtual void SetUp() override;
 	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) override;
@@ -20,9 +19,9 @@ public:
 	virtual void EndOperation() override;
 
 private:
-
-private:
-	cPlane*					m_currPlane;
-	cDot*					m_firstDot;
+	cPlane*		m_currPlane;
+	cDot*		m_currDot;
+	UINT		m_addDotCount;
+	UINT		m_existingDotNum;
 };
 

@@ -20,6 +20,7 @@ public:
 	virtual cObject* AddElement() = 0;
 
 	void DeleteBackObject();
+	UINT GetObjectNum() { return m_objects.size(); }
 
 protected:
 	shared_ptr<cRenderItem> m_renderItem;
