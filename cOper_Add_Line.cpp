@@ -79,11 +79,24 @@ void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw
 
 void cOper_Add_Line::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 {
-	draw[DRAW_LINES].get()->DeleteBackObject();
+	draw[DRAW_LINES]->DeleteBackObject();
+
+	if (m_firstDot)
+	{
+		draw[DRAW_DOTS]->DeleteBackObject();
+	}
 	m_firstDot = nullptr;
 	m_operationText->isRender = false;
 	m_operationText->printString = L"Select Plane";
 	EndOperation();
+}
+
+void cOper_Add_Line::EndOperation()
+{
+	cOperation::EndOperation();
+	m_firstDot = nullptr;
+	m_operationText->isRender = false;
+	m_operationText->printString = L"Select Plane";
 }
 
 cDot * cOper_Add_Line::AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw)
@@ -94,6 +107,16 @@ cDot * cOper_Add_Line::AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw)
 		PICKRAY ray = INPUTMG->GetMousePickLay();
 		if (m_currPlane->Picking(ray, distance))
 		{
+			cObject* pickDot = nullptr;
+			if (draw[DRAW_DOTS]->Picking(&pickDot))
+			{
+				cDot* resultDot = static_cast<cDot*>(pickDot);
+				if (resultDot->GetHostObject() == m_currPlane)
+				{
+					return resultDot;
+				}
+			}
+
 			XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), m_currPlane->GetXMMatrix());
 			XMVECTOR pos = ray.origin + ray.ray*distance;
 			pos = XMVector3TransformCoord(pos, planeInvMat);

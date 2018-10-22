@@ -17,6 +17,7 @@ public:
 	virtual void SetUp() override;
 	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
+	virtual void EndOperation() override;
 
 private:
 	cDot * AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw);

@@ -123,7 +123,7 @@ bool XM_CALLCONV cOcTree::OctreeNode::Picking(PICKRAY ray, float & dist)
 				assert(false);
 				break;
 			}
-
+			
 			float distance = FLT_MAX;
 			if (TriangleTests::Intersects(ray.origin, ray.ray, XMLoadFloat3(vertexPosition0),
 				XMLoadFloat3(vertexPosition1), XMLoadFloat3(vertexPosition2), distance))

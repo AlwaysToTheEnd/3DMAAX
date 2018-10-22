@@ -16,7 +16,7 @@ public:
 
 	virtual void Update();
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) = 0;
-	virtual bool Picking(cObject** ppObject) = 0;
+	virtual bool Picking(cObject** ppObject);
 	virtual cObject* AddElement() = 0;
 
 	void DeleteBackObject();

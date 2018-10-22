@@ -126,11 +126,11 @@ void D12D3Maaax::Draw()
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
-	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 
 	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
 	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
+	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);

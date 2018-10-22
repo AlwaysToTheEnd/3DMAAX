@@ -29,13 +29,13 @@ public:
 	virtual void SetUp() = 0;
 	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
+	virtual void EndOperation();
 
 public:
 	void StartOperation() { m_operState = true; m_operControl.IsRenderState(true); }
 
 	bool GetOperState() const { return m_operState; }
 	OPERATIONTYPE GetOperType() const { return m_operType; }
-	void EndOperation();
 
 protected:
 	static shared_ptr<cRenderItem> m_OperatorUi;

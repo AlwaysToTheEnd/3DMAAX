@@ -3,6 +3,7 @@
 unique_ptr<MeshGeometry> cDrawLines::m_geo = nullptr;
 
 cLine::cLine()
+	:m_lineDistacne(0)
 {
 	m_hostObject[0] = nullptr;
 	m_hostObject[1] = nullptr;
@@ -17,10 +18,10 @@ void XM_CALLCONV cLine::Update(FXMMATRIX mat)
 	assert(m_hostObject[0] && m_hostObject[1]);
 
 	XMVECTOR lineVec = XMLoadFloat3(&m_hostObject[1]->GetWorldPos()) - XMLoadFloat3(&m_hostObject[0]->GetWorldPos());
-	float scale = XMVector3Length(lineVec).m128_f32[0];
+	m_lineDistacne = XMVector3Length(lineVec).m128_f32[0];
 
 	m_pos = m_hostObject[0]->GetWorldPos();
-	m_scale = { scale/2 ,1 ,1 };
+	m_scale = { m_lineDistacne /2 ,1 ,1 };
 	XMVECTOR baseVector = XMVectorSet(1, 0, 0, 0);
 	XMVECTOR axis = XMVector3Cross(baseVector, lineVec);
 	XMStoreFloat4(&m_quaternion, XMQuaternionNormalize(XMQuaternionRotationAxis(axis,
@@ -47,8 +48,8 @@ void cDrawLines::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cm
 	auto lineGeo = make_unique<MeshGeometry>();
 	lineGeo->name = "line";
 
-	colorVertex.push_back(C_Vertex({ 0,0,0 }, Colors::PaleVioletRed));
-	colorVertex.push_back(C_Vertex({ 1,0,0 }, Colors::PaleVioletRed));
+	colorVertex.push_back(C_Vertex({ 0,0,0 }, Colors::Black));
+	colorVertex.push_back(C_Vertex({ 1,0,0 }, Colors::Black));
 	indices.push_back(0);
 	indices.push_back(1);
 

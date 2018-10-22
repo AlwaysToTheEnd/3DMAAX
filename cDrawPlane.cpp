@@ -102,27 +102,6 @@ void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-bool cDrawPlane::Picking(cObject ** ppObject)
-{
-	float dist = FLT_MAX;
-	PICKRAY mouseRay = INPUTMG->GetMousePickLay();
-
-	for (auto& it : m_objects)
-	{
-		float currObjectDist;
-		if (it->Picking(mouseRay, currObjectDist))
-		{
-			if (currObjectDist < dist)
-			{
-				*ppObject = it.get();
-				dist = currObjectDist;
-			}
-		}
-	}
-
-	return dist != FLT_MAX;
-}
-
 cObject * cDrawPlane::AddElement()
 {
 	m_objects.push_back(make_unique<cPlane>());

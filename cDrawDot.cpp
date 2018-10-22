@@ -27,7 +27,11 @@ void XM_CALLCONV cDot::Update(FXMMATRIX mat)
 
 bool XM_CALLCONV cDot::Picking(PICKRAY ray, float & distance)
 {
-	return false;
+	BoundingSphere sphere;
+	sphere.Center = GetWorldPos();
+	sphere.Radius = 0.02f;
+
+	return sphere.Intersects(ray.origin,ray.ray,distance);
 }
 
 void cDrawDot::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
@@ -44,7 +48,7 @@ void cDrawDot::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdL
 	for (int i = 0; i < sphere.Vertices.size(); i++)
 	{
 		vertices[i].pos = sphere.Vertices[i].Position;
-		XMStoreFloat4(&vertices[i].color, Colors::Gray.v);
+		XMStoreFloat4(&vertices[i].color, Colors::Black.v);
 	}
 
 	const UINT vertexSize = vertices.size() * sizeof(C_Vertex);
@@ -85,11 +89,6 @@ void cDrawDot::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 	m_renderItem = renderItem;
 	m_renderItem->SetGeometry(m_geo.get(), "dot");
 	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-
-bool cDrawDot::Picking(cObject ** ppObject)
-{
-	return false;
 }
 
 cObject * cDrawDot::AddElement()

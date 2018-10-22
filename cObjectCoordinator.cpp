@@ -23,7 +23,7 @@ void cObjectCoordinator::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandL
 	m_geo = make_unique<MeshGeometry>();
 	m_geo->name = "objectCoordinator";
 
-	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.2f, 35, 35);
+	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.2f, 20, 20);
 
 	vertices.resize(sphere.Vertices.size());
 
@@ -35,21 +35,6 @@ void cObjectCoordinator::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandL
 	}
 
 	indices = sphere.GetIndices16();
-	const UINT vertexSize = vertices.size() * sizeof(C_Vertex);
-	const UINT indicesSize = indices.size() * sizeof(UINT16);
-
-	m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
-	m_geo->indexBufferByteSize = indicesSize;
-	m_geo->vertexBufferByteSize = vertexSize;
-	m_geo->vertexByteStride = sizeof(C_Vertex);
-
-	D3DCreateBlob(vertexSize, m_geo->vertexBufferCPU.GetAddressOf());
-	memcpy(m_geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vertexSize);
-
-	D3DCreateBlob(indicesSize, m_geo->indexBufferCPU.GetAddressOf());
-	memcpy(m_geo->indexBufferCPU->GetBufferPointer(), indices.data(), indicesSize);
-
-	m_geo->SetOctree(0);
 
 	vector<UINT16> arrowindices;
 	vector<C_Vertex> arrowVertex;
@@ -134,6 +119,7 @@ void cObjectCoordinator::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandL
 	m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
 	m_geo->indexBufferByteSize = indices.size() * sizeof(UINT16);
 	m_geo->vertexBufferByteSize = vertices.size() * sizeof(C_Vertex);
+	m_geo->vertexByteStride = sizeof(C_Vertex);
 	
 	m_geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
 		vertices.data(), m_geo->vertexBufferByteSize, m_geo->vertexUploadBuffer);
@@ -172,6 +158,9 @@ void cObjectCoordinator::SetUp()
 	m_sphereRenderItem->SetGeometry(m_geo.get(), "sphere");
 	m_sphereRenderInstance = m_sphereRenderItem->GetRenderIsntance();
 	m_sphereRenderInstance->m_isRenderOK = false;
+
+	m_sphereBounding.Center = { 0,0,0 };
+	m_sphereBounding.Radius = 0.2f;
 }
 
 void cObjectCoordinator::Update()
@@ -189,6 +178,7 @@ void cObjectCoordinator::Update()
 		m_sphereRenderInstance->instanceData.World = m_controlObject->GetMatrix();
 		m_sphereRenderInstance->numFramesDirty = gNumFrameResources;
 		XMFLOAT3 pos = m_controlObject->GetPos();
+
 		for (int i = 0; i < AXIS_NONE; i++)
 		{
 			m_arrowRenderInstance[i]->m_isRenderOK = true;
@@ -238,7 +228,7 @@ void cObjectCoordinator::Update()
 
 			if (m_controlState == AXIS_NONE)
 			{
-				if (m_geo->octree->Picking(objectLocalRay, distance))
+				if (m_sphereBounding.Intersects(objectLocalRay.origin, objectLocalRay.ray, distance))
 				{
 					pickPos = (mouseRay.origin + mouseRay.ray*distance);
 					XMStoreFloat3(&m_prevVec, XMVector3Normalize((objectLocalRay.origin + objectLocalRay.ray*distance)));
@@ -294,7 +284,7 @@ void cObjectCoordinator::Update()
 		{
 			if (m_isRotationControl)
 			{
-				if (m_geo->octree->Picking(objectLocalRay, distance))
+				if (m_sphereBounding.Intersects(objectLocalRay.origin, objectLocalRay.ray, distance))
 				{
 					pickPos = (mouseRay.origin + mouseRay.ray*distance);
 

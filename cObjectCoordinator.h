@@ -46,6 +46,7 @@ private:
 	BoundingBox					m_arrowBoundingBox[AXIS_NONE] = {};
 	shared_ptr<cRenderItem>		m_arrowRenderItem;
 	shared_ptr<RenderInstance>	m_arrowRenderInstance[AXIS_NONE] = {};
+	BoundingSphere				m_sphereBounding;
 	shared_ptr<cRenderItem>		m_sphereRenderItem;
 	shared_ptr<RenderInstance>	m_sphereRenderInstance;
 

@@ -13,7 +13,8 @@ public:
 	void SetFirstDot(cObject* object) { m_hostObject[0] = object; }
 	void SetSecendDot(cObject* object) { m_hostObject[1] = object; }
 private:
-	cObject* m_hostObject[2];
+	cObject*	m_hostObject[2];
+	float		m_lineDistacne;
 };
 
 class cDrawLines : public cDrawElement
