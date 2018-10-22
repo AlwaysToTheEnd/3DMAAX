@@ -10,7 +10,7 @@ public:
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
 	void SetHostObject(cObject* object) { m_hostObject = object; }
 private:
-	cObject* m_hostObject;
+	cObject*		m_hostObject;
 };
 
 class cDrawDot : public cDrawElement

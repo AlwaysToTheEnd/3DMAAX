@@ -37,7 +37,7 @@ void cDrawDot::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdL
 	m_geo = make_unique<MeshGeometry>();
 	m_geo->name = "dot";
 
-	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.4f, 6, 6);
+	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.01f, 6, 6);
 
 	vertices.resize(sphere.Vertices.size());
 

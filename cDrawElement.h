@@ -1,11 +1,11 @@
 #pragma once
 
-enum DRAWELEMNTPLACE
+enum OBJECTSPLACE
 {
 	DRAW_PLNAES,
 	DRAW_LINES,
 	DRAW_DOTS,
-	DRAW_COUNT,
+	OBJECTS_COUNT,
 };
 
 class cDrawElement

@@ -50,6 +50,6 @@ private:
 	XMFLOAT4X4		m_2DProj = MathHelper::Identity4x4();
 
 private:
-	cOperator							m_operator;
+	unique_ptr<cOperator>				m_operator =nullptr;
 	vector<unique_ptr<cDrawElement>>	m_drawElements;
 };

@@ -8,13 +8,15 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 
 D12D3Maaax::~D12D3Maaax()
 {
+	m_operator = nullptr;
+	delete RENDERITEMMG;
 	delete OBJCOORD;
 	delete INPUTMG;
-	delete RENDERITEMMG;
-	delete FONTMANAGER;
 
 	if (m_D3dDevice != nullptr)
 		FlushCommandQueue();
+
+	delete FONTMANAGER;
 }
 
 bool D12D3Maaax::Initialize()
@@ -79,7 +81,7 @@ void D12D3Maaax::Update()
 	UpdateMainPassCB();
 	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, m_ClientWidth, m_ClientHeight);
 	
-	m_operator.Update(m_drawElements);
+	m_operator->Update(m_drawElements);
 	OBJCOORD->Update();
 	UpdateDrawElement();
 
@@ -126,7 +128,9 @@ void D12D3Maaax::Draw()
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
 	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 
-	//m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
+	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "line");
+	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
 
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
@@ -424,15 +428,33 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
-	m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
-	m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawLines));
-	m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("line"));
-	m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawDot));
-	m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("dot"));
+	for (int i = 0; i < OBJECTSPLACE::OBJECTS_COUNT; i++)
+	{
+		switch (i)
+		{
+		case DRAW_PLNAES:
+			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
+			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
+			break;
+		case DRAW_LINES:
+			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawLines));
+			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("line"));
+			break;
+		case DRAW_DOTS:
+			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawDot));
+			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("dot"));
+			break;
+		case OBJECTS_COUNT:
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
 
+	m_operator = make_unique<cOperator>();
 	cOperation::SetOperatorUIRender(RENDERITEMMG->AddRenderItem("ui"));
-	m_operator.SetUp(RENDERITEMMG->AddRenderItem("ui"));
+	m_operator->SetUp(RENDERITEMMG->AddRenderItem("ui"));
 
 	OBJCOORD->SetUp();
 }

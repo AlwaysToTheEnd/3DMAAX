@@ -2,6 +2,20 @@
 
 class cPlane;
 
+class cLine :public cObject
+{
+public:
+	cLine();
+	virtual ~cLine();
+
+	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
+	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
+	void SetFirstDot(cObject* object) { m_hostObject[0] = object; }
+	void SetSecendDot(cObject* object) { m_hostObject[1] = object; }
+private:
+	cObject* m_hostObject[2];
+};
+
 class cDrawLines : public cDrawElement
 {
 public:

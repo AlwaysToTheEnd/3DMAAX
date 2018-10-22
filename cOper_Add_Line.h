@@ -8,7 +8,6 @@ private:
 		SELECT_PLANE,
 		FIRST_DOT_PICK,
 		SECEND_DOT_PICK,
-		OPER_END,
 	};
 
 public:
@@ -20,7 +19,11 @@ public:
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 
 private:
+	cDot * AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw);
+
+private:
 	shared_ptr<RenderFont>	m_operationText;
 	cPlane*					m_currPlane;
+	cDot*					m_firstDot;
 };
 
