@@ -1,7 +1,10 @@
 #include "stdafx.h"
 
 cObject::cObject()
-	: m_RenderItem(nullptr)
+	: m_renderInstance(nullptr)
+	, m_pos(0,0,0)
+	, m_quaternion(0,0,0,1)
+	, m_scale(1,1,1)
 {
 }
 
@@ -10,25 +13,18 @@ cObject::~cObject()
 
 }
 
-void cObject::Build(string piplineName)
+void cObject::Build(shared_ptr<cRenderItem> renderItem)
 {
-	m_RenderItem = RENDERITEMMG->AddRenderItem(piplineName);
-}
-
-void cObject::Build(string subMeshName, MeshGeometry * geo, Material * mater,
-	D3D12_GPU_DESCRIPTOR_HANDLE tex, string piplineName)
-{
-	m_RenderItem = RENDERITEMMG->AddRenderItem(piplineName);
-
-	m_RenderItem->geo = geo;
-	m_RenderItem->mater = mater;
-	m_RenderItem->texture = tex;
-	m_RenderItem->indexCount = geo->DrawArgs[subMeshName].indexCount;
-	m_RenderItem->baseVertexLocation = geo->DrawArgs[subMeshName].baseVertexLocation;
-	m_RenderItem->startIndexLocation = geo->DrawArgs[subMeshName].startIndexLocation;
+	m_renderInstance = renderItem->GetRenderIsntance();
 }
 
 void cObject::Update(FXMMATRIX mat)
 {
+	XMMATRIX localMat = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) * 
+		XMMatrixRotationQuaternion(XMLoadFloat4(&m_quaternion))*
+		XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+	XMMATRIX worldMat = localMat * mat;
 
+	XMStoreFloat4x4(&m_renderInstance->instanceData.World, worldMat);
+	m_renderInstance->numFramesDirty = gNumFrameResources;
 }

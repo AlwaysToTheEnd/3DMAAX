@@ -3,7 +3,8 @@
 #include <windowsx.h>
 
 double D12App::m_DeltaTime = 0;
-POINT D12App::m_MousePos = { 0,0 };
+mt19937 D12App::m_random(42);
+cCamera D12App::m_Camera;
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -32,7 +33,7 @@ void D12App::CreateRtvAndDsvDescriptorHeaps()
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
-	rtvHeapDesc.NumDescriptors = SwapChainBufferCount+1;
+	rtvHeapDesc.NumDescriptors = SwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
@@ -61,7 +62,7 @@ void D12App::OnResize()
 	{
 		m_SwapChainBuffer[i] = nullptr;
 	}
-	m_ShadowMap = nullptr;
+
 	m_DepthStencilBuffer = nullptr;
 
 	ThrowIfFailed(m_SwapChain->ResizeBuffers(SwapChainBufferCount,
@@ -76,25 +77,6 @@ void D12App::OnResize()
 		m_D3dDevice->CreateRenderTargetView(m_SwapChainBuffer[i].Get(), nullptr, rtvHandle);
 		rtvHandle.Offset(1, m_RTVDescriptorSize);
 	}
-
-	D3D12_RESOURCE_DESC shadowRsvDesc;
-	shadowRsvDesc.Alignment = 0; //조정
-	shadowRsvDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	shadowRsvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	shadowRsvDesc.DepthOrArraySize = 1;
-	shadowRsvDesc.MipLevels = 1;
-	shadowRsvDesc.Width = m_ClientWidth;
-	shadowRsvDesc.Height = m_ClientHeight;
-	shadowRsvDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-	shadowRsvDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	shadowRsvDesc.SampleDesc.Count = m_4xMsaaState ? 4 : 1;
-	shadowRsvDesc.SampleDesc.Quality = m_4xMsaaState ? (m_4xmsaaQuality - 1) : 0;
-
-	ThrowIfFailed(m_D3dDevice->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE, &shadowRsvDesc,
-		D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(m_ShadowMap.GetAddressOf())));
-
-	m_D3dDevice->CreateRenderTargetView(m_ShadowMap.Get(), nullptr, rtvHandle);
 
 	D3D12_RESOURCE_DESC dsvDesc;
 	dsvDesc.Alignment = 0; //조정
@@ -235,16 +217,10 @@ bool D12App::Initialize()
 LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	m_Camera.WndProc(hwnd, msg, wParam, lParam);
+	INPUTMG->WndProc(hwnd, msg, wParam, lParam);
 
 	switch (msg)
 	{
-		// WM_ACTIVATE is sent when the window is activated or deactivated.  
-		// We pause the game when the window is deactivated and unpause it 
-		// when it becomes active. 
-	case WM_MOUSEMOVE:
-		m_MousePos.x = LOWORD(lParam);
-		m_MousePos.y = HIWORD(lParam);
-		break;
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
@@ -257,10 +233,8 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			m_Timer.Start();
 		}
 		return 0;
-
-		// WM_SIZE is sent when the user resizes the window.  
+ 
 	case WM_SIZE:
-		// Save the new client area dimensions.
 		m_ClientWidth = LOWORD(lParam);
 		m_ClientHeight = HIWORD(lParam);
 		if (m_D3dDevice)
@@ -280,8 +254,6 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			else if (wParam == SIZE_RESTORED)
 			{
-
-				// Restoring from minimized state?
 				if (mMinimized)
 				{
 					mAppPaused = false;
@@ -289,7 +261,6 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					OnResize();
 				}
 
-				// Restoring from maximized state?
 				else if (mMaximized)
 				{
 					mAppPaused = false;
@@ -307,7 +278,7 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					// done resizing the window and releases the resize bars, which 
 					// sends a WM_EXITSIZEMOVE message.
 				}
-				else // API call such as SetWindowPos or mSwapChain->SetFullscreenState.
+				else
 				{
 					OnResize();
 				}
@@ -315,15 +286,12 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
-		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
 	case WM_ENTERSIZEMOVE:
 		mAppPaused = true;
 		mResizing = true;
 		m_Timer.Stop();
 		return 0;
 
-		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
-		// Here we reset everything based on the new window dimensions.
 	case WM_EXITSIZEMOVE:
 		mAppPaused = false;
 		mResizing = false;
@@ -331,32 +299,16 @@ LRESULT D12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		OnResize();
 		return 0;
 
-		// WM_DESTROY is sent when the window is being destroyed.
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
 
-		// The WM_MENUCHAR message is sent when a menu is active and the user presses 
-		// a key that does not correspond to any mnemonic or accelerator key. 
 	case WM_MENUCHAR:
-		// Don't beep when we alt-enter.
 		return MAKELRESULT(0, MNC_CLOSE);
 
-		// Catch this message so to prevent the window from becoming too small.
 	case WM_GETMINMAXINFO:
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
-		return 0;
-	case WM_KEYUP:
-		if (wParam == VK_ESCAPE)
-		{
-			PostQuitMessage(0);
-		}
-		else if ((int)wParam == VK_F2)
-		{
-			Set4xMsaaState(!m_4xMsaaState);
-		}
-
 		return 0;
 	}
 
@@ -555,12 +507,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE D12App::CurrentBackBufferView() const
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_RTVHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_CurrBackBuffer,m_RTVDescriptorSize);
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE D12App::ShadowMapView() const
-{
-	return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_RTVHeap->GetCPUDescriptorHandleForHeapStart(),
-		SwapChainBufferCount, m_RTVDescriptorSize);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE D12App::DepthStencilView() const

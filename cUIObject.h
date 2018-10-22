@@ -3,26 +3,28 @@
 class cUIObject : public cObject
 {
 public:
-	static void UIMeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+	static void MeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+	static void DisPosUploaders() { m_geo->DisPosUploaders(); }
+	static void SetGeoAtRenderItem(shared_ptr<cRenderItem> renderItem);
+
+private:
+	static unique_ptr<MeshGeometry> m_geo;
 
 public:
 	cUIObject();
 	virtual ~cUIObject();
 
-	virtual void Build(string piplineName = "") override;
-	virtual void Update(FXMMATRIX mat) override;
-	virtual void UIUpdate() {}
+	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
+	virtual void SetActiveFunc(function<void(int)> func) {};
 
-	void AddChild(cUIObject* ui) { m_ChildObject.push_back(unique_ptr<cUIObject>(ui)); }
-	void SetPos(XMFLOAT3 pos) { m_Pos = pos; }
-	void SetSize(XMFLOAT2 size) { m_Size.x = size.x / 2; m_Size.y = size.y / 2; }
-	void SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE tex) { m_RenderItem->texture = tex; }
-	void SetMaterial(Material* mater) { m_RenderItem->mater = mater; }
-	void RenderUI(bool value);
+	void SetPos(XMFLOAT3 pos);
+	void SetSize(XMFLOAT2 size);
+	
+	vector<unique_ptr<cUIObject>>& GetChilds() { return m_ChildObject; }
 
 protected:
-	static unique_ptr<MeshGeometry> m_uiGeo;
-	XMFLOAT3 m_Pos;
-	XMFLOAT2 m_Size;
+	virtual void UIUpdate() = 0;
+
+protected:
 	vector<unique_ptr<cUIObject>> m_ChildObject;
 };

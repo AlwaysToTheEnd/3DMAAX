@@ -29,7 +29,7 @@ public:
 
 	void Build(ID3D12Device* device, ID3D12CommandQueue* queue);
 	void AddFont(const string& fontName ,const wstring& fileName);
-	RenderFont* GetFont(string fontName);
+	shared_ptr<RenderFont> GetFont(string fontName);
 
 	void Resize(UINT clientWidth, UINT clientHeight);
 	void Render(ID3D12GraphicsCommandList* cmdList);
@@ -51,6 +51,6 @@ private:
 	unique_ptr<DescriptorHeap> m_resourceDescriptors = nullptr;
 	unique_ptr<SpriteBatch> m_spriteBatch = nullptr;
 	unordered_map<string, unique_ptr<SpriteFont>> m_fonts;
-	vector<unique_ptr<RenderFont>> m_renderFonts;
+	list<shared_ptr<RenderFont>> m_renderFonts;
 };
 

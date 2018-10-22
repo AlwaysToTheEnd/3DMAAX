@@ -16,9 +16,6 @@
     <Filter Include="D12App">
       <UniqueIdentifier>{f1d175c1-594c-4e78-87b6-9cb83d0f6093}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OBJECTS">
-      <UniqueIdentifier>{b5fb56ba-0e4a-4c6c-a811-c774bb0ac8f7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="UI">
       <UniqueIdentifier>{3334d577-1f3b-44c1-90e5-e3b1a0ae70b2}</UniqueIdentifier>
     </Filter>
@@ -31,23 +28,41 @@
     <Filter Include="ManagedClass\cFontMG">
       <UniqueIdentifier>{5d038177-4056-4fcb-88fd-aed99b4518eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="D12App\D12TextureApp">
-      <UniqueIdentifier>{eb152862-70fb-4054-9644-bb43ce0d9057}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="D12App\D12TextureApp\cTextureHeap">
-      <UniqueIdentifier>{39fe9927-055d-4dfd-8544-b5e7e745c8ef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="D12App\D12TextureApp\cCamera">
-      <UniqueIdentifier>{39310a70-d4d4-4197-92f1-423419117506}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ManagedClass\D12Util">
       <UniqueIdentifier>{44675d16-ea4e-4a06-a938-4cdff2c794a8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OBJECTS\MeshObject">
+    <Filter Include="Objects">
+      <UniqueIdentifier>{b5fb56ba-0e4a-4c6c-a811-c774bb0ac8f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\MeshObject">
       <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OBJECTS\ElementObject">
+    <Filter Include="Objects\ElementObject">
       <UniqueIdentifier>{a48e8c07-d0ec-4ebd-b60f-eb44946d9f64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass\cInputDeviceMG">
+      <UniqueIdentifier>{3e4a0b16-91bb-4d7b-833b-f67734f2cfee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cOperation">
+      <UniqueIdentifier>{b3364ae8-48ae-493f-889b-d5de058b2465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cOperation\cOperator">
+      <UniqueIdentifier>{6d30d187-8d9c-46a8-ac4e-57aabe59dc80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\cButtonCollector">
+      <UniqueIdentifier>{4a72d741-81e4-4a35-9d4f-d4b15d2d3e45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12D3Maaax">
+      <UniqueIdentifier>{eb152862-70fb-4054-9644-bb43ce0d9057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12D3Maaax\cTextureHeap">
+      <UniqueIdentifier>{39fe9927-055d-4dfd-8544-b5e7e745c8ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D12App\D12D3Maaax\cCamera">
+      <UniqueIdentifier>{39310a70-d4d4-4197-92f1-423419117506}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ElementObject\Childs">
+      <UniqueIdentifier>{74b12965-073b-4868-b2f8-eb3f5436c60c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -69,17 +84,14 @@
     <ClInclude Include="D12App.h">
       <Filter>D12App</Filter>
     </ClInclude>
-    <ClInclude Include="D12TextureApp.h">
-      <Filter>D12App\D12TextureApp</Filter>
-    </ClInclude>
     <ClInclude Include="cRenderItemMG.h">
       <Filter>ManagedClass\cRenderItemMG</Filter>
     </ClInclude>
     <ClInclude Include="cObejct.h">
-      <Filter>OBJECTS</Filter>
+      <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="cTextureHeap.h">
-      <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
+      <Filter>D12App\D12D3Maaax\cTextureHeap</Filter>
     </ClInclude>
     <ClInclude Include="GameTimer.h">
       <Filter>ManagedClass\D12Util</Filter>
@@ -91,7 +103,7 @@
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
     <ClInclude Include="cCamera.h">
-      <Filter>D12App\D12TextureApp\cCamera</Filter>
+      <Filter>D12App\D12D3Maaax\cCamera</Filter>
     </ClInclude>
     <ClInclude Include="UploadBuffer.h">
       <Filter>ManagedClass\D12Util</Filter>
@@ -105,11 +117,50 @@
     <ClInclude Include="cOcTree.h">
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
-    <ClInclude Include="cMirror.h">
-      <Filter>OBJECTS\MeshObject</Filter>
-    </ClInclude>
     <ClInclude Include="cPercentageValueSet.h">
       <Filter>ManagedClass\D12Util</Filter>
+    </ClInclude>
+    <ClInclude Include="D12D3Maaax.h">
+      <Filter>D12App\D12D3Maaax</Filter>
+    </ClInclude>
+    <ClInclude Include="cInputDeviceMG.h">
+      <Filter>ManagedClass\cInputDeviceMG</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawElement.h">
+      <Filter>Objects\ElementObject</Filter>
+    </ClInclude>
+    <ClInclude Include="cOperation.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Plane.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
+    <ClInclude Include="cUIButton.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="cOperator.h">
+      <Filter>cOperation\cOperator</Filter>
+    </ClInclude>
+    <ClInclude Include="cUIOperWindow.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="cButtonCollector.h">
+      <Filter>UI\cButtonCollector</Filter>
+    </ClInclude>
+    <ClInclude Include="cObjectCoordinator.h">
+      <Filter>ManagedClass</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Line.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawDot.h">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawLines.h">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawPlane.h">
+      <Filter>Objects\ElementObject\Childs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -125,17 +176,14 @@
     <ClCompile Include="D12App.cpp">
       <Filter>D12App</Filter>
     </ClCompile>
-    <ClCompile Include="D12TextureApp.cpp">
-      <Filter>D12App\D12TextureApp</Filter>
-    </ClCompile>
     <ClCompile Include="cRenderItemMG.cpp">
       <Filter>ManagedClass\cRenderItemMG</Filter>
     </ClCompile>
     <ClCompile Include="cObejct.cpp">
-      <Filter>OBJECTS</Filter>
+      <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="cTextureHeap.cpp">
-      <Filter>D12App\D12TextureApp\cTextureHeap</Filter>
+      <Filter>D12App\D12D3Maaax\cTextureHeap</Filter>
     </ClCompile>
     <ClCompile Include="GeometryGenerator.cpp">
       <Filter>ManagedClass\D12Util</Filter>
@@ -147,7 +195,7 @@
       <Filter>ManagedClass\D12Util</Filter>
     </ClCompile>
     <ClCompile Include="cCamera.cpp">
-      <Filter>D12App\D12TextureApp\cCamera</Filter>
+      <Filter>D12App\D12D3Maaax\cCamera</Filter>
     </ClCompile>
     <ClCompile Include="cUIObject.cpp">
       <Filter>UI</Filter>
@@ -158,11 +206,50 @@
     <ClCompile Include="cOcTree.cpp">
       <Filter>ManagedClass\D12Util</Filter>
     </ClCompile>
-    <ClCompile Include="cMirror.cpp">
-      <Filter>OBJECTS\MeshObject</Filter>
-    </ClCompile>
     <ClCompile Include="cPercentageValueSet.cpp">
       <Filter>ManagedClass\D12Util</Filter>
+    </ClCompile>
+    <ClCompile Include="D12D3Maaax.cpp">
+      <Filter>D12App\D12D3Maaax</Filter>
+    </ClCompile>
+    <ClCompile Include="cInputDeviceMG.cpp">
+      <Filter>ManagedClass\cInputDeviceMG</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawElement.cpp">
+      <Filter>Objects\ElementObject</Filter>
+    </ClCompile>
+    <ClCompile Include="cOperation.cpp">
+      <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Plane.cpp">
+      <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cUIButton.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="cOperator.cpp">
+      <Filter>cOperation\cOperator</Filter>
+    </ClCompile>
+    <ClCompile Include="cUIOperWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="cButtonCollector.cpp">
+      <Filter>UI\cButtonCollector</Filter>
+    </ClCompile>
+    <ClCompile Include="cObjectCoordinator.cpp">
+      <Filter>ManagedClass</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Line.cpp">
+      <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawDot.cpp">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawLines.cpp">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawPlane.cpp">
+      <Filter>Objects\ElementObject\Childs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +276,12 @@
       <Filter>리소스 파일</Filter>
     </FxCompile>
     <FxCompile Include="ShadowShader.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DrawElementSahder.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Common.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
   </ItemGroup>

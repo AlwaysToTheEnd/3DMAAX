@@ -1,9 +1,8 @@
 #include "stdafx.h"
 
-unique_ptr<MeshGeometry> cUIObject::m_uiGeo = nullptr;
+unique_ptr<MeshGeometry> cUIObject::m_geo = nullptr;
 
 cUIObject::cUIObject()
-	:m_Pos(0,0,0)
 {
 }
 
@@ -12,18 +11,18 @@ cUIObject::~cUIObject()
 {
 }
 
-void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
+void cUIObject::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
 {
-	if (m_uiGeo == nullptr)
+	if (m_geo == nullptr)
 	{
-		m_uiGeo = make_unique<MeshGeometry>();
-		m_uiGeo->name = "UI";
-		vector<Vertex> vertices(4);
+		m_geo = make_unique<MeshGeometry>();
+		m_geo->name = "UI";
+		vector<NT_Vertex> vertices(4);
 
-		vertices[0] = { {0,0,0},{0,0,1},{0,0} };
-		vertices[1] = { {1,0,0},{0,0,1},{1,0} };
-		vertices[2] = { {1,1,0},{0,0,1},{1,1} };
-		vertices[3] = { {0,1,0},{0,0,1},{0,1} };
+		vertices[0] = { {0,0,0},{0,0,-1},{0,0} };
+		vertices[1] = { {1,0,0},{0,0,-1},{1,0} };
+		vertices[2] = { {1,1,0},{0,0,-1},{1,1} };
+		vertices[3] = { {0,1,0},{0,0,-1},{0,1} };
 
 		vector<UINT16> Indices;
 		Indices.push_back(0);
@@ -33,60 +32,57 @@ void cUIObject::UIMeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * c
 		Indices.push_back(2);
 		Indices.push_back(3);
 
-		const UINT uiGeoDataSize = sizeof(Vertex)*vertices.size();
+		const UINT uiGeoDataSize = sizeof(NT_Vertex)*vertices.size();
 		const UINT uiGeoIndexSize = sizeof(UINT16)*Indices.size();
 
-		m_uiGeo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
-			vertices.data(), uiGeoDataSize, m_uiGeo->vertexUploadBuffer);
+		m_geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
+			vertices.data(), uiGeoDataSize, m_geo->vertexUploadBuffer);
 
-		m_uiGeo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
-			Indices.data(), uiGeoIndexSize, m_uiGeo->indexUploadBuffer);
+		m_geo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
+			Indices.data(), uiGeoIndexSize, m_geo->indexUploadBuffer);
 
-		m_uiGeo->indexFormat = DXGI_FORMAT_R16_UINT;
-		m_uiGeo->indexBufferByteSize = uiGeoIndexSize;
-		m_uiGeo->vertexBufferByteSize = uiGeoDataSize;
-		m_uiGeo->vertexByteStride = sizeof(Vertex);
+		m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
+		m_geo->indexBufferByteSize = uiGeoIndexSize;
+		m_geo->vertexBufferByteSize = uiGeoDataSize;
+		m_geo->vertexByteStride = sizeof(NT_Vertex);
 
 		SubMeshGeometry subMesh;
 		subMesh.baseVertexLocation = 0;
 		subMesh.startIndexLocation = 0;
 		subMesh.indexCount = Indices.size();
-		m_uiGeo->DrawArgs["UI"] = subMesh;
+		m_geo->DrawArgs["UI"] = subMesh;
 	}
 }
 
-void cUIObject::Update(FXMMATRIX mat)
+void cUIObject::SetGeoAtRenderItem(shared_ptr<cRenderItem> renderItem)
+{
+	assert(m_geo.get() && "UIObject Geo didn`t have Setup");
+
+	renderItem->SetGeometry(m_geo.get(), "UI");
+}
+
+void XM_CALLCONV cUIObject::Update(FXMMATRIX mat)
 {
 	UIUpdate();
-	XMMATRIX translationMat = XMMatrixTranslation(m_Pos.x, m_Pos.y, m_Pos.z);
-	XMMATRIX scaleMat = XMMatrixScaling(m_Size.x, m_Size.y, 1);
-	XMMATRIX uiMat = scaleMat * translationMat*mat;
+	XMMATRIX localMat = XMMatrixScaling(m_scale.x, m_scale.y, 1)* XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+	XMMATRIX worldMat = localMat * mat;
 
-	XMStoreFloat4x4(&m_RenderItem->world, uiMat);
-
-	m_RenderItem->numFramesDirty = gNumFrameResources;
+	XMStoreFloat4x4(&m_renderInstance->instanceData.World, worldMat);
+	m_renderInstance->numFramesDirty = gNumFrameResources;
 
 	for (auto& it : m_ChildObject)
 	{
-		it->Update(uiMat);
+		it->Update(worldMat);
 	}
 }
 
-void cUIObject::Build(string piplineName)
+void cUIObject::SetPos(XMFLOAT3 pos)
 {
-	m_RenderItem = RENDERITEMMG->AddRenderItem(piplineName);
-	m_RenderItem->geo = m_uiGeo.get();
-	m_RenderItem->indexCount = m_RenderItem->geo->DrawArgs["UI"].indexCount;
-	m_RenderItem->baseVertexLocation = m_RenderItem->geo->DrawArgs["UI"].baseVertexLocation;
-	m_RenderItem->startIndexLocation = m_RenderItem->geo->DrawArgs["UI"].startIndexLocation;
+	m_pos = pos;
 }
 
-void cUIObject::RenderUI(bool value)
+void cUIObject::SetSize(XMFLOAT2 size)
 {
-	m_RenderItem->isRenderOK = value;
-
-	for (auto& it : m_ChildObject)
-	{
-		it->m_RenderItem->isRenderOK = value;
-	}
+	m_scale.x = size.x;
+	m_scale.y = size.y;
 }

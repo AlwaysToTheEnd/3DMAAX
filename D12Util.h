@@ -8,15 +8,20 @@ struct PICKRAY
 	XMVECTOR ray;
 };
 
-inline static XMFLOAT3 operator-(XMFLOAT3& lhs, XMFLOAT3& rhs)
+inline XMFLOAT3 operator-(XMFLOAT3& lhs, XMFLOAT3& rhs)
 {
 	return { lhs.x - rhs.x,lhs.y - rhs.y,lhs.z - rhs.z };
 }
 
 
-inline static XMFLOAT3 operator+(XMFLOAT3& lhs, XMFLOAT3& rhs)
+inline XMFLOAT3 operator+(XMFLOAT3& lhs, XMFLOAT3& rhs)
 {
 	return { lhs.x + rhs.x,lhs.y + rhs.y,lhs.z + rhs.z };
+}
+
+inline XMFLOAT4 Xmfloat4Zero()
+{
+	return { 0.0f,0.0f,0.0f,0.0f };
 }
 
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
@@ -41,7 +46,7 @@ inline void d3dSetDebugName(ID3D12DeviceChild* obj, const char* name)
 	}
 }
 
-static XMFLOAT3 operator *(const XMFLOAT3& lhs,float rhs)
+static XMFLOAT3 operator *(const XMFLOAT3& lhs, float rhs)
 {
 	return { lhs.x*rhs,lhs.y*rhs ,lhs.z*rhs };
 }
@@ -74,6 +79,24 @@ public:
 		const string& entrypoint,
 		const string& target);
 };
+
+//2018.10.14 ver
+template<typename Iterator, typename _Function>
+static void ContainerSharedCountUseCheckAndForRoop(Iterator begin, Iterator end, const _Function& func)
+{
+	for (auto it = begin; it != end;)
+	{
+		if (it->use_count() == 1)
+		{
+			it = m_instances.erase(it);
+		}
+		else
+		{
+			func(it);
+			it++;
+		}
+	}
+}
 
 class DxException
 {
@@ -113,27 +136,29 @@ inline wstring AnsiToWString(const string& str)
 //------------------------------------user define Structers--------------------//
 struct Material
 {
-	string name;
+	string		name;
+	int			matCBIndex = -1;
+	int			diffuseSrvHeapIndex = -1;
 
-	int matCBIndex = -1;
-	int diffuseSrvHeapIndex = -1;
+	int			numFramesDirty = gNumFrameResources;
 
-	int numFramesDirty = gNumFrameResources;
-
-	XMFLOAT4 diffuseAlbedo = { 1,1,1,1 };
-	XMFLOAT3 fresnel0 = { 0.01f,0.01f,0.01f };
-
-	float roughness = 0.25f;
-	XMFLOAT4X4 matTransform = MathHelper::Identity4x4();
+	XMFLOAT4	diffuseAlbedo = { 1,1,1,1 };
+	XMFLOAT3	fresnel0 = { 0.01f,0.01f,0.01f };
+	float		roughness = 0.25f;
+	XMFLOAT4X4	matTransform = MathHelper::Identity4x4();
+	UINT		diffuseMapIndex = 0;
 };
 
 struct MaterialConstants
 {
-	XMFLOAT4 diffuseAlbedo = { 1,1,1,1 };
-	XMFLOAT3 fresnel0 = { 0.01f,0.01f,0.01f };
-
-	float roughness = 0.25f;
-	XMFLOAT4X4 matTransform = MathHelper::Identity4x4();
+	XMFLOAT4	diffuseAlbedo = { 1,1,1,1 };
+	XMFLOAT3	fresnel0 = { 0.01f,0.01f,0.01f };
+	float		roughness = 0.25f;
+	XMFLOAT4X4	matTransform = MathHelper::Identity4x4();
+	UINT		diffuseMapIndex = 0;
+	UINT		MaterialPad0;
+	UINT		MaterialPad1;
+	UINT		MaterialPad2;
 };
 
 struct SubMeshGeometry
@@ -141,8 +166,6 @@ struct SubMeshGeometry
 	UINT indexCount = 0;
 	UINT startIndexLocation = 0;
 	UINT baseVertexLocation = 0;
-
-	BoundingBox bounds;
 };
 
 struct MeshGeometry
@@ -166,7 +189,7 @@ struct MeshGeometry
 	unique_ptr<cOcTree> octree = nullptr;
 	unordered_map<string, SubMeshGeometry> DrawArgs;
 
-	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView()
+	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const
 	{
 		D3D12_VERTEX_BUFFER_VIEW vbv;
 		vbv.BufferLocation = vertexBufferGPU->GetGPUVirtualAddress();
@@ -176,7 +199,7 @@ struct MeshGeometry
 		return vbv;
 	}
 
-	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView()
+	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const
 	{
 		D3D12_INDEX_BUFFER_VIEW ibv;
 		ibv.BufferLocation = indexBufferGPU->GetGPUVirtualAddress();

@@ -1,6 +1,5 @@
 #pragma once
 #define DELTATIME D12App::GetDeltaTime()
-#define MOUSEPOS D12App::GetMousePos()
 
 class D12App
 {
@@ -16,9 +15,11 @@ protected:
 	virtual void OnResize();
 
 public:
-	static D12App* GetApp();
-	static double GetDeltaTime() { return m_DeltaTime; }
-	static POINT GetMousePos() { return m_MousePos; }
+	static D12App*	GetApp();
+	static double	GetDeltaTime() { return m_DeltaTime; }
+	static cCamera& GetCamera() { return m_Camera; }
+	static UINT		GetRandom() { return m_random(); }
+
 	HINSTANCE AppInst()const;
 	HWND      MainWnd()const;
 	float     AspectRatio()const;
@@ -42,7 +43,6 @@ protected:
 
 	ID3D12Resource* CurrentBackBuffer() const;
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE ShadowMapView() const;
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const;
 
 	void LogAdapters();
@@ -53,9 +53,9 @@ protected:
 protected:
 	static D12App*	m_Instance;
 	static double	m_DeltaTime;
-	static POINT	m_MousePos;
+	static mt19937	m_random;
+	static cCamera	m_Camera;
 
-	//this variable is for CreateWindow
 	HINSTANCE		mhInstance = nullptr;
 	HWND			mhMainWnd = nullptr;
 	bool			mAppPaused = false;
@@ -69,18 +69,17 @@ protected:
 
 	D3D12_VIEWPORT	m_ScreenViewport;
 	D3D12_RECT		m_ScissorRect;
-	wstring			m_MainWndCaption = L"Texture Study";
+	wstring			m_MainWndCaption = L"DX12 CGH 3DMAAAAX";
 	D3D_DRIVER_TYPE	m_D3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 
 	GameTimer		m_Timer;
-	cCamera			m_Camera;
 
 	ComPtr<IDXGIFactory4>	m_DxgiFactory;
 	ComPtr<IDXGISwapChain>	m_SwapChain;
 	DXGI_FORMAT				m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // 0~1 
 	DXGI_FORMAT				m_DepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	int						m_ClientWidth = 800;
-	int						m_ClientHeight = 600;
+	int						m_ClientWidth = 1000;
+	int						m_ClientHeight = 700;
 
 	ComPtr<ID3D12Device>	m_D3dDevice;
 
@@ -94,7 +93,6 @@ protected:
 	static const int				SwapChainBufferCount = 2;
 	int								m_CurrBackBuffer = 0;
 	ComPtr<ID3D12Resource>			m_SwapChainBuffer[SwapChainBufferCount];
-	ComPtr<ID3D12Resource>			m_ShadowMap;
 	ComPtr<ID3D12Resource>			m_DepthStencilBuffer;
 
 	ComPtr<ID3D12DescriptorHeap>	m_RTVHeap;

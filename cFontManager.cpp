@@ -44,14 +44,14 @@ void cFontManager::Resize(UINT clientWidth, UINT clientHeight)
 	}
 }
 
-RenderFont* cFontManager::GetFont(string fontName)
+shared_ptr<RenderFont> cFontManager::GetFont(string fontName)
 {
 	auto it = m_fonts.find(fontName);
 	if (it != m_fonts.end())
 	{
-		m_renderFonts.push_back(make_unique<RenderFont>());
+		m_renderFonts.push_back(make_shared<RenderFont>());
 		m_renderFonts.back()->font = it->second.get();
-		return m_renderFonts.back().get();
+		return m_renderFonts.back();
 	}
 	else
 	{
@@ -68,13 +68,22 @@ void cFontManager::Render(ID3D12GraphicsCommandList * cmdList)
 
 	DirectX::SimpleMath::Vector2 origin = {0,0};
 
-	for (auto& it : m_renderFonts)
+	for (auto it = m_renderFonts.begin(); it != m_renderFonts.end();)
 	{
-		if (it->isRender)
+		if (it->use_count() == 1)
 		{
-			SpriteFont* font = it->font;
-			font->DrawString(m_spriteBatch.get(), it->printString.c_str(), it->pos,
-				it->color, it->rotation, origin, it->scale);
+			it = m_renderFonts.erase(it);
+		}
+		else
+		{
+			if ((*it)->isRender)
+			{
+				SpriteFont* font = (*it)->font;
+				font->DrawString(m_spriteBatch.get(), (*it)->printString.c_str(), (*it)->pos,
+					(*it)->color, (*it)->rotation, origin, (*it)->scale);
+			}
+
+			it++;
 		}
 	}
 

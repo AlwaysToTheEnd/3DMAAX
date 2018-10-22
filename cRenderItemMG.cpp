@@ -1,93 +1,159 @@
 #include "stdafx.h"
 
-cRenderItemMG* cRenderItemMG::instance = nullptr;
+RenderItemMG* RenderItemMG::instance = nullptr;
+ID3D12Device* cRenderItem::m_device = nullptr;
 
-void cRenderItemMG::Update(FrameResource* currFrameResource)
+void cRenderItem::Update()
 {
-	auto currObjectCB = currFrameResource->objectCB.get();
+	if (!m_isRenderOK) return;
 
-	for (auto& mapIter : m_RenderItemSets)
+	if (m_numFrameDirty > 0)
 	{
-		for (auto& it = mapIter.second.items.begin(); it != mapIter.second.items.end();)
+		SetUploadBufferSize(m_currBufferSize);
+		m_numFrameDirty--;
+	}
+
+	m_currFrameCB = m_objectCB[m_currFrameCBIndex].get();
+
+	for (auto it = m_instances.begin(); it != m_instances.end();)
+	{
+		if (it->use_count() == 1)
 		{
-			if (it->use_count() <= 1)
-			{
-				it = mapIter.second.items.erase(it);
-			}
-			else
-			{
-				if ((*it)->numFramesDirty > 0)
-				{
-					XMMATRIX world = XMLoadFloat4x4(&(*it)->world);
-					XMMATRIX texTransform = XMLoadFloat4x4(&(*it)->texTransform);
-
-					ObjectConstants objConstants;
-					XMStoreFloat4x4(&objConstants.world, XMMatrixTranspose(world));
-					XMStoreFloat4x4(&objConstants.TexTransform, XMMatrixTranspose(texTransform));
-
-					currObjectCB->CopyData((*it)->objCBIndex, objConstants);
-
-					(*it)->numFramesDirty--;
-				}
-
-				it++;
-			}
+			it = m_instances.erase(it);
 		}
+		else
+		{
+			it++;
+		}
+	}
+
+	m_renderInstanceCount = 0;
+	UINT nonRenderCount = 0;
+
+	for (auto it = m_instances.begin(); it != m_instances.end();)
+	{
+		if (m_instances.size() == nonRenderCount + m_renderInstanceCount) break;
+
+		if ((*it)->m_isRenderOK == false)
+		{
+			m_instances.push_back(*it);
+			it = m_instances.erase(it);
+			nonRenderCount++;
+		}
+		else
+		{
+			if ((*it)->numFramesDirty > 0)
+			{
+				InstanceData data;
+				XMMATRIX world = XMLoadFloat4x4(&(*it)->instanceData.World);
+				XMMATRIX texTransform = XMLoadFloat4x4(&(*it)->instanceData.TexTransform);
+				data.MaterialIndex = (*it)->instanceData.MaterialIndex;
+				XMStoreFloat4x4(&data.World, XMMatrixTranspose(world));
+				XMStoreFloat4x4(&data.TexTransform, XMMatrixTranspose(texTransform));
+				data.sizeScale = (*it)->instanceData.sizeScale;
+
+				m_currFrameCB->CopyData(m_renderInstanceCount, data);
+				(*it)->numFramesDirty = gNumFrameResources;
+			}
+
+			it++;
+			m_renderInstanceCount++;
+		}
+	}
+
+	m_currFrameCBIndex = (m_currFrameCBIndex + 1) % gNumFrameResources;
+}
+
+void cRenderItem::Render(ID3D12GraphicsCommandList * cmdList)
+{
+	if (m_isRenderOK)
+	{
+		cmdList->IASetVertexBuffers(0, 1, &m_geo->GetVertexBufferView());
+		cmdList->IASetIndexBuffer(&m_geo->GetIndexBufferView());
+		cmdList->IASetPrimitiveTopology(m_primitiveType);
+
+		cmdList->SetGraphicsRootShaderResourceView(0,
+			m_currFrameCB->Resource()->GetGPUVirtualAddress());
+
+		cmdList->DrawIndexedInstanced(m_indexCount, m_renderInstanceCount, m_startIndexLocation,
+			m_baseVertexLocation, 0);
 	}
 }
 
-void cRenderItemMG::Render(ID3D12GraphicsCommandList * cmdList,
-	FrameResource* currFrameResource, string renderItemSetName)
+void cRenderItem::SetUploadBufferSize(UINT numInstance)
 {
-	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
-	UINT matCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(MaterialConstants));
+	m_objectCB[m_currFrameCBIndex] = nullptr;
+	m_objectCB[m_currFrameCBIndex] = make_unique<UploadBuffer<InstanceData>>(m_device, numInstance, false);
+}
 
-	auto frameObjCB = currFrameResource->objectCB->Resource();
-	auto frameMaterCB = currFrameResource->materialCB->Resource();
+void cRenderItem::SetGeometry(const MeshGeometry * geometry, string submeshName)
+{
+	m_geo = geometry;
+	auto subMesh = m_geo->DrawArgs.find(submeshName)->second;
+	m_indexCount = subMesh.indexCount;
+	m_baseVertexLocation = subMesh.baseVertexLocation;
+	m_startIndexLocation = subMesh.startIndexLocation;
+}
 
-	vector<shared_ptr<RenderItem>>* targetRenderItem;
+shared_ptr<RenderInstance> cRenderItem::GetRenderIsntance()
+{
+	m_instances.push_back(make_shared<RenderInstance>());
 
+	if (m_instances.size() > m_currBufferSize)
+	{
+		m_numFrameDirty = gNumFrameResources;
+		m_currBufferSize = m_instances.size() * 2;
+	}
+
+	return m_instances.back();
+}
+
+
+void RenderItemMG::Update()
+{
+	for (auto& it : m_RenderItemSets)
+	{
+		for (auto& it2 : it.second.items)
+		{
+			it2->Update();
+		}
+	}
+
+	//Concurrency::parallel_for_each(m_RenderItemSets.begin(), m_RenderItemSets.end(),
+	//[](std::pair<const string, RenderItemSet> renderItemset)
+	//{
+	//	for (auto it = renderItemset.second.items.begin();
+	//		it != renderItemset.second.items.end();)
+	//	{
+	//		if (it->use_count() == 1)
+	//		{
+	//			it = renderItemset.second.items.erase(it);
+	//		}
+	//		else
+	//		{
+	//			(*it)->Update();
+	//			it++;
+	//		}
+	//	}
+	//});
+}
+
+void RenderItemMG::Render(ID3D12GraphicsCommandList * cmdList, string renderItemSetName)
+{
 	auto it = m_RenderItemSets.find(renderItemSetName);
 
 	assert(it != m_RenderItemSets.end());
 
 	for (auto& it2 : it->second.items)
 	{
-		if (it2->isRenderOK)
+		if (it2->m_instances.size())
 		{
-			cmdList->IASetVertexBuffers(0, 1, &it2->geo->GetVertexBufferView());
-			cmdList->IASetPrimitiveTopology(it2->primitiveType);
-
-			D3D12_GPU_VIRTUAL_ADDRESS objCBAdress =
-				frameObjCB->GetGPUVirtualAddress() + it2->objCBIndex*objCBByteSize;
-			cmdList->SetGraphicsRootConstantBufferView(1, objCBAdress);
-
-			if (it2->texture.ptr)
-			{
-				cmdList->SetGraphicsRootDescriptorTable(0, it2->texture);
-			}
-
-			if (it2->mater)
-			{
-				D3D12_GPU_VIRTUAL_ADDRESS matCBAddress =
-					frameMaterCB->GetGPUVirtualAddress() + it2->mater->matCBIndex*matCBByteSize;
-				cmdList->SetGraphicsRootConstantBufferView(3, matCBAddress);
-			}
-
-			if (it2->isIndexRender)
-			{
-				cmdList->IASetIndexBuffer(&it2->geo->GetIndexBufferView());
-				cmdList->DrawIndexedInstanced(it2->indexCount, 1, it2->startIndexLocation, it2->baseVertexLocation, 0);
-			}
-			else
-			{
-				cmdList->DrawInstanced(it2->indexCount, 1, it2->baseVertexLocation, 0);
-			}
+			it2->Render(cmdList);
 		}
 	}
 }
 
-void cRenderItemMG::AddRenderSet(string renderSetKeyName)
+void RenderItemMG::AddRenderSet(string renderSetKeyName)
 {
 	auto iter = m_RenderItemSets.find(renderSetKeyName);
 
@@ -101,7 +167,7 @@ void cRenderItemMG::AddRenderSet(string renderSetKeyName)
 	m_RenderItemSets[renderSetKeyName];
 }
 
-RenderItemSet * cRenderItemMG::GetRenderItemSet(string key)
+RenderItemSet * RenderItemMG::GetRenderItemSet(string key)
 {
 	auto iter = m_RenderItemSets.find(key);
 	assert(iter != m_RenderItemSets.end());
@@ -109,7 +175,7 @@ RenderItemSet * cRenderItemMG::GetRenderItemSet(string key)
 	return &iter->second;
 }
 
-shared_ptr<RenderItem> cRenderItemMG::AddRenderItem(string renderSetKeyName)
+shared_ptr<cRenderItem> RenderItemMG::AddRenderItem(string renderSetKeyName)
 {
 	if (renderSetKeyName == "")
 	{
@@ -119,9 +185,9 @@ shared_ptr<RenderItem> cRenderItemMG::AddRenderItem(string renderSetKeyName)
 	auto iter = m_RenderItemSets.find(renderSetKeyName);
 	assert(iter != m_RenderItemSets.end());
 
-	auto renderItem = make_shared<RenderItem>();
-	renderItem->objCBIndex = RenderItemIndexCount++;
-	iter->second.items.push_back(renderItem);
+	iter->second.items.push_back(make_shared<cRenderItem>());
 
 	return iter->second.items.back();
 }
+
+
