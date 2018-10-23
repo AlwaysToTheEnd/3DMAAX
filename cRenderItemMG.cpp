@@ -44,13 +44,11 @@ void cRenderItem::Update()
 		{
 			if ((*it)->numFramesDirty > 0)
 			{
-				InstanceData data;
+				InstanceData data = (*it)->instanceData;
 				XMMATRIX world = XMLoadFloat4x4(&(*it)->instanceData.World);
 				XMMATRIX texTransform = XMLoadFloat4x4(&(*it)->instanceData.TexTransform);
-				data.MaterialIndex = (*it)->instanceData.MaterialIndex;
 				XMStoreFloat4x4(&data.World, XMMatrixTranspose(world));
 				XMStoreFloat4x4(&data.TexTransform, XMMatrixTranspose(texTransform));
-				data.sizeScale = (*it)->instanceData.sizeScale;
 
 				m_currFrameCB->CopyData(m_renderInstanceCount, data);
 				(*it)->numFramesDirty = gNumFrameResources;

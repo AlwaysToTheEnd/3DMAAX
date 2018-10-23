@@ -13,6 +13,7 @@ public:
 
 	void SetMatrialIndex(UINT index) { m_renderInstance->instanceData.MaterialIndex = index; }
 	void SetSizeScale(float scale) { m_renderInstance->instanceData.sizeScale = scale; }
+	void SetPickRender(UINT value) { m_renderInstance->instanceData.PickState = value; }
 
 	XMFLOAT4X4 GetMatrix() const { return m_renderInstance->instanceData.World; }
 	XMMATRIX XM_CALLCONV GetXMMatrix() const { return XMLoadFloat4x4(&m_renderInstance->instanceData.World); }

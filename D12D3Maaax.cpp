@@ -125,12 +125,14 @@ void D12D3Maaax::Draw()
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
-	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
 
 	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
 	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
 	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
+
+	m_CommandList->SetPipelineState(m_PSOs["planes"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
 
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
@@ -364,7 +366,6 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["ui"])));
 
 	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	//opaquePsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(), (UINT)m_CVertexInputLayout.size() };
 	opaquePsoDesc.VS =
 	{
@@ -379,6 +380,18 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
 
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawElement"])));
+
+	opaquePsoDesc.BlendState.RenderTarget[0].BlendEnable = true;
+	opaquePsoDesc.BlendState.RenderTarget[0].LogicOpEnable = false;
+	opaquePsoDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_DEST_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	opaquePsoDesc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_SRC_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_DEST_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_MAX;
+	opaquePsoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["planes"])));
 
 	RENDERITEMMG->AddRenderSet("base");
 	RENDERITEMMG->AddRenderSet("objectCoordinator");

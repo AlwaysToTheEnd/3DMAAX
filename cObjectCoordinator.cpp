@@ -31,7 +31,6 @@ void cObjectCoordinator::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandL
 	{
 		vertices[i].pos = sphere.Vertices[i].Position;
 		XMStoreFloat4(&vertices[i].color, Colors::Gray.v);
-		vertices[i].color.w = 0.5f;
 	}
 
 	indices = sphere.GetIndices16();

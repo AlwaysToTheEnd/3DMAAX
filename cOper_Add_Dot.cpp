@@ -49,11 +49,18 @@ void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
 
 		if (addDot != nullptr && m_currDot != addDot)
 		{
+			if (m_currDot)
+			{
+				m_currDot->SetPickRender(0);
+			}
+
 			m_currDot = addDot;
 			m_operControl.ClearParameters();
 			m_operControl.AddParameter(L"pos    X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currDot->GetPos().x);
 			m_operControl.AddParameter(L"pos    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currDot->GetPos().y);
-			m_operControl.IsRenderState(true);
+			m_operControl.IsRenderState(1);
+
+			m_currDot->SetPickRender(0);
 		}
 
 		if (m_existingDotNum < draw[DRAW_DOTS]->GetObjectNum())
@@ -72,20 +79,23 @@ void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
 
 void cOper_Add_Dot::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 {
-	cOperation::EndOperation();
-	
 	for (UINT i = 0; i < m_addDotCount; i++)
 	{
 		draw[DRAW_DOTS]->DeleteBackObject();
 	}
 
-	m_currDot = nullptr;
-	m_addDotCount = 0;
+	EndOperation();
 }
 
 void cOper_Add_Dot::EndOperation()
 {
 	cOperation::EndOperation();
+
+	if (m_currDot)
+	{
+		m_currDot->SetPickRender(false);
+	}
+
 	m_currDot = nullptr;
 	m_addDotCount = 0;
 }

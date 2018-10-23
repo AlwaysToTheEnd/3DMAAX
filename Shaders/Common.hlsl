@@ -6,7 +6,7 @@ struct InstanceData
     float4x4 TexTransform;
     float SizeScale;
     uint MaterialIndex;
-    uint InstPad1;
+    uint PickState;
     uint InstPad2;
 };
 

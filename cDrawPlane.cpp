@@ -47,12 +47,17 @@ void cDrawPlane::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cm
 	{
 		m_geo = make_unique<MeshGeometry>();
 		m_geo->name = "Plane";
-		vector<NT_Vertex> vertices(4);
+		vector<C_Vertex> vertices(4);
 
-		vertices[0] = { { -0.5f,0.5f,0 },{ 0,0,-1 },{ 0,0 } };
-		vertices[1] = { { 0.5f,0.5f,0 },{ 0,0,-1 },{ 1,0 } };
-		vertices[2] = { { 0.5f,-0.5f,0 },{ 0,0,-1 },{ 1,1 } };
-		vertices[3] = { { -0.5f,-0.5f,0 },{ 0,0,-1 },{ 0,1 } };
+		vertices[0] = { { -0.5f,0.5f,0 },Colors::Yellow };
+		vertices[1] = { { 0.5f,0.5f,0 },Colors::Yellow };
+		vertices[2] = { { 0.5f,-0.5f,0 },Colors::Yellow };
+		vertices[3] = { { -0.5f,-0.5f,0 }, Colors::Yellow };
+
+		for (int i = 0; i < 4; i++)
+		{
+			vertices[i].color.w = 0.5f;
+		}
 
 		vector<UINT16> Indices;
 		Indices.push_back(0);
@@ -62,7 +67,7 @@ void cDrawPlane::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cm
 		Indices.push_back(2);
 		Indices.push_back(3);
 
-		const UINT PlaneGeoDataSize = sizeof(NT_Vertex)*vertices.size();
+		const UINT PlaneGeoDataSize = sizeof(C_Vertex)*vertices.size();
 		const UINT PlaneGeoIndexSize = sizeof(UINT16)*Indices.size();
 
 		m_geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
@@ -74,7 +79,7 @@ void cDrawPlane::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cm
 		m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
 		m_geo->indexBufferByteSize = PlaneGeoIndexSize;
 		m_geo->vertexBufferByteSize = PlaneGeoDataSize;
-		m_geo->vertexByteStride = sizeof(NT_Vertex);
+		m_geo->vertexByteStride = sizeof(C_Vertex);
 
 		SubMeshGeometry subMesh;
 		subMesh.baseVertexLocation = 0;

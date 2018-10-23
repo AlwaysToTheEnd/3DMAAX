@@ -32,10 +32,18 @@ VertexOut VS(VertexIn vin, uint instanceID : SV_InstanceID)
 
     InstanceData instData = gInstanceData[instanceID];
     float4x4 world = instData.World;
+    uint pickState = instData.PickState;
 
     vout.PosH = mul(float4(vin.PosL*instData.SizeScale, 1.0f), world);
 	vout.PosH = mul(vout.PosH, gViewProj);
-	vout.Color = vin.Color;
+
+    vout.Color = vin.Color;
+
+    if(pickState!=0)
+    {
+        vout.Color = float4(1, 0, 0, 1);
+    }
+
 	return vout;
 }
 

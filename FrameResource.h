@@ -8,8 +8,8 @@ struct InstanceData
 	XMFLOAT4X4	TexTransform = MathHelper::Identity4x4();
 	float		sizeScale = 1;
 	UINT		MaterialIndex = 0;
-	UINT		InstancePad1;
-	UINT		InstancePad2;
+	UINT		PickState = 0;
+	UINT		InstancePad2 = 0;
 };
 
 struct PassConstants

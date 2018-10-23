@@ -8,7 +8,6 @@ cOper_Add_Line::cOper_Add_Line()
 {
 }
 
-
 cOper_Add_Line::~cOper_Add_Line()
 {
 
@@ -90,5 +89,4 @@ void cOper_Add_Line::EndOperation()
 	cOperation::EndOperation();
 	m_firstDot = nullptr;
 	m_operationText->printString = L"Select Plane";
-	CAMERA.SetTarget(nullptr);
 }
