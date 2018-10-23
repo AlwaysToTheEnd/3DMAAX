@@ -12,6 +12,20 @@ enum OPERATIONTYPE
 	OPER_MESHOPER,
 };
 
+class cPlane;
+
+struct DrawItems
+{
+	vector<unique_ptr<cDrawElement>>	m_draws;
+	cPlane*								m_plane = nullptr;
+
+	DrawItems() {}
+	DrawItems(cPlane* plane)
+	{
+		m_plane = plane;
+	}
+};
+
 class cOperation
 {
 public:
@@ -29,7 +43,9 @@ public:
 
 	virtual ~cOperation() {}
 	virtual void SetUp() = 0;
-	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes) = 0;
+	virtual void DrawElementOperation(DrawItems* drawItems) { assert(false); }
+	virtual void PlaneAddOperation(cDrawPlane& planes) { assert(false); }
+	virtual DrawItems* DrawsAddOperatioin(unordered_map<wstring, DrawItems>& drawItems, cDrawPlane& planes) { assert(false); return nullptr; }
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
 	virtual void EndOperation();
 
@@ -43,7 +59,7 @@ protected:
 	cDot* AddDot(vector<unique_ptr<cDrawElement>>& draw);
 	cLine* AddLine(vector<unique_ptr<cDrawElement>>& draw);
 	bool PickPlane(cDrawPlane* planes, cPlane** plane);
-	cDot * AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw, cPlane* currPlane);
+	cDot * AddDotAtCurrPlane(DrawItems* drawItems);
 
 protected:
 	static shared_ptr<cRenderItem> m_OperatorUi;

@@ -165,6 +165,9 @@
     <ClInclude Include="cOper_Add_Dot.h">
       <Filter>cOperation</Filter>
     </ClInclude>
+    <ClInclude Include="cOper_Add_Draws.h">
+      <Filter>cOperation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -255,6 +258,9 @@
       <Filter>Objects\ElementObject\Childs</Filter>
     </ClCompile>
     <ClCompile Include="cOper_Add_Dot.cpp">
+      <Filter>cOperation</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Draws.cpp">
       <Filter>cOperation</Filter>
     </ClCompile>
   </ItemGroup>

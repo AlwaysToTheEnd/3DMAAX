@@ -14,18 +14,30 @@ cOperator::~cOperator()
 
 void cOperator::SetUp()
 {
-	SetObjectRenderItems();
+	m_buttonRenderItem = RENDERITEMMG->AddRenderItem("ui");
+	m_planes.SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
 
 	m_operSelectButtons.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
 	m_operSelectButtons.SetPos({ 0,0,0 });
+
+	m_drawButtons.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
+	m_drawButtons.SetPos({ 0,NOMALBUTTONSIZE,0 });
+	m_drawButtons.SetRenderState(false);
+
+	m_meshButtons.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
+	m_meshButtons.SetPos({ 0,NOMALBUTTONSIZE,0 });
+	m_meshButtons.SetRenderState(false);
 
 	for (int i = 0; i < OPER_MESHOPER; i++)
 	{
 		switch (i)
 		{
 		case OPER_ADD_PLANE:
+			m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
+				bind(&cOperator::OperationStart, this, placeholders::_1), i);
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Plane));
-			break;
+			m_operations.back()->SetUp();
+			continue;
 		case OPER_ADD_LINE:
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Line));
 			break;
@@ -33,11 +45,15 @@ void cOperator::SetUp()
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Dot));
 			break;
 		case OPER_DRAWOPER:
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Draws));
+			m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
+				bind(&cOperator::OperationStart, this, placeholders::_1), i);
+			m_operations.back()->SetUp();
+			break;
 		case OPER_PUSH_MESH:
 			m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
-				bind(&cOperator::OperTypeSelect, this, placeholders::_1), m_operSelectButtons.GetButtonNum());
+				bind(&cOperator::OperationStart, this, placeholders::_1), i);
 			continue;
-			break;
 		default:
 			assert(false);
 			break;
@@ -46,22 +62,20 @@ void cOperator::SetUp()
 		if (i < OPER_DRAWOPER)
 		{
 			m_drawButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
-				bind(&cOperator::OperationStart, this, placeholders::_1), m_operations.size());
+				bind(&cOperator::OperationStart, this, placeholders::_1), i);
 		}
 		else if (i < OPER_PUSH_MESH)
 		{
 			m_meshButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
-				bind(&cOperator::OperationStart, this, placeholders::_1), m_operations.size());
+				bind(&cOperator::OperationStart, this, placeholders::_1), i);
 		}
 
 		m_operations.back()->SetUp();
 	}
 }
 
-void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws, cDrawPlane* drawPlane)
+void cOperator::Update()
 {
-	m_currDraws = &draws;
-
 	if (m_currOperation)
 	{
 		if (!m_currOperation->GetOperState())
@@ -77,14 +91,8 @@ void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws, cDrawPlane* draw
 			}
 			else if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 			{
-				m_currOperation->CancleOperation(draws);
+				m_currOperation->CancleOperation(m_currDraws->m_draws);
 				m_currOperation = nullptr;
-				
-				if (m_currButtons)
-				{
-					m_currButtons->SetRenderState(false);
-					m_currButtons = nullptr;
-				}
 			}
 		}
 	}
@@ -103,6 +111,12 @@ void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws, cDrawPlane* draw
 		{
 			if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 			{
+				if (m_currButtons)
+				{
+					m_currButtons->SetRenderState(false);
+					m_currButtons = nullptr;
+				}
+
 				CAMERA.SetTarget(nullptr);
 			}
 		}
@@ -113,24 +127,41 @@ void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws, cDrawPlane* draw
 		switch (m_currOperation->GetOperType())
 		{
 		case OPER_ADD_PLANE:
-			m_currOperation->DrawElementOperation(draws, drawPlane);
+			m_currOperation->PlaneAddOperation(m_planes);
 			break;
 		case OPER_ADD_LINE:
 		case OPER_ADD_DOT:
-			m_currOperation->DrawElementOperation(draws, drawPlane);
+			m_currOperation->DrawElementOperation(m_currDraws);
+			break;
+		case OPER_DRAWOPER:
+			m_currDraws = m_currOperation->DrawsAddOperatioin(m_drawItems, m_planes);
+			if (m_currDraws)
+			{
+				CAMERA.SetTarget(m_currDraws->m_plane);
+			}
 			break;
 		default:
 			assert(false);
 			break;
 		}
 	}
-	else
+
+	if (m_currDraws)
 	{
-		if (m_currButtons)
+		for (auto& it : m_currDraws->m_draws)
 		{
-			m_currButtons->Update();
+			it->Update();
 		}
 	}
+
+	m_operSelectButtons.Update();
+
+	if (m_currButtons)
+	{
+		m_currButtons->Update();
+	}
+
+	m_planes.Update();
 }
 
 void cOperator::SetRenderState(bool value)
@@ -146,7 +177,16 @@ void cOperator::OperationStart(int index)
 
 	if (m_currOperation)
 	{
-		m_currOperation->CancleOperation(*m_currDraws);
+		m_currOperation->CancleOperation(m_currDraws->m_draws);
+	}
+
+	if (index == OPER_DRAWOPER)
+	{
+		OperTypeSelect(0);
+	}
+	else if (index == OPER_DRAWOPER)
+	{
+		OperTypeSelect(1);
 	}
 
 	m_currOperation = m_operations[index].get();
@@ -170,27 +210,4 @@ void cOperator::OperTypeSelect(int num)
 	default:
 		break;
 	}
-}
-
-void cOperator::SetObjectRenderItems()
-{
-	for (int i = 0; i < DRAWOBJECTSPLACE::OBJECTS_COUNT; i++)
-	{
-		switch (i)
-		{
-		case DRAW_LINES:
-			m_renderItems.push_back(RENDERITEMMG->AddRenderItem("line"));
-			break;
-		case DRAW_DOTS:
-			m_renderItems.push_back(RENDERITEMMG->AddRenderItem("dot"));
-			break;
-		case OBJECTS_COUNT:
-			break;
-		default:
-			assert(false);
-			break;
-		}
-	}
-
-	m_buttonRenderItem = RENDERITEMMG->AddRenderItem("ui");
 }

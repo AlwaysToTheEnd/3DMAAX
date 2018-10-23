@@ -165,6 +165,7 @@
     <ClInclude Include="cOperation.h" />
     <ClInclude Include="cOperator.h" />
     <ClInclude Include="cOper_Add_Dot.h" />
+    <ClInclude Include="cOper_Add_Draws.h" />
     <ClInclude Include="cOper_Add_Line.h" />
     <ClInclude Include="cOper_Add_Plane.h" />
     <ClInclude Include="cPercentageValueSet.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="cOperation.cpp" />
     <ClCompile Include="cOperator.cpp" />
     <ClCompile Include="cOper_Add_Dot.cpp" />
+    <ClCompile Include="cOper_Add_Draws.cpp" />
     <ClCompile Include="cOper_Add_Line.cpp" />
     <ClCompile Include="cOper_Add_Plane.cpp" />
     <ClCompile Include="cPercentageValueSet.cpp" />

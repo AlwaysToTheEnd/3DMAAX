@@ -5,7 +5,6 @@ class cOper_Add_Dot :public cOperation
 private:
 	enum STATE
 	{
-		SELECT_PLANE,
 		SET_DOTS,
 	};
 
@@ -14,7 +13,7 @@ public:
 	virtual ~cOper_Add_Dot();
 
 	virtual void SetUp() override;
-	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes) override;
+	virtual void DrawElementOperation(DrawItems* drawItems) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 	virtual void EndOperation() override;
 

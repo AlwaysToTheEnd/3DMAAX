@@ -16,7 +16,6 @@ private:
 	virtual void Update() override;
 	virtual void Draw() override;
 
-	void UpdateDrawElement();
 	void UpdateMaterialCBs();
 	void UpdateMainPassCB();
 

@@ -17,18 +17,16 @@ cOper_Add_Plane::~cOper_Add_Plane()
 void cOper_Add_Plane::SetUp()
 {
 	m_operControl.Build(m_OperatorUi);
+	m_operControl.SetPos({ 650,100,0 });
 }
 
-void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes)
+void cOper_Add_Plane::PlaneAddOperation(cDrawPlane & planes)
 {
-	assert(planes);
-	m_planes = planes;
-
 	switch (m_worksSate)
 	{
 	case cOper_Add_Plane::ADD_PLANE:
 	{
-		cObject* element = planes->AddElement();
+		cObject* element = planes.AddElement();
 		OBJCOORD->ObjectRegistration(element);
 		m_operControl.AddParameter(L"quater X : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().x);
 		m_operControl.AddParameter(L"quater Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&element->GetQuaternion().y);
@@ -48,6 +46,7 @@ void cOper_Add_Plane::DrawElementOperation(vector<unique_ptr<cDrawElement>>& dra
 		break;
 	}
 }
+
 
 void cOper_Add_Plane::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 {

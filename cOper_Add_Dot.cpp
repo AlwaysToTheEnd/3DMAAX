@@ -19,32 +19,22 @@ cOper_Add_Dot::~cOper_Add_Dot()
 void cOper_Add_Dot::SetUp()
 {
 	m_operControl.Build(m_OperatorUi);
+	m_operControl.SetPos({ 650,100,0 });
 	m_operationText = FONTMANAGER->GetFont("baseFont");
 	m_operationText->isRender = false;
 	m_operationText->color = Colors::Red;
-	m_operationText->printString = L"Select Plane";
+	m_operationText->printString = L"Set dot Time";
 	m_operationText->pos = { 30,30,0 };
 }
 
-void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes)
+void cOper_Add_Dot::DrawElementOperation(DrawItems* drawItems)
 {
 	switch (m_worksSate)
 	{
-	case cOper_Add_Dot::SELECT_PLANE:
-	{
-		m_operationText->isRender = true;
-		m_existingDotNum = draw[DRAW_DOTS]->GetObjectNum();
-
-		if (PickPlane(planes, &m_currPlane))
-		{
-			m_worksSate = SET_DOTS;
-			m_operationText->printString = L"Set Dot Time!";
-		}
-	}
-		break;
 	case cOper_Add_Dot::SET_DOTS:
 	{
-		cDot* addDot = AddDotAtCurrPlane(draw, m_currPlane);
+		cDot* addDot = AddDotAtCurrPlane(drawItems);
+		m_operationText->isRender = true;
 
 		if (addDot != nullptr && m_currDot != addDot)
 		{
@@ -62,7 +52,7 @@ void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw,
 			m_currDot->SetPickRender(1);
 		}
 
-		if (m_existingDotNum < draw[DRAW_DOTS]->GetObjectNum())
+		if (m_existingDotNum < drawItems->m_draws[DRAW_DOTS]->GetObjectNum())
 		{
 			m_existingDotNum++;
 			m_addDotCount++;

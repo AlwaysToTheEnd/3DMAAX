@@ -3,7 +3,6 @@
 
 cOper_Add_Line::cOper_Add_Line()
 	:cOperation(OPER_ADD_LINE)
-	, m_currPlane(nullptr)
 	, m_firstDot(nullptr)
 {
 }
@@ -15,34 +14,21 @@ cOper_Add_Line::~cOper_Add_Line()
 
 void cOper_Add_Line::SetUp()
 {
-	m_operControl.Build(m_OperatorUi);
 	m_operationText = FONTMANAGER->GetFont("baseFont");
 	m_operationText->isRender = false;
 	m_operationText->color = Colors::Red;
-	m_operationText->printString = L"Select Plane";
+	m_operationText->printString = L"Select First Dot";
 	m_operationText->pos = { 30,30,0 };
 }
 
-void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes)
+void cOper_Add_Line::DrawElementOperation(DrawItems* drawItems)
 {
 	switch (m_worksSate)
 	{
-	case cOper_Add_Line::SELECT_PLANE:
-	{
-		m_operationText->isRender = true;
-
-		if (PickPlane(draw, &m_currPlane))
-		{
-			m_worksSate = FIRST_DOT_PICK;
-			m_operationText->printString = L"Select First dot";
-
-			CAMERA.SetTargetAndSettingAngle(m_currPlane);
-		}
-	}
-	break;
 	case cOper_Add_Line::FIRST_DOT_PICK:
 	{
-		m_firstDot = AddDotAtCurrPlane(draw, m_currPlane);
+		m_operationText->isRender = true;
+		m_firstDot = AddDotAtCurrPlane(drawItems);
 
 		if (m_firstDot)
 		{
@@ -53,16 +39,15 @@ void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw
 	break;
 	case cOper_Add_Line::SECEND_DOT_PICK:
 	{
-		cDot* secendDot = AddDotAtCurrPlane(draw,m_currPlane);
+		cDot* secendDot = AddDotAtCurrPlane(drawItems);
 
 		if (secendDot)
 		{
-			cLine* line = AddLine(draw);
+			cLine* line = AddLine(drawItems->m_draws);
 			line->SetFirstDot(m_firstDot);
 			line->SetSecendDot(secendDot);
 			m_firstDot = nullptr;
-			m_operationText->isRender = false;
-			m_operationText->printString = L"Select Plane";
+			m_operationText->printString = L"Select First Dot";
 			EndOperation();
 		}
 	}
@@ -80,7 +65,6 @@ void cOper_Add_Line::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 	}
 
 	m_firstDot = nullptr;
-	m_operationText->printString = L"Select Plane";
 	EndOperation();
 }
 
@@ -88,5 +72,5 @@ void cOper_Add_Line::EndOperation()
 {
 	cOperation::EndOperation();
 	m_firstDot = nullptr;
-	m_operationText->printString = L"Select Plane";
+	m_operationText->printString = L"Select First Dot";
 }

@@ -81,9 +81,8 @@ void D12D3Maaax::Update()
 	UpdateMainPassCB();
 	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, m_ClientWidth, m_ClientHeight);
 	
-	m_operator->Update(m_drawElements);
+	m_operator->Update();
 	OBJCOORD->Update();
-	UpdateDrawElement();
 
 	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
@@ -160,14 +159,6 @@ void D12D3Maaax::Draw()
 	m_CommandQueue->Signal(m_Fence.Get(), m_CurrentFence);
 }
 
-
-void D12D3Maaax::UpdateDrawElement()
-{
-	for (auto& it : m_drawElements)
-	{
-		it->Update();
-	}
-}
 
 void D12D3Maaax::UpdateMaterialCBs()
 {
@@ -441,33 +432,9 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	for (int i = 0; i < DRAWOBJECTSPLACE::OBJECTS_COUNT; i++)
-	{
-		switch (i)
-		{
-		case DRAW_PLNAES:
-			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
-			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
-			break;
-		case DRAW_LINES:
-			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawLines));
-			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("line"));
-			break;
-		case DRAW_DOTS:
-			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawDot));
-			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("dot"));
-			break;
-		case OBJECTS_COUNT:
-			break;
-		default:
-			assert(false);
-			break;
-		}
-	}
-
-	m_operator = make_unique<cOperator>();
 	cOperation::SetOperatorUIRender(RENDERITEMMG->AddRenderItem("ui"));
-	m_operator->SetUp(RENDERITEMMG->AddRenderItem("ui"));
+	m_operator = make_unique<cOperator>();
+	m_operator->SetUp();
 
 	OBJCOORD->SetUp();
 }

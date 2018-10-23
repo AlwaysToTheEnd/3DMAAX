@@ -22,11 +22,14 @@ void cUIOperWindow::Build(shared_ptr<cRenderItem> renderItem)
 
 void cUIOperWindow::IsRenderState(bool value)
 {
-	m_renderInstance->m_isRenderOK = value;
-
-	for (int i = 0; i < m_operParameters.size(); i++)
+	if (m_renderInstance)
 	{
-		m_operFonts[i]->isRender = value;
+		m_renderInstance->m_isRenderOK = value;
+
+		for (int i = 0; i < m_operParameters.size(); i++)
+		{
+			m_operFonts[i]->isRender = value;
+		}
 	}
 }
 
@@ -44,7 +47,6 @@ void cUIOperWindow::AddParameter(wstring dataName, DXGI_FORMAT format, void * pD
 void cUIOperWindow::UIUpdate()
 {
 	SetSize({ 150.0f,m_operParameters.size() * 15.0f });
-	SetPos({ 650,100,0 });
 
 	RECT buttonRect;
 	buttonRect.left = m_renderInstance->instanceData.World._41;
@@ -80,7 +82,6 @@ void cUIOperWindow::UIUpdate()
 			dataStr = to_wstring(*((float*)m_operParameters[i].data));
 			break;
 		case DXGI_FORMAT_R32_SINT:
-			dataStr = to_wstring(*((int*)m_operParameters[i].data));
 			break;
 		default:
 			assert(false && "It is not support this format" && m_operParameters[i].dataFormat);
@@ -130,7 +131,7 @@ void cUIOperWindow::UIUpdate()
 					*(float*)(m_operParameters[i].data) = _wtof(m_currInputData.c_str());
 					break;
 				case DXGI_FORMAT_R32_SINT:
-					*(int*)(m_operParameters[i].data) = _wtoi(m_currInputData.c_str());
+					*(int*)(m_operParameters[i].data) = m_currParameterIndex;
 					break;
 				}
 			

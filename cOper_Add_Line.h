@@ -5,7 +5,6 @@ class cOper_Add_Line : public cOperation
 private:
 	enum STATE
 	{
-		SELECT_PLANE,
 		FIRST_DOT_PICK,
 		SECEND_DOT_PICK,
 	};
@@ -15,14 +14,11 @@ public:
 	virtual ~cOper_Add_Line();
 
 	virtual void SetUp() override;
-	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes) override;
+	virtual void DrawElementOperation(DrawItems* drawItems) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 	virtual void EndOperation() override;
 
 private:
-
-private:
-	cPlane*					m_currPlane;
 	cDot*					m_firstDot;
 };
 
