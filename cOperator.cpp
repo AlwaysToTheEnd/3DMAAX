@@ -117,6 +117,14 @@ void cOperator::Update()
 					m_currButtons = nullptr;
 				}
 
+				m_currDraws->SetPickRender(0);
+
+				for (auto& it : m_currDraws->m_draws)
+				{
+					it->Update();
+				}
+
+				m_currDraws = nullptr;
 				CAMERA.SetTarget(nullptr);
 			}
 		}
@@ -137,6 +145,7 @@ void cOperator::Update()
 			m_currDraws = m_currOperation->DrawsAddOperatioin(m_drawItems, m_planes);
 			if (m_currDraws)
 			{
+				m_currDraws->SetPickRender(2);
 				CAMERA.SetTarget(m_currDraws->m_plane);
 			}
 			break;

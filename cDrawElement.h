@@ -19,6 +19,7 @@ public:
 	virtual cObject* AddElement() = 0;
 
 	void DeleteBackObject();
+	void SetPickRender(UINT key);
 	UINT GetObjectNum() { return m_objects.size(); }
 
 protected:

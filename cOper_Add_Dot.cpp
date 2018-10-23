@@ -40,7 +40,7 @@ void cOper_Add_Dot::DrawElementOperation(DrawItems* drawItems)
 		{
 			if (m_currDot)
 			{
-				m_currDot->SetPickRender(0);
+				m_currDot->SetPickRender(2);
 			}
 
 			m_currDot = addDot;

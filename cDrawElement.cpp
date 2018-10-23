@@ -47,3 +47,11 @@ void cDrawElement::DeleteBackObject()
 		m_objects.pop_back();
 	}
 }
+
+void cDrawElement::SetPickRender(UINT key)
+{
+	for (auto& it : m_objects)
+	{
+		it->SetPickRender(key);
+	}
+}

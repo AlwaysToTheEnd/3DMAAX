@@ -24,6 +24,14 @@ struct DrawItems
 	{
 		m_plane = plane;
 	}
+
+	void SetPickRender(UINT key)
+	{
+		for (auto& it : m_draws)
+		{
+			it->SetPickRender(key);
+		}
+	}
 };
 
 class cOperation
