@@ -51,5 +51,4 @@ private:
 
 private:
 	unique_ptr<cOperator>				m_operator =nullptr;
-	vector<unique_ptr<cDrawElement>>	m_drawElements;
 };

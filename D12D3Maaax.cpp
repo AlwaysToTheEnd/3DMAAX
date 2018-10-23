@@ -441,7 +441,7 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	for (int i = 0; i < OBJECTSPLACE::OBJECTS_COUNT; i++)
+	for (int i = 0; i < DRAWOBJECTSPLACE::OBJECTS_COUNT; i++)
 	{
 		switch (i)
 		{

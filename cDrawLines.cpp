@@ -21,7 +21,7 @@ void XM_CALLCONV cLine::Update(FXMMATRIX mat)
 	m_lineDistacne = XMVector3Length(lineVec).m128_f32[0];
 
 	m_pos = m_hostObject[0]->GetWorldPos();
-	m_scale = { m_lineDistacne /2 ,1 ,1 };
+	m_scale = { m_lineDistacne, 1 ,1 };
 	XMVECTOR baseVector = XMVectorSet(1, 0, 0, 0);
 	XMVECTOR axis = XMVector3Cross(baseVector, lineVec);
 	XMStoreFloat4(&m_quaternion, XMQuaternionNormalize(XMQuaternionRotationAxis(axis,

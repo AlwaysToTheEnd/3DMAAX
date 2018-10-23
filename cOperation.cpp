@@ -32,13 +32,14 @@ cLine* cOperation::AddLine(vector<unique_ptr<cDrawElement>>& draw)
 	return static_cast<cLine*>(draw[DRAW_LINES]->AddElement());
 }
 
-bool cOperation::PickPlane(vector<unique_ptr<cDrawElement>>& draw, cPlane ** plane)
+bool cOperation::PickPlane(cDrawPlane* planes, cPlane ** plane)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
 		cObject* pickPlane = nullptr;
-		if (draw[DRAW_PLNAES]->Picking(&pickPlane))
+		if (planes->Picking(&pickPlane))
 		{
+			CAMERA.SetTargetAndSettingAngle(pickPlane);
 			*plane = static_cast<cPlane*>(pickPlane);
 			return true;
 		}

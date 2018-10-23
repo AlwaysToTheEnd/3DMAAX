@@ -23,7 +23,7 @@ void cOper_Add_Line::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes)
 {
 	switch (m_worksSate)
 	{

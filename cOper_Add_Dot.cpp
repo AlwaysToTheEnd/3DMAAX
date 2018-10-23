@@ -26,7 +26,7 @@ void cOper_Add_Dot::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes)
 {
 	switch (m_worksSate)
 	{
@@ -35,10 +35,9 @@ void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
 		m_operationText->isRender = true;
 		m_existingDotNum = draw[DRAW_DOTS]->GetObjectNum();
 
-		if (PickPlane(draw, &m_currPlane))
+		if (PickPlane(planes, &m_currPlane))
 		{
 			m_worksSate = SET_DOTS;
-			CAMERA.SetTargetAndSettingAngle(m_currPlane);
 			m_operationText->printString = L"Set Dot Time!";
 		}
 	}
@@ -60,7 +59,7 @@ void cOper_Add_Dot::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
 			m_operControl.AddParameter(L"pos    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currDot->GetPos().y);
 			m_operControl.IsRenderState(1);
 
-			m_currDot->SetPickRender(0);
+			m_currDot->SetPickRender(1);
 		}
 
 		if (m_existingDotNum < draw[DRAW_DOTS]->GetObjectNum())

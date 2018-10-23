@@ -45,3 +45,11 @@ void cButtonCollector::AddButton(UINT materTexIndex, function<void(int)> func, U
 	m_buttons.back()->SetSize(m_buttonSize);
 	m_buttons.back()->SetPos({ pos.x,pos.y,m_pos.z });
 }
+
+void cButtonCollector::SetRenderState(bool value)
+{
+	for (auto& it : m_buttons)
+	{
+		it->IsRenderState(value);
+	}
+}

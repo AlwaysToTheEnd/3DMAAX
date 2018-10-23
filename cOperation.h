@@ -7,9 +7,9 @@ enum OPERATIONTYPE
 	OPER_ADD_PLANE,
 	OPER_ADD_LINE,
 	OPER_ADD_DOT,
-	OPER_DRAWOPER_COUNT,
+	OPER_DRAWOPER,
 	OPER_PUSH_MESH,
-	OPER_MESHOPER_COUNT,
+	OPER_MESHOPER,
 };
 
 class cOperation
@@ -29,7 +29,7 @@ public:
 
 	virtual ~cOperation() {}
 	virtual void SetUp() = 0;
-	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
+	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes) = 0;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
 	virtual void EndOperation();
 
@@ -42,7 +42,7 @@ public:
 protected:
 	cDot* AddDot(vector<unique_ptr<cDrawElement>>& draw);
 	cLine* AddLine(vector<unique_ptr<cDrawElement>>& draw);
-	bool PickPlane(vector<unique_ptr<cDrawElement>>& draw, cPlane** plane);
+	bool PickPlane(cDrawPlane* planes, cPlane** plane);
 	cDot * AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw, cPlane* currPlane);
 
 protected:

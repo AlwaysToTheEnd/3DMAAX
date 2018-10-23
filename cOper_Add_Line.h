@@ -15,7 +15,7 @@ public:
 	virtual ~cOper_Add_Line();
 
 	virtual void SetUp() override;
-	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw) override;
+	virtual void DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw, cDrawPlane* planes) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 	virtual void EndOperation() override;
 
