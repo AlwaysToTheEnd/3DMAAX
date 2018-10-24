@@ -100,7 +100,7 @@ shared_ptr<RenderInstance> cRenderItem::GetRenderIsntance()
 	if (m_instances.size() > m_currBufferSize)
 	{
 		m_numFrameDirty = gNumFrameResources;
-		m_currBufferSize = m_instances.size() * 2;
+		m_currBufferSize = (UINT)m_instances.size() * 2;
 	}
 
 	return m_instances.back();

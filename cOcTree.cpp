@@ -263,14 +263,14 @@ cOcTree * cOcTree::CreateOcTree(const MeshGeometry * geo, int numRecursion)
 
 	UINT vertexByteStride = geo->vertexByteStride;
 	UINT indexByteSize = geo->indexFormat == DXGI_FORMAT_R16_UINT ? sizeof(UINT16) : sizeof(UINT);
-	UINT vertexCount = geo->vertexBufferCPU->GetBufferSize() / vertexByteStride;
-	UINT triangleCount = geo->indexBufferCPU->GetBufferSize() / indexByteSize / 3;
+	UINT vertexCount = (UINT)geo->vertexBufferCPU->GetBufferSize() / vertexByteStride;
+	UINT triangleCount = (UINT)geo->indexBufferCPU->GetBufferSize() / indexByteSize / 3;
 
 	XMFLOAT3 maxPos = { -FLT_MAX,-FLT_MAX,-FLT_MAX };
 	XMFLOAT3 minPos = { FLT_MAX,FLT_MAX ,FLT_MAX };
 	XMFLOAT3* vertexPos = nullptr;
 
-	for (int i = 0; i < vertexCount; i++)
+	for (UINT i = 0; i < vertexCount; i++)
 	{
 		vertexPos = reinterpret_cast<XMFLOAT3*>(vertexs + i * vertexByteStride);
 		maxPos.x = MathHelper::Max(vertexPos->x, maxPos.x);

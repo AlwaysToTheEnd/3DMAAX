@@ -9,7 +9,7 @@ public:
 	virtual void IsRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
 
 private:
-	vector<unique_ptr<MeshGeometry>> m_geo;
+	
 };
 
 
@@ -25,6 +25,6 @@ public:
 	virtual cObject* AddElement() override;
 
 private:
-
+	vector<unique_ptr<MeshGeometry>> m_geo;
 };
 

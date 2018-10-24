@@ -132,10 +132,9 @@ void cOperator::Update()
 					m_currButtons = nullptr;
 				}
 
-				m_currDraws->SetPickRender(0);
-
 				if (m_currDraws)
 				{
+					m_currDraws->SetPickRender(0);
 					for (auto& it : m_currDraws->m_draws)
 					{
 						it->Update();
@@ -228,13 +227,6 @@ void cOperator::OperationStart(int index)
 {
 	assert(m_operations.size() && "It had not Setup");
 
-	m_operations[index]->StartOperation();
-
-	if (m_currOperation)
-	{
-		m_currOperation->CancleOperation(m_currDraws->m_draws);
-	}
-
 	if (index == OPER_DRAWOPER)
 	{
 		OperTypeButtonSelect(0);
@@ -246,6 +238,17 @@ void cOperator::OperationStart(int index)
 	else if (index == OPER_DRAWOPER)
 	{
 		OperTypeButtonSelect(1);
+	}
+	else if(index != OPER_ADD_PLANE)
+	{
+		if (!m_currDraws) return;
+	}
+
+	m_operations[index]->StartOperation();
+
+	if (m_currOperation)
+	{
+		m_currOperation->CancleOperation(m_currDraws->m_draws);
 	}
 
 	m_currOperation = m_operations[index].get();

@@ -22,6 +22,8 @@ void cOper_Add_Plane::SetUp()
 
 void cOper_Add_Plane::PlaneAddOperation(cDrawPlane & planes)
 {
+	m_planes = &planes;
+
 	switch (m_worksSate)
 	{
 	case cOper_Add_Plane::ADD_PLANE:

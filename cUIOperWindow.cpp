@@ -37,7 +37,7 @@ void cUIOperWindow::AddParameter(wstring dataName, DXGI_FORMAT format, void * pD
 {
 	m_operParameters.push_back({ dataName,format,pData });
 
-	for (int i = m_operFonts.size(); i < m_operParameters.size(); i++)
+	for (size_t i = m_operFonts.size(); i < m_operParameters.size(); i++)
 	{
 		m_operFonts.push_back(FONTMANAGER->GetFont("baseFont"));
 		m_operFonts.back()->isRender = false;
@@ -49,10 +49,10 @@ void cUIOperWindow::UIUpdate()
 	SetSize({ 150.0f,m_operParameters.size() * 15.0f });
 
 	RECT buttonRect;
-	buttonRect.left = m_renderInstance->instanceData.World._41;
-	buttonRect.top = m_renderInstance->instanceData.World._42;
-	buttonRect.right = buttonRect.left + m_renderInstance->instanceData.World._11;
-	buttonRect.bottom = buttonRect.top + m_renderInstance->instanceData.World._22;
+	buttonRect.left = (LONG)m_renderInstance->instanceData.World._41;
+	buttonRect.top = (LONG)m_renderInstance->instanceData.World._42;
+	buttonRect.right = buttonRect.left + (LONG)m_renderInstance->instanceData.World._11;
+	buttonRect.bottom = buttonRect.top + (LONG)m_renderInstance->instanceData.World._22;
 
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
@@ -125,10 +125,10 @@ void cUIOperWindow::UIUpdate()
 				switch (m_operParameters[i].dataFormat)
 				{
 				case DXGI_FORMAT_D32_FLOAT:
-					*(float*)(m_operParameters[i].data) = _wtof(m_currInputData.c_str());
+					*(float*)(m_operParameters[i].data) = (float)_wtof(m_currInputData.c_str());
 					break;
 				case DXGI_FORMAT_R32_FLOAT:
-					*(float*)(m_operParameters[i].data) = _wtof(m_currInputData.c_str());
+					*(float*)(m_operParameters[i].data) = (float)_wtof(m_currInputData.c_str());
 					break;
 				case DXGI_FORMAT_R32_SINT:
 					*(int*)(m_operParameters[i].data) = m_currParameterIndex;
@@ -148,8 +148,8 @@ void cUIOperWindow::UIUpdate()
 			m_operFonts[i]->printString = m_operParameters[i].dataName + dataStr;
 		}
 
-		m_operFonts[i]->pos.x = buttonRect.left;
-		m_operFonts[i]->pos.y = buttonRect.top + i * 15;
+		m_operFonts[i]->pos.x = (float)buttonRect.left;
+		m_operFonts[i]->pos.y = (float)buttonRect.top + i * 15;
 		m_operFonts[i]->scale = { 0.3f,0.35f,1 };
 	}
 }

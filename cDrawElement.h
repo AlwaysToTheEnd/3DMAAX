@@ -20,7 +20,7 @@ public:
 
 	void DeleteBackObject();
 	void SetPickRender(UINT key);
-	UINT GetObjectNum() { return m_objects.size(); }
+	UINT GetObjectNum() { return (UINT)m_objects.size(); }
 
 protected:
 	shared_ptr<cRenderItem>		m_renderItem;

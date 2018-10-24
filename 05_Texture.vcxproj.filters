@@ -28,9 +28,6 @@
     <Filter Include="ManagedClass\cFontMG">
       <UniqueIdentifier>{5d038177-4056-4fcb-88fd-aed99b4518eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ManagedClass\D12Util">
-      <UniqueIdentifier>{44675d16-ea4e-4a06-a938-4cdff2c794a8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Objects">
       <UniqueIdentifier>{b5fb56ba-0e4a-4c6c-a811-c774bb0ac8f7}</UniqueIdentifier>
     </Filter>
@@ -66,6 +63,12 @@
     </Filter>
     <Filter Include="cOperation\MainOper">
       <UniqueIdentifier>{60a113f6-e3a4-4c3c-90e3-7bc3cfdaf40f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass\cMeshgeometryMG">
+      <UniqueIdentifier>{34c6fa8f-2c01-4561-8c16-94db40c3c667}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass\D12Util">
+      <UniqueIdentifier>{44675d16-ea4e-4a06-a938-4cdff2c794a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +180,9 @@
     <ClInclude Include="cDrawMesh.h">
       <Filter>Objects\ElementObject\Childs</Filter>
     </ClInclude>
+    <ClInclude Include="cMeshgeometryMG.h">
+      <Filter>ManagedClass\cMeshgeometryMG</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -277,6 +283,9 @@
     </ClCompile>
     <ClCompile Include="cDrawMesh.cpp">
       <Filter>Objects\ElementObject\Childs</Filter>
+    </ClCompile>
+    <ClCompile Include="cMeshgeometryMG.cpp">
+      <Filter>ManagedClass\cMeshgeometryMG</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

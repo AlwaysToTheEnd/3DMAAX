@@ -18,10 +18,10 @@ void cUIButton::UIUpdate()
 	assert(m_Param != -1);
 
 	RECT buttonRect;
-	buttonRect.left = m_renderInstance->instanceData.World._41;
-	buttonRect.top = m_renderInstance->instanceData.World._42;
-	buttonRect.right = buttonRect.left + m_renderInstance->instanceData.World._11;
-	buttonRect.bottom= buttonRect.top + m_renderInstance->instanceData.World._22;
+	buttonRect.left = (LONG)m_renderInstance->instanceData.World._41;
+	buttonRect.top = (LONG)m_renderInstance->instanceData.World._42;
+	buttonRect.right = buttonRect.left + (LONG)m_renderInstance->instanceData.World._11;
+	buttonRect.bottom= buttonRect.top + (LONG)m_renderInstance->instanceData.World._22;
 
 	if (PtInRect(&buttonRect, INPUTMG->GetMousePosPt()))
 	{

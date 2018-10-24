@@ -160,6 +160,7 @@
     <ClInclude Include="cDrawDot.h" />
     <ClInclude Include="cFontManager.h" />
     <ClInclude Include="cInputDeviceMG.h" />
+    <ClInclude Include="cMeshgeometryMG.h" />
     <ClInclude Include="cObejct.h" />
     <ClInclude Include="cObjectCoordinator.h" />
     <ClInclude Include="cOcTree.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="cDrawDot.cpp" />
     <ClCompile Include="cFontManager.cpp" />
     <ClCompile Include="cInputDeviceMG.cpp" />
+    <ClCompile Include="cMeshgeometryMG.cpp" />
     <ClCompile Include="cObejct.cpp" />
     <ClCompile Include="cObjectCoordinator.cpp" />
     <ClCompile Include="cOcTree.cpp" />

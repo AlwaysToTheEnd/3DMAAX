@@ -13,7 +13,7 @@ public:
 	void SetPos(XMFLOAT3 pos) { m_pos = pos; }
 	void SetRenderState(bool value);
 
-	UINT GetButtonNum() { return m_buttons.size(); }
+	UINT GetButtonNum() { return (UINT)m_buttons.size(); }
 
 private:
 	XMFLOAT3 m_pos;

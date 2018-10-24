@@ -20,11 +20,10 @@ private:
 class cDrawLines : public cDrawElement
 {
 public:
-	static void MeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-	static void DisPosUploaders() { m_geo->DisPosUploaders(); }
+	static void MeshSetUp();
 
 private:
-	static unique_ptr<MeshGeometry> m_geo;
+	static MeshGeometry* m_geo;
 
 public:
 	cDrawLines();

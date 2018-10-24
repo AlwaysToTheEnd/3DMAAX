@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-unique_ptr<MeshGeometry> cDrawPlane::m_geo = nullptr;
+MeshGeometry* cDrawPlane::m_geo = nullptr;
 
 cPlane::cPlane()
 {
@@ -16,7 +16,7 @@ bool XM_CALLCONV cPlane::Picking(PICKRAY ray, float & distance)
 {
 	XMMATRIX world = XMLoadFloat4x4(&m_renderInstance->instanceData.World);
 	XMMATRIX invWorld = XMMatrixInverse(&XMVECTOR(), world);
-	
+
 	PICKRAY planeLocalRay;
 	planeLocalRay.ray = XMVector3TransformNormal(ray.ray, invWorld);
 	planeLocalRay.origin = XMVector3TransformCoord(ray.origin, invWorld);
@@ -41,52 +41,33 @@ bool XM_CALLCONV cPlane::Picking(PICKRAY ray, float & distance)
 	return false;
 }
 
-void cDrawPlane::MeshSetUp(ID3D12Device * device, ID3D12GraphicsCommandList * cmdList)
+void cDrawPlane::MeshSetUp()
 {
-	if (m_geo == nullptr)
+	vector<C_Vertex> vertices(4);
+
+	vertices[0] = { { -0.5f,0.5f,0 },Colors::Yellow };
+	vertices[1] = { { 0.5f,0.5f,0 },Colors::Yellow };
+	vertices[2] = { { 0.5f,-0.5f,0 },Colors::Yellow };
+	vertices[3] = { { -0.5f,-0.5f,0 }, Colors::Yellow };
+
+	for (int i = 0; i < 4; i++)
 	{
-		m_geo = make_unique<MeshGeometry>();
-		m_geo->name = "Plane";
-		vector<C_Vertex> vertices(4);
-
-		vertices[0] = { { -0.5f,0.5f,0 },Colors::Yellow };
-		vertices[1] = { { 0.5f,0.5f,0 },Colors::Yellow };
-		vertices[2] = { { 0.5f,-0.5f,0 },Colors::Yellow };
-		vertices[3] = { { -0.5f,-0.5f,0 }, Colors::Yellow };
-
-		for (int i = 0; i < 4; i++)
-		{
-			vertices[i].color.w = 0.5f;
-		}
-
-		vector<UINT16> Indices;
-		Indices.push_back(0);
-		Indices.push_back(1);
-		Indices.push_back(2);
-		Indices.push_back(0);
-		Indices.push_back(2);
-		Indices.push_back(3);
-
-		const UINT PlaneGeoDataSize = sizeof(C_Vertex)*vertices.size();
-		const UINT PlaneGeoIndexSize = sizeof(UINT16)*Indices.size();
-
-		m_geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
-			vertices.data(), PlaneGeoDataSize, m_geo->vertexUploadBuffer);
-
-		m_geo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(device, cmdList,
-			Indices.data(), PlaneGeoIndexSize, m_geo->indexUploadBuffer);
-
-		m_geo->indexFormat = DXGI_FORMAT_R16_UINT;
-		m_geo->indexBufferByteSize = PlaneGeoIndexSize;
-		m_geo->vertexBufferByteSize = PlaneGeoDataSize;
-		m_geo->vertexByteStride = sizeof(C_Vertex);
-
-		SubMeshGeometry subMesh;
-		subMesh.baseVertexLocation = 0;
-		subMesh.startIndexLocation = 0;
-		subMesh.indexCount = Indices.size();
-		m_geo->DrawArgs["Plane"] = subMesh;
+		vertices[i].color.w = 0.5f;
 	}
+
+	vector<UINT16> Indices;
+	Indices.push_back(0);
+	Indices.push_back(1);
+	Indices.push_back(2);
+	Indices.push_back(0);
+	Indices.push_back(2);
+	Indices.push_back(3);
+
+	const UINT PlaneGeoDataSize = sizeof(C_Vertex)*(UINT)vertices.size();
+	const UINT PlaneGeoIndexSize = sizeof(UINT16)*(UINT)Indices.size();
+
+	m_geo = MESHMG->AddMeshGeometry("Plane", vertices.data(), Indices.data(),
+		sizeof(C_Vertex), PlaneGeoDataSize, DXGI_FORMAT_R16_UINT, PlaneGeoIndexSize, false);
 }
 
 
@@ -103,7 +84,7 @@ cDrawPlane::~cDrawPlane()
 void cDrawPlane::SetRenderItem(shared_ptr<cRenderItem> renderItem)
 {
 	m_renderItem = renderItem;
-	m_renderItem->SetGeometry(m_geo.get(), "Plane");
+	m_renderItem->SetGeometry(m_geo, "Plane");
 	m_renderItem->SetPrimitiveType(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 

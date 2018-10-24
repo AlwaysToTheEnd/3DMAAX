@@ -9,6 +9,7 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 D12D3Maaax::~D12D3Maaax()
 {
 	m_operator = nullptr;
+	delete MESHMG;
 	delete RENDERITEMMG;
 	delete OBJCOORD;
 	delete INPUTMG;
@@ -27,6 +28,7 @@ bool D12D3Maaax::Initialize()
 	cRenderItem::SetDevice(m_D3dDevice.Get());
 
 	FONTMANAGER->Build(m_D3dDevice.Get(), m_CommandQueue.Get());
+	MESHMG->Build(m_D3dDevice.Get(), m_CommandQueue);
 	ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
 	BuildTextures();
 	BuildRootSignature();
@@ -41,11 +43,7 @@ bool D12D3Maaax::Initialize()
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
 
-	cDrawLines::DisPosUploaders();
-	cDrawDot::DisPosUploaders();
-	cDrawPlane::DisPosUploaders();
-	cUIObject::DisPosUploaders();
-	cObjectCoordinator::DisPosUploaders();
+	MESHMG->MeshBuildUpGPU(m_Fence, m_CurrentFence);
 	
 	OnResize();
 
@@ -58,7 +56,7 @@ void D12D3Maaax::OnResize()
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&m_3DProj, P);
-	P = XMMatrixOrthographicOffCenterLH(0, m_ClientWidth, m_ClientHeight, 0, -1, 1);
+	P = XMMatrixOrthographicOffCenterLH(0, (float)m_ClientWidth, (float)m_ClientHeight, 0, -1, 1);
 	XMStoreFloat4x4(&m_2DProj, P);
 
 	FONTMANAGER->Resize(m_ClientWidth, m_ClientHeight);
@@ -77,9 +75,11 @@ void D12D3Maaax::Update()
 		CloseHandle(eventHandle);
 	}
 
+	MESHMG->MeshBuildUpGPU(m_Fence, m_CurrentFence);
+
 	m_Camera.Update();
 	UpdateMainPassCB();
-	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, m_ClientWidth, m_ClientHeight);
+	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
 	
 	m_operator->Update();
 	OBJCOORD->Update();
@@ -291,11 +291,11 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 
 void D12D3Maaax::BuildGeometry()
 {
-	cDrawPlane::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cDrawLines::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cDrawDot::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cUIObject::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cObjectCoordinator::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cDrawPlane::MeshSetUp();
+	cDrawLines::MeshSetUp();
+	cDrawDot::MeshSetUp();
+	cUIObject::MeshSetUp();
+	cObjectCoordinator::MeshSetUp();
 }
 
 void D12D3Maaax::BuildPSOs()
@@ -411,7 +411,7 @@ void D12D3Maaax::BuildMaterials()
 {
 	auto wirefence = make_unique<Material>();
 	wirefence->name = "wirefence";
-	wirefence->matCBIndex = m_Materials.size();
+	wirefence->matCBIndex = (int)m_Materials.size();
 	wirefence->diffuseSrvHeapIndex = 0;
 	wirefence->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	wirefence->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
@@ -421,7 +421,7 @@ void D12D3Maaax::BuildMaterials()
 
 	auto icemirror = std::make_unique<Material>();
 	icemirror->name = "icemirror";
-	icemirror->matCBIndex = m_Materials.size();
+	icemirror->matCBIndex = (int)m_Materials.size();
 	icemirror->diffuseSrvHeapIndex = 2;
 	icemirror->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 	icemirror->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
