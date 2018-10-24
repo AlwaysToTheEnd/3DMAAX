@@ -237,7 +237,7 @@ void cOperator::OperationStart(int index)
 
 	if (index == OPER_DRAWOPER)
 	{
-		OperTypeSelect(0);
+		OperTypeButtonSelect(0);
 		if (m_currDraws)
 		{
 			m_currDraws->SetPickRender(0);
@@ -245,13 +245,13 @@ void cOperator::OperationStart(int index)
 	}
 	else if (index == OPER_DRAWOPER)
 	{
-		OperTypeSelect(1);
+		OperTypeButtonSelect(1);
 	}
 
 	m_currOperation = m_operations[index].get();
 }
 
-void cOperator::OperTypeSelect(int num)
+void cOperator::OperTypeButtonSelect(int num)
 {
 	m_drawButtons.SetRenderState(false);
 	m_meshButtons.SetRenderState(false);

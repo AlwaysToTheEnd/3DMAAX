@@ -155,6 +155,7 @@
     <ClInclude Include="cCamera.h" />
     <ClInclude Include="cDrawElement.h" />
     <ClInclude Include="cDrawLines.h" />
+    <ClInclude Include="cDrawMesh.h" />
     <ClInclude Include="cDrawPlane.h" />
     <ClInclude Include="cDrawDot.h" />
     <ClInclude Include="cFontManager.h" />
@@ -192,6 +193,7 @@
     <ClCompile Include="cCamera.cpp" />
     <ClCompile Include="cDrawElement.cpp" />
     <ClCompile Include="cDrawLines.cpp" />
+    <ClCompile Include="cDrawMesh.cpp" />
     <ClCompile Include="cDrawPlane.cpp" />
     <ClCompile Include="cDrawDot.cpp" />
     <ClCompile Include="cFontManager.cpp" />

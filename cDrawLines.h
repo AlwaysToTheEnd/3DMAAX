@@ -28,7 +28,7 @@ private:
 
 public:
 	cDrawLines();
-	~cDrawLines();
+	virtual ~cDrawLines();
 
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
 	virtual bool Picking(cObject** ppObject) override;

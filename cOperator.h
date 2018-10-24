@@ -14,7 +14,7 @@ public:
 
 private:
 	void OperationStart(int type);
-	void OperTypeSelect(int num);
+	void OperTypeButtonSelect(int num);
 
 private:
 	const int						m_ButtonMtlTexBaseIndex = 0;

@@ -174,6 +174,9 @@
     <ClInclude Include="cOper_Add_Mesh.h">
       <Filter>cOperation\MainOper</Filter>
     </ClInclude>
+    <ClInclude Include="cDrawMesh.h">
+      <Filter>Objects\ElementObject\Childs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -271,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="cOper_Add_Mesh.cpp">
       <Filter>cOperation\MainOper</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawMesh.cpp">
+      <Filter>Objects\ElementObject\Childs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
