@@ -10,6 +10,7 @@ enum OPERATIONTYPE
 	OPER_DRAWOPER,
 	OPER_PUSH_MESH,
 	OPER_MESHOPER,
+	OPER_COUNT,
 };
 
 class cPlane;
@@ -53,7 +54,10 @@ public:
 	virtual void SetUp() = 0;
 	virtual void DrawElementOperation(DrawItems* drawItems) { assert(false); }
 	virtual void PlaneAddOperation(cDrawPlane& planes) { assert(false); }
+	virtual void MeshOperation(DrawItems* drawItems) { assert(false); }
 	virtual DrawItems* DrawsAddOperatioin(unordered_map<wstring, DrawItems>& drawItems, cDrawPlane& planes) { assert(false); return nullptr; }
+	virtual DrawItems* DrawSelectOperation(unordered_map<wstring, DrawItems>& drawItems) { assert(false); return nullptr; }
+
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
 	virtual void EndOperation();
 

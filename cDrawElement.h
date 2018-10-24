@@ -23,7 +23,8 @@ public:
 	UINT GetObjectNum() { return m_objects.size(); }
 
 protected:
-	shared_ptr<cRenderItem> m_renderItem;
-	vector<unique_ptr<cObject>> m_objects;
+	shared_ptr<cRenderItem>		m_renderItem;
+	vector<unique_ptr<cObject>>	m_objects;
+	UINT						m_pickRender;
 };
 

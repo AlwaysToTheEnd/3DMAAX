@@ -68,12 +68,12 @@ void cOper_Add_Dot::DrawElementOperation(DrawItems* drawItems)
 
 void cOper_Add_Dot::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 {
+	EndOperation();
+
 	for (UINT i = 0; i < m_addDotCount; i++)
 	{
 		draw[DRAW_DOTS]->DeleteBackObject();
 	}
-
-	EndOperation();
 }
 
 void cOper_Add_Dot::EndOperation()

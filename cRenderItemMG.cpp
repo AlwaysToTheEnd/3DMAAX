@@ -69,7 +69,7 @@ void cRenderItem::Render(ID3D12GraphicsCommandList * cmdList)
 		cmdList->IASetVertexBuffers(0, 1, &m_geo->GetVertexBufferView());
 		cmdList->IASetIndexBuffer(&m_geo->GetIndexBufferView());
 		cmdList->IASetPrimitiveTopology(m_primitiveType);
-
+	
 		cmdList->SetGraphicsRootShaderResourceView(0,
 			m_currFrameCB->Resource()->GetGPUVirtualAddress());
 

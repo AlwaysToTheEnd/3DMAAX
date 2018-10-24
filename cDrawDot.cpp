@@ -95,6 +95,7 @@ cObject * cDrawDot::AddElement()
 {
 	m_objects.push_back(make_unique<cDot>());
 	m_objects.back()->Build(m_renderItem);
+	m_objects.back()->SetPickRender(m_pickRender);
 	return m_objects.back().get();
 }
 

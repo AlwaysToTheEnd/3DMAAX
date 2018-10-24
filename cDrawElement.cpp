@@ -3,6 +3,7 @@
 
 cDrawElement::cDrawElement()
 	:m_renderItem(nullptr)
+	, m_pickRender(0)
 {
 }
 
@@ -50,6 +51,8 @@ void cDrawElement::DeleteBackObject()
 
 void cDrawElement::SetPickRender(UINT key)
 {
+	m_pickRender = key;
+
 	for (auto& it : m_objects)
 	{
 		it->SetPickRender(key);

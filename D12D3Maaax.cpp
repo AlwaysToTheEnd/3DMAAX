@@ -91,7 +91,7 @@ void D12D3Maaax::Update()
 void D12D3Maaax::Draw()
 {
 	auto cmdListAlloc = m_CurrFrameResource->cmdListAlloc.Get();
-	Model::meshes=
+
 	ThrowIfFailed(cmdListAlloc->Reset());
 
 	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc,

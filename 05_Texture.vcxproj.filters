@@ -64,6 +64,9 @@
     <Filter Include="Objects\ElementObject\Childs">
       <UniqueIdentifier>{74b12965-073b-4868-b2f8-eb3f5436c60c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cOperation\MainOper">
+      <UniqueIdentifier>{60a113f6-e3a4-4c3c-90e3-7bc3cfdaf40f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -166,7 +169,10 @@
       <Filter>cOperation</Filter>
     </ClInclude>
     <ClInclude Include="cOper_Add_Draws.h">
-      <Filter>cOperation</Filter>
+      <Filter>cOperation\MainOper</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Mesh.h">
+      <Filter>cOperation\MainOper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -261,7 +267,10 @@
       <Filter>cOperation</Filter>
     </ClCompile>
     <ClCompile Include="cOper_Add_Draws.cpp">
-      <Filter>cOperation</Filter>
+      <Filter>cOperation\MainOper</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Mesh.cpp">
+      <Filter>cOperation\MainOper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

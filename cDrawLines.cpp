@@ -98,6 +98,7 @@ cObject * cDrawLines::AddElement()
 {
 	m_objects.push_back(make_unique<cLine>());
 	m_objects.back()->Build(m_renderItem);
+	m_objects.back()->SetPickRender(m_pickRender);
 	return m_objects.back().get();
 }
 

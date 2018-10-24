@@ -167,6 +167,7 @@
     <ClInclude Include="cOper_Add_Dot.h" />
     <ClInclude Include="cOper_Add_Draws.h" />
     <ClInclude Include="cOper_Add_Line.h" />
+    <ClInclude Include="cOper_Add_Mesh.h" />
     <ClInclude Include="cOper_Add_Plane.h" />
     <ClInclude Include="cPercentageValueSet.h" />
     <ClInclude Include="cRenderItemMG.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="cOper_Add_Dot.cpp" />
     <ClCompile Include="cOper_Add_Draws.cpp" />
     <ClCompile Include="cOper_Add_Line.cpp" />
+    <ClCompile Include="cOper_Add_Mesh.cpp" />
     <ClCompile Include="cOper_Add_Plane.cpp" />
     <ClCompile Include="cPercentageValueSet.cpp" />
     <ClCompile Include="cRenderItemMG.cpp" />
