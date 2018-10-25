@@ -65,10 +65,7 @@ cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
 				if (drawItems->m_draws[DRAW_DOTS]->Picking(&pickDot))
 				{
 					cDot* resultDot = static_cast<cDot*>(pickDot);
-					if (resultDot->GetHostObject() == drawItems->m_plane)
-					{
-						return resultDot;
-					}
+					return resultDot;
 				}
 
 				XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), drawItems->m_plane->GetXMMatrix());
@@ -76,8 +73,8 @@ cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
 				pos = XMVector3TransformCoord(pos, planeInvMat);
 				pos.m128_f32[2] = 0;
 				cDot* dot = AddDot(drawItems->m_draws);
-				XMStoreFloat3(&dot->GetPos(), pos);
 				dot->SetHostObject(drawItems->m_plane);
+				XMStoreFloat3(&dot->GetPos(), pos);
 
 				return dot;
 			}

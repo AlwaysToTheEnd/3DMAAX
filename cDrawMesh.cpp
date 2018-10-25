@@ -28,6 +28,40 @@ bool XM_CALLCONV cMesh::Picking(PICKRAY ray, float & distance)
 	return false;
 }
 
+bool cMesh::VertexCircleCheck(UINT drawItemIndex)
+{
+	vector<cDot*> dots = m_draws[drawItemIndex]->m_draws[DRAW_DOTS]->GetObjectsPtr<cDot>();
+	
+	size_t dotsNum = dots.size();
+	if (dotsNum < 3)
+	{
+		return false;
+	}
+
+	vector<cDot*> circleDots;
+
+	for (auto& it: dots)
+	{
+		while (it)
+		{
+
+		}
+	}
+}
+
+UINT cMesh::SetDrawItems(DrawItems * drawItem)
+{
+	UINT indexNum = 0;
+	for (auto& it : m_draws)
+	{
+		if (drawItem == it) return indexNum;
+		indexNum++;
+	}
+
+	m_draws.push_back(drawItem);
+	return indexNum;
+}
+
 
 cDrawMesh::cDrawMesh()
 {
@@ -38,11 +72,6 @@ cDrawMesh::cDrawMesh()
 cDrawMesh::~cDrawMesh()
 {
 }
-
-void cDrawMesh::SetRenderItem(shared_ptr<cRenderItem> renderItem)
-{
-}
-
 
 cObject * cDrawMesh::AddElement()
 {

@@ -58,3 +58,4 @@ void cDrawElement::SetPickRender(UINT key)
 		it->SetPickRender(key);
 	}
 }
+

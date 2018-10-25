@@ -22,9 +22,24 @@ public:
 	void SetPickRender(UINT key);
 	UINT GetObjectNum() { return (UINT)m_objects.size(); }
 
+	template<typename T>
+	vector<T*> GetObjectsPtr();
+
 protected:
 	shared_ptr<cRenderItem>		m_renderItem;
 	vector<unique_ptr<cObject>>	m_objects;
 	UINT						m_pickRender;
 };
 
+template<typename T>
+inline vector<T*> cDrawElement::GetObjectsPtr()
+{
+	vector<T*> objectPtrs;
+
+	for (auto& it : m_objects)
+	{
+		objectPtrs.push_back(static_cast<T*>(it.get()));
+	}
+
+	return objectPtrs;
+}

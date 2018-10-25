@@ -14,8 +14,6 @@ cDot::~cDot()
 
 void XM_CALLCONV cDot::Update(FXMMATRIX mat)
 {
-	assert(m_hostObject);
-
 	XMMATRIX localMat = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) *
 		XMMatrixRotationQuaternion(XMLoadFloat4(&m_quaternion))*
 		XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
@@ -32,6 +30,16 @@ bool XM_CALLCONV cDot::Picking(PICKRAY ray, float & distance)
 	sphere.Radius = 0.02f;
 
 	return sphere.Intersects(ray.origin,ray.ray,distance);
+}
+
+void cDot::SetNextDots(cDot * dot)
+{
+	for (auto& it : m_nextDots)
+	{
+		if (dot == it) return;
+	}
+
+	m_nextDots.push_back(dot);
 }
 
 void cDrawDot::MeshSetUp()

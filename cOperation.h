@@ -1,6 +1,7 @@
 #pragma once
 #include "cUIObject.h"
 #include "cUIOperWindow.h"
+#include "cDrawMesh.h"
 
 enum OPERATIONTYPE
 {
@@ -25,6 +26,21 @@ struct DrawItems
 	{
 		m_plane = plane;
 	}
+
+	/*DrawItems(DrawItems& rhs)
+	{
+		m_draws.resize(rhs.m_draws.size());
+	
+		for (size_t i = 0; i < m_draws.size(); i++)
+		{
+			m_draws[i] = move(rhs.m_draws[i]);
+		}
+
+		m_plane = rhs.m_plane;
+
+		rhs.m_draws.clear();
+		rhs.m_plane = nullptr;
+	}*/
 
 	void SetPickRender(UINT key)
 	{
@@ -54,9 +70,9 @@ public:
 	virtual void SetUp() = 0;
 	virtual void DrawElementOperation(DrawItems* drawItems) { assert(false); }
 	virtual void PlaneAddOperation(cDrawPlane& planes) { assert(false); }
-	virtual void MeshOperation(cDrawMesh& drawMesh) { assert(false); }
+	virtual void MeshOperation(cDrawMesh& drawMesh, DrawItems* drawItem, cMesh** currMesh) { assert(false); }
 	virtual DrawItems* DrawsAddOperatioin(unordered_map<wstring, DrawItems>& drawItems, cDrawPlane& planes) { assert(false); return nullptr; }
-	virtual DrawItems* MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh) { assert(false); return nullptr; }
+	virtual DrawItems* MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh, cMesh** mesh) { assert(false); return nullptr; }
 
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
 	virtual void EndOperation();

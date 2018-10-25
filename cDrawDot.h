@@ -8,10 +8,12 @@ public:
 
 	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
+
+	void SetNextDots(cDot* dot);
 	void SetHostObject(cObject* object) { m_hostObject = object; }
 	cObject* GetHostObject() { return m_hostObject; }
-
 private:
+	vector<cDot*>	m_nextDots;
 	cObject*		m_hostObject;
 };
 

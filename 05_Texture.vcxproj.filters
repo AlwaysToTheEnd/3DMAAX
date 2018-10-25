@@ -70,6 +70,12 @@
     <Filter Include="ManagedClass\D12Util">
       <UniqueIdentifier>{44675d16-ea4e-4a06-a938-4cdff2c794a8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cOperation\MeshOper">
+      <UniqueIdentifier>{582a8552-9196-434d-ba07-80bfd9491580}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cOperation\DrawOper">
+      <UniqueIdentifier>{6db0a8e6-c16b-4100-8230-a2dc1f4961d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -138,9 +144,6 @@
     <ClInclude Include="cOperation.h">
       <Filter>cOperation</Filter>
     </ClInclude>
-    <ClInclude Include="cOper_Add_Plane.h">
-      <Filter>cOperation</Filter>
-    </ClInclude>
     <ClInclude Include="cUIButton.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -156,9 +159,6 @@
     <ClInclude Include="cObjectCoordinator.h">
       <Filter>ManagedClass</Filter>
     </ClInclude>
-    <ClInclude Include="cOper_Add_Line.h">
-      <Filter>cOperation</Filter>
-    </ClInclude>
     <ClInclude Include="cDrawDot.h">
       <Filter>Objects\ElementObject\Childs</Filter>
     </ClInclude>
@@ -168,20 +168,29 @@
     <ClInclude Include="cDrawPlane.h">
       <Filter>Objects\ElementObject\Childs</Filter>
     </ClInclude>
-    <ClInclude Include="cOper_Add_Dot.h">
-      <Filter>cOperation</Filter>
-    </ClInclude>
     <ClInclude Include="cOper_Add_Draws.h">
       <Filter>cOperation\MainOper</Filter>
     </ClInclude>
     <ClInclude Include="cOper_Add_Mesh.h">
       <Filter>cOperation\MainOper</Filter>
     </ClInclude>
-    <ClInclude Include="cDrawMesh.h">
-      <Filter>Objects\ElementObject\Childs</Filter>
-    </ClInclude>
     <ClInclude Include="cMeshgeometryMG.h">
       <Filter>ManagedClass\cMeshgeometryMG</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Dot.h">
+      <Filter>cOperation\DrawOper</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Line.h">
+      <Filter>cOperation\DrawOper</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Add_Plane.h">
+      <Filter>cOperation\MainOper</Filter>
+    </ClInclude>
+    <ClInclude Include="cOper_Push_Mesh.h">
+      <Filter>cOperation\MeshOper</Filter>
+    </ClInclude>
+    <ClInclude Include="cDrawMesh.h">
+      <Filter>Objects\MeshObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -242,9 +251,6 @@
     <ClCompile Include="cOperation.cpp">
       <Filter>cOperation</Filter>
     </ClCompile>
-    <ClCompile Include="cOper_Add_Plane.cpp">
-      <Filter>cOperation</Filter>
-    </ClCompile>
     <ClCompile Include="cUIButton.cpp">
       <Filter>UI</Filter>
     </ClCompile>
@@ -260,9 +266,6 @@
     <ClCompile Include="cObjectCoordinator.cpp">
       <Filter>ManagedClass</Filter>
     </ClCompile>
-    <ClCompile Include="cOper_Add_Line.cpp">
-      <Filter>cOperation</Filter>
-    </ClCompile>
     <ClCompile Include="cDrawDot.cpp">
       <Filter>Objects\ElementObject\Childs</Filter>
     </ClCompile>
@@ -272,20 +275,29 @@
     <ClCompile Include="cDrawPlane.cpp">
       <Filter>Objects\ElementObject\Childs</Filter>
     </ClCompile>
-    <ClCompile Include="cOper_Add_Dot.cpp">
-      <Filter>cOperation</Filter>
-    </ClCompile>
     <ClCompile Include="cOper_Add_Draws.cpp">
       <Filter>cOperation\MainOper</Filter>
     </ClCompile>
     <ClCompile Include="cOper_Add_Mesh.cpp">
       <Filter>cOperation\MainOper</Filter>
     </ClCompile>
-    <ClCompile Include="cDrawMesh.cpp">
-      <Filter>Objects\ElementObject\Childs</Filter>
-    </ClCompile>
     <ClCompile Include="cMeshgeometryMG.cpp">
       <Filter>ManagedClass\cMeshgeometryMG</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Dot.cpp">
+      <Filter>cOperation\DrawOper</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Line.cpp">
+      <Filter>cOperation\DrawOper</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Add_Plane.cpp">
+      <Filter>cOperation\MainOper</Filter>
+    </ClCompile>
+    <ClCompile Include="cOper_Push_Mesh.cpp">
+      <Filter>cOperation\MeshOper</Filter>
+    </ClCompile>
+    <ClCompile Include="cDrawMesh.cpp">
+      <Filter>Objects\MeshObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

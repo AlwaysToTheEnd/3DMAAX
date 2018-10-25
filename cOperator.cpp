@@ -47,22 +47,22 @@ void cOperator::SetUp()
 			break;
 
 		case OPER_PUSH_MESH:
-			continue;
-			/*	m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Mesh));
-				m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
-					bind(&cOperator::OperationStart, this, placeholders::_1), i);*/
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Push_Mesh));
+			m_operations.back()->SetUp();
+			m_meshButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
+				bind(&cOperator::OperationStart, this, placeholders::_1), i);
 			break;
 		case OPER_DRAWOPER:
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Draws));
+			m_operations.back()->SetUp();
 			m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
 				bind(&cOperator::OperationStart, this, placeholders::_1), i);
-			m_operations.back()->SetUp();
 			continue;
 		case OPER_MESHOPER:
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Mesh));
-			m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
-				bind(&cOperator::OperationStart, this, placeholders::_1), i-1);
 			m_operations.back()->SetUp();
+			m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
+				bind(&cOperator::OperationStart, this, placeholders::_1), i - 1);
 			continue;
 		default:
 			assert(false);
@@ -160,7 +160,7 @@ void cOperator::Update()
 			m_currOperation->DrawElementOperation(m_currDraws);
 			break;
 		case OPER_PUSH_MESH:
-			m_currOperation->MeshOperation(&m_meshs);
+			m_currOperation->MeshOperation(m_meshs, m_currDraws, &m_currMesh);
 			break;
 		case OPER_DRAWOPER:
 		{
@@ -179,12 +179,17 @@ void cOperator::Update()
 				m_currDraws = draws;
 			}
 		}
-			break;
+		break;
 		case OPER_MESHOPER:
 		{
-			DrawItems * draws = m_currOperation->DrawSelectOperation(m_drawItems);
+			cMesh* pickMesh = nullptr;
+			DrawItems * draws = m_currOperation->MeshSelectOperation(m_drawItems, m_meshs, &pickMesh);
 
-			if (draws)
+			if (pickMesh)
+			{
+				m_currMesh = pickMesh;
+			}
+			else if (draws)
 			{
 				draws->SetPickRender(2);
 				CAMERA.SetTarget(draws->m_plane);
@@ -197,7 +202,7 @@ void cOperator::Update()
 				m_currDraws = draws;
 			}
 		}
-			break;
+		break;
 		default:
 			assert(false);
 			break;
@@ -239,11 +244,11 @@ void cOperator::OperationStart(int index)
 			m_currDraws->SetPickRender(0);
 		}
 	}
-	else if (index == OPER_DRAWOPER)
+	else if (index == OPER_MESHOPER)
 	{
 		OperTypeButtonSelect(1);
 	}
-	else if(index != OPER_ADD_PLANE)
+	else if (index != OPER_ADD_PLANE)
 	{
 		if (!m_currDraws) return;
 	}

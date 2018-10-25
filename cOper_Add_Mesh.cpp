@@ -24,7 +24,8 @@ void cOper_Add_Mesh::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-DrawItems * cOper_Add_Mesh::MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh)
+DrawItems * cOper_Add_Mesh::MeshSelectOperation(
+	unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh, cMesh** mesh)
 {
 	switch (m_worksSate)
 	{
@@ -57,6 +58,16 @@ DrawItems * cOper_Add_Mesh::MeshSelectOperation(unordered_map<wstring, DrawItems
 				}
 
 				i++;
+			}
+		}
+		else
+		{
+			cObject* pickMesh = nullptr;
+			if (drawMesh.Picking(&pickMesh))
+			{
+				*mesh =static_cast<cMesh*>(pickMesh);
+				cOperation::EndOperation();
+				return nullptr;
 			}
 		}
 
