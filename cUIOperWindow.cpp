@@ -44,6 +44,20 @@ void cUIOperWindow::AddParameter(wstring dataName, DXGI_FORMAT format, void * pD
 	}
 }
 
+bool cUIOperWindow::IsMousePosInUIWindow()
+{
+	if (m_renderInstance == nullptr) return false;
+
+	RECT buttonRect;
+	buttonRect.left = (LONG)m_renderInstance->instanceData.World._41;
+	buttonRect.top = (LONG)m_renderInstance->instanceData.World._42;
+	buttonRect.right = buttonRect.left + (LONG)m_renderInstance->instanceData.World._11;
+	buttonRect.bottom = buttonRect.top + (LONG)m_renderInstance->instanceData.World._22;
+	POINT mousePos = INPUTMG->GetMousePosPt();
+
+	return PtInRect(&buttonRect, mousePos);
+}
+
 void cUIOperWindow::UIUpdate()
 {
 	SetSize({ 150.0f,m_operParameters.size() * 15.0f });

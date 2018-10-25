@@ -24,7 +24,7 @@ void cOper_Add_Mesh::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-DrawItems * cOper_Add_Mesh::DrawSelectOperation(unordered_map<wstring, DrawItems>& drawItems)
+DrawItems * cOper_Add_Mesh::MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh)
 {
 	switch (m_worksSate)
 	{

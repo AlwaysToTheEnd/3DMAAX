@@ -82,7 +82,7 @@ void cOper_Add_Dot::EndOperation()
 
 	if (m_currDot)
 	{
-		m_currDot->SetPickRender(false);
+		m_currDot->SetPickRender(2);
 	}
 
 	m_currDot = nullptr;

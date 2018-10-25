@@ -92,6 +92,83 @@ MeshGeometry* cMeshgeometryMG::AddMeshGeometry(const string& name,const void * v
 	return m_Meshgometrys[name].get();
 }
 
+MeshGeometry * cMeshgeometryMG::AddTemporaryMesh(const string & name)
+{
+	auto iter = m_Meshgometrys.find(name);
+	assert(iter == m_Meshgometrys.end());
+
+	unique_ptr<MeshGeometry> geo = make_unique<MeshGeometry>();
+	geo->name = name;
+	m_Meshgometrys.insert({ name, move(geo) });
+
+	return m_Meshgometrys[name].get();
+}
+
+void cMeshgeometryMG::ChangeMeshGeometryData(const string & name, const void * vertexData, const void * indexData, UINT vertexByteStride, UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU, const unordered_map<string, SubMeshGeometry>* subMeshs)
+{
+	auto iter = m_Meshgometrys.find(name);
+	assert(iter != m_Meshgometrys.end());
+
+	if (m_needMeshBuildUp == false)
+	{
+		ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
+		m_needMeshBuildUp = true;
+	}
+
+	MeshGeometry* geo = iter->second.get();
+
+	geo->vertexBufferCPU = nullptr;
+	geo->indexBufferCPU = nullptr;
+	geo->vertexBufferGPU = nullptr;
+	geo->indexBufferGPU = nullptr;
+	geo->vertexUploadBuffer = nullptr;
+	geo->indexUploadBuffer = nullptr;
+	geo->octree = nullptr;
+	geo->DrawArgs.clear();
+
+
+	geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
+		vertexData, vertexBufferByteSize, geo->vertexUploadBuffer);
+
+	geo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
+		indexData, indexBufferByteSize, geo->indexUploadBuffer);
+
+	if (leaveDataInCPU)
+	{
+		D3DCreateBlob(vertexBufferByteSize, geo->vertexBufferCPU.GetAddressOf());
+		memcpy(geo->vertexBufferCPU->GetBufferPointer(), vertexData, vertexBufferByteSize);
+
+		D3DCreateBlob(indexBufferByteSize, geo->indexBufferCPU.GetAddressOf());
+		memcpy(geo->indexBufferCPU->GetBufferPointer(), indexData, indexBufferByteSize);
+	}
+
+	geo->indexFormat = indexFormat;
+	geo->indexBufferByteSize = indexBufferByteSize;
+	geo->vertexBufferByteSize = vertexBufferByteSize;
+	geo->vertexByteStride = vertexByteStride;
+
+	if (subMeshs == nullptr)
+	{
+		SubMeshGeometry sub;
+		sub.baseVertexLocation = 0;
+		sub.startIndexLocation = 0;
+		if (indexFormat == DXGI_FORMAT_R16_UINT)
+		{
+			sub.indexCount = indexBufferByteSize / sizeof(UINT16);
+		}
+		else if (indexFormat == DXGI_FORMAT_R32_UINT)
+		{
+			sub.indexCount = indexBufferByteSize / sizeof(UINT32);
+		}
+
+		geo->DrawArgs[name] = sub;
+	}
+	else
+	{
+		geo->DrawArgs = *subMeshs;
+	}
+}
+
 void cMeshgeometryMG::MeshBuildUpGPU(ComPtr<ID3D12Fence> fence, UINT64 & currentFenc)
 {
 	if (m_needMeshBuildUp)

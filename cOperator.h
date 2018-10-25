@@ -28,6 +28,8 @@ private:
 	cOperation*						m_currOperation;
 
 	cDrawPlane							m_planes;
+	cDrawMesh							m_meshs;
+	cMesh*								m_currMesh;
 	unordered_map<wstring, DrawItems>	m_drawItems;
 	DrawItems*							m_currDraws;
 };

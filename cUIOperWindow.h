@@ -22,6 +22,7 @@ public:
 	void ClearParameters() { m_operParameters.clear(); m_currParameterIndex = -1; }
 
 	void SetFontSize(int size) { m_fontSize = size; }
+	bool IsMousePosInUIWindow();
 private:
 	virtual void UIUpdate() override;
 

@@ -390,6 +390,7 @@ void D12D3Maaax::BuildPSOs()
 	RENDERITEMMG->AddRenderSet("line");
 	RENDERITEMMG->AddRenderSet("dot");
 	RENDERITEMMG->AddRenderSet("ui");
+	RENDERITEMMG->AddRenderSet(cDrawMesh::m_meshRenderName);
 }
 
 void D12D3Maaax::BuildTextures()

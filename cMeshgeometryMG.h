@@ -23,6 +23,12 @@ public:
 		UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU,
 		const unordered_map<string, SubMeshGeometry>* subMeshs=nullptr);
 
+	MeshGeometry* AddTemporaryMesh(const string& name);
+
+	void ChangeMeshGeometryData(const string& name, const void* vertexData, const void* indexData, UINT vertexByteStride,
+		UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU,
+		const unordered_map<string, SubMeshGeometry>* subMeshs = nullptr);
+
 	void MeshBuildUpGPU(ComPtr<ID3D12Fence> fence, UINT64& currentFenc);
 	void DisposUploadBuffers();
 

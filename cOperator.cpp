@@ -5,6 +5,7 @@ cOperator::cOperator()
 	, m_buttonRenderItem(nullptr)
 	, m_currDraws(nullptr)
 	, m_currButtons(nullptr)
+	, m_currMesh(nullptr)
 {
 }
 
@@ -157,6 +158,9 @@ void cOperator::Update()
 		case OPER_ADD_LINE:
 		case OPER_ADD_DOT:
 			m_currOperation->DrawElementOperation(m_currDraws);
+			break;
+		case OPER_PUSH_MESH:
+			m_currOperation->MeshOperation(&m_meshs);
 			break;
 		case OPER_DRAWOPER:
 		{

@@ -13,7 +13,7 @@ public:
 	virtual ~cOper_Add_Mesh();
 
 	virtual void SetUp() override;
-	virtual DrawItems* DrawSelectOperation(unordered_map<wstring, DrawItems>& drawItems) override;
+	virtual DrawItems* MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 
 private:

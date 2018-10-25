@@ -36,12 +36,15 @@ bool cOperation::PickPlane(cDrawPlane* planes, cPlane ** plane)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
-		cObject* pickPlane = nullptr;
-		if (planes->Picking(&pickPlane))
+		if (!m_operControl.IsMousePosInUIWindow())
 		{
-			CAMERA.SetTargetAndSettingAngle(pickPlane);
-			*plane = static_cast<cPlane*>(pickPlane);
-			return true;
+			cObject* pickPlane = nullptr;
+			if (planes->Picking(&pickPlane))
+			{
+				CAMERA.SetTargetAndSettingAngle(pickPlane);
+				*plane = static_cast<cPlane*>(pickPlane);
+				return true;
+			}
 		}
 	}
 
@@ -52,29 +55,32 @@ cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
-		float distance;
-		PICKRAY ray = INPUTMG->GetMousePickLay();
-		if (drawItems->m_plane->Picking(ray, distance))
+		if (!m_operControl.IsMousePosInUIWindow())
 		{
-			cObject* pickDot = nullptr;
-			if (drawItems->m_draws[DRAW_DOTS]->Picking(&pickDot))
+			float distance;
+			PICKRAY ray = INPUTMG->GetMousePickLay();
+			if (drawItems->m_plane->Picking(ray, distance))
 			{
-				cDot* resultDot = static_cast<cDot*>(pickDot);
-				if (resultDot->GetHostObject() == drawItems->m_plane)
+				cObject* pickDot = nullptr;
+				if (drawItems->m_draws[DRAW_DOTS]->Picking(&pickDot))
 				{
-					return resultDot;
+					cDot* resultDot = static_cast<cDot*>(pickDot);
+					if (resultDot->GetHostObject() == drawItems->m_plane)
+					{
+						return resultDot;
+					}
 				}
+
+				XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), drawItems->m_plane->GetXMMatrix());
+				XMVECTOR pos = ray.origin + ray.ray*distance;
+				pos = XMVector3TransformCoord(pos, planeInvMat);
+				pos.m128_f32[2] = 0;
+				cDot* dot = AddDot(drawItems->m_draws);
+				XMStoreFloat3(&dot->GetPos(), pos);
+				dot->SetHostObject(drawItems->m_plane);
+
+				return dot;
 			}
-
-			XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), drawItems->m_plane->GetXMMatrix());
-			XMVECTOR pos = ray.origin + ray.ray*distance;
-			pos = XMVector3TransformCoord(pos, planeInvMat);
-			pos.m128_f32[2] = 0;
-			cDot* dot = AddDot(drawItems->m_draws);
-			XMStoreFloat3(&dot->GetPos(), pos);
-			dot->SetHostObject(drawItems->m_plane);
-
-			return dot;
 		}
 	}
 
