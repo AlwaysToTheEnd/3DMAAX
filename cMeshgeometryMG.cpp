@@ -30,9 +30,9 @@ void cMeshgeometryMG::Build(ID3D12Device* device, ComPtr<ID3D12CommandQueue> com
 	m_CommandList->Close();
 }
 
-MeshGeometry* cMeshgeometryMG::AddMeshGeometry(const string& name,const void * vertexData,const void * indexData,
+MeshGeometry* cMeshgeometryMG::AddMeshGeometry(const string& name, const void * vertexData, const void * indexData,
 	UINT vertexByteStride, UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize,
-	bool leaveDataInCPU,const unordered_map<string, SubMeshGeometry>* subMeshs)
+	bool leaveDataInCPU, const unordered_map<string, SubMeshGeometry>* subMeshs)
 {
 	auto iter = m_Meshgometrys.find(name);
 	assert(iter == m_Meshgometrys.end());
@@ -99,6 +99,13 @@ MeshGeometry * cMeshgeometryMG::AddTemporaryMesh(const string & name)
 
 	unique_ptr<MeshGeometry> geo = make_unique<MeshGeometry>();
 	geo->name = name;
+
+	SubMeshGeometry sub;
+	sub.baseVertexLocation = 0;
+	sub.startIndexLocation = 0;
+	sub.indexCount = 0;
+	geo->DrawArgs[name] = sub;
+
 	m_Meshgometrys.insert({ name, move(geo) });
 
 	return m_Meshgometrys[name].get();

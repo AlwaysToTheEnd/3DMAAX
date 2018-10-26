@@ -36,7 +36,7 @@ void cOper_Push_Mesh::MeshOperation(cDrawMesh & drawMesh, DrawItems * drawItem, 
 		m_draws = nullptr;
 		m_selectDrawsIndex = -1;
 
-		if (drawItem && !currMesh)
+		if (drawItem && !*currMesh)
 		{
 			m_currMesh = static_cast<cMesh*>(drawMesh.AddElement());
 			*currMesh = m_currMesh;
@@ -52,7 +52,7 @@ void cOper_Push_Mesh::MeshOperation(cDrawMesh & drawMesh, DrawItems * drawItem, 
 
 			m_worksSate = DRAW_SELECT;
 		}
-		else if (currMesh)
+		else if (*currMesh)
 		{
 			m_currMesh = *currMesh;
 

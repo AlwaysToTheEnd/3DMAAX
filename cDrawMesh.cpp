@@ -115,7 +115,7 @@ bool cMesh::LineCycleCheck(UINT drawItemIndex)
 				rootLine.nextLines.push_back({ *it, &rootLine });
 				it = leaveLines.erase(it);
 			}
-		} //nextLine Check
+		}
 
 		if (rootLine.nextLines.empty()) continue;
 
@@ -125,6 +125,7 @@ bool cMesh::LineCycleCheck(UINT drawItemIndex)
 		}
 	}
 
+	OverLapCycleDotsCheck(cycleDots);
 
 }
 
@@ -139,12 +140,39 @@ void cMesh::OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist)
 
 			vector<const cDot*>& dots = *it2;
 
-			size_t equalStartIndex = -1;
+			int equalStartIndex = -1;
+
 			for (size_t i = 0; i < pivotDots.size(); i++)
 			{
-				if (pivotDots[0] == dots[i])
+				if (equalStartIndex == -1)
 				{
-					equalStartIndex = i;
+					if (pivotDots[0] == dots[i])
+					{
+						equalStartIndex = i;
+					}
+				}
+				else
+				{
+					if (pivotDots[i - equalStartIndex] != dots[i])
+					{
+						it2 = dotslist.erase(it2);
+						continue;
+					}
+				}
+			}
+
+			if (equalStartIndex == -1)
+			{
+				it2 = dotslist.erase(it2);
+				continue;
+			}
+
+			for (size_t i = 0; i < equalStartIndex; i++)
+			{
+				if (pivotDots[equalStartIndex + i] != dots[i])
+				{
+					it2 = dotslist.erase(it2);
+					continue;
 				}
 			}
 		}
@@ -262,7 +290,7 @@ cObject * cDrawMesh::AddElement()
 {
 	auto renderItem = RENDERITEMMG->AddRenderItem(m_meshRenderName);
 	auto geometry = MESHMG->AddTemporaryMesh(m_meshRenderName + to_string(m_objects.size()));
-	renderItem->SetGeometry(geometry, m_meshRenderName);
+	renderItem->SetGeometry(geometry, m_meshRenderName + to_string(m_objects.size()));
 	renderItem->SetRenderOK(false);
 
 	auto addObejct = make_unique<cMesh>();

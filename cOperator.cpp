@@ -62,7 +62,7 @@ void cOperator::SetUp()
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Mesh));
 			m_operations.back()->SetUp();
 			m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
-				bind(&cOperator::OperationStart, this, placeholders::_1), i - 1);
+				bind(&cOperator::OperationStart, this, placeholders::_1), i);
 			continue;
 		default:
 			assert(false);
