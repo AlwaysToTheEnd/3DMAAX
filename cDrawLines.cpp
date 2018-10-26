@@ -51,7 +51,7 @@ int cLine::CheckLinked(const cLine * line)
 
 	if (m_hostObject[0] == line->m_hostObject[0] ||
 		m_hostObject[0] == line->m_hostObject[1])
-	{
+	{	
 		return 0;
 	}
 
@@ -60,6 +60,8 @@ int cLine::CheckLinked(const cLine * line)
 	{
 		return 1;
 	}
+
+	return INT_MAX;
 }
 
 void cDrawLines::MeshSetUp()

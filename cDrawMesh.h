@@ -5,6 +5,26 @@ struct DrawItems;
 class cMesh :public cObject
 {
 private:
+	struct CycleLine
+	{
+		cLine* line = nullptr;
+		CycleLine* parentLine = nullptr;
+
+		vector<CycleLine> nextLines;
+
+		CycleLine() {}
+		CycleLine(cLine* line, CycleLine* parentLine)
+		{
+			this->line = line;
+			this->parentLine = parentLine;
+		}
+
+		void CycleLineCheck(list<cLine*>& leaveLines, 
+			cLine* endLinkLine, list<vector<const cDot*>>& cycleDots);
+
+		vector<const cDot*> GetDotsToParents();
+	};
+
 
 public:
 	cMesh();
@@ -16,7 +36,10 @@ public:
 	virtual void IsRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
 	
 public:
-	bool VertexCircleCheck(UINT drawItemIndex);
+	bool LineCycleCheck(UINT drawItemIndex);
+
+private:
+	void OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
 
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }

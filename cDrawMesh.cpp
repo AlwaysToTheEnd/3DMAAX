@@ -28,24 +28,12 @@ bool XM_CALLCONV cMesh::Picking(PICKRAY ray, float & distance)
 	return false;
 }
 
-bool cMesh::VertexCircleCheck(UINT drawItemIndex)
+bool cMesh::LineCycleCheck(UINT drawItemIndex)
 {
 	vector<cLine*> lines = m_draws[drawItemIndex]->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
 
-	size_t linesNum = lines.size();
-	if (linesNum < 3)
-	{
-		return false;
-	}
-
-	vector<const cDot*> circleDots;
-
 	for (size_t i = 0; i < lines.size(); i++)
 	{
-		vector<cLine*> checkLines;
-		const cDot* endLinkDot = nullptr;
-		const cDot* nextPivotDot = nullptr;
-
 		for (size_t j = 0; j < lines.size(); j++)
 		{
 			if (i == j) continue;
@@ -56,44 +44,194 @@ bool cMesh::VertexCircleCheck(UINT drawItemIndex)
 				m_draws[drawItemIndex]->m_draws[DRAW_LINES]->DeleteObject(lines[j--]);
 				lines = m_draws[drawItemIndex]->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
 				break;
-			case 0:
-				if (endLinkDot == nullptr)
-				{
-					endLinkDot = lines[i]->GetSecondDot();
-					checkLines.push_back(lines[j]);
-					nextPivotDot = lines[i]->GetFirstDot();
-				}
-				else
-				{
-					if (nextPivotDot == lines[i]->GetFirstDot())
-					{
-						checkLines.push_back(lines[j]);
-					}
-				}
-				break;
-			case 1:
-				if (endLinkDot == nullptr)
-				{
-					endLinkDot = lines[i]->GetFirstDot();
-					checkLines.push_back(lines[j]);
-					nextPivotDot = lines[i]->GetSecondDot();
-				}
-				else
-				{
-					if (nextPivotDot == lines[i]->GetSecondDot())
-					{
-						checkLines.push_back(lines[j]);
-					}
-				}
-				break;
 			}
 		}
+	}
 
-		for (size_t j = 0; j < checkLines.size(); j++)
+	size_t linesNum = lines.size();
+	if (linesNum < 3)
+	{
+		return false;
+	}
+
+	list<cLine*> leaveLines;
+	list<vector<const cDot*>> cycleDots;
+
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		leaveLines.clear();
+
+		CycleLine rootLine;
+		rootLine.line = lines[i];
+
+		for (int j = 0; j < lines.size(); j++)
 		{
+			if (j == i) continue;
 
+			leaveLines.push_back(lines[j]);
+		}
+
+		int nexSpotindex = -1;
+
+		for (auto it = leaveLines.begin(); it != leaveLines.end(); )
+		{
+			bool isNextLine = true;
+			switch (rootLine.line->CheckLinked(*it))
+			{
+			case 0:
+			{
+				if (nexSpotindex = -1)
+				{
+					nexSpotindex = 0;
+				}
+
+				if (nexSpotindex == 0)
+				{
+					isNextLine == false;
+				}
+			}
+			break;
+			case 1:
+			{
+				if (nexSpotindex = -1)
+				{
+					nexSpotindex = 1;
+				}
+
+				if (nexSpotindex == 1)
+				{
+					isNextLine == false;
+				}
+			}
+			break;
+			}
+
+			if (isNextLine)
+			{
+				it++;
+			}
+			else
+			{
+				rootLine.nextLines.push_back({ *it, &rootLine });
+				it = leaveLines.erase(it);
+			}
+		} //nextLine Check
+
+		if (rootLine.nextLines.empty()) continue;
+
+		for (auto& it : rootLine.nextLines)
+		{
+			it.CycleLineCheck(leaveLines, rootLine.line, cycleDots);
 		}
 	}
+
+
+}
+
+void cMesh::OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist)
+{
+	for (auto it1 = dotslist.begin(); it1 != dotslist.end(); it1++)
+	{
+		vector<const cDot*> pivotDots = *it1;
+		for (auto it2 = dotslist.begin(); it2 != dotslist.end();)
+		{
+			if (it1 == it2 || it1->size() != it2->size()) continue;
+
+			vector<const cDot*>& dots = *it2;
+
+			size_t equalStartIndex = -1;
+			for (size_t i = 0; i < pivotDots.size(); i++)
+			{
+				if (pivotDots[0] == dots[i])
+				{
+					equalStartIndex = i;
+				}
+			}
+		}
+	}
+}
+
+
+void cMesh::CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
+	cLine * endLinkLine, list<vector<const cDot*>>& cycleDots)
+{
+	int endcheck = line->CheckLinked(endLinkLine);
+	if (endcheck == 0 || endcheck == 1)
+	{
+		cycleDots.push_back(GetDotsToParents());
+		return;
+	}
+
+	if (leaveLines.empty()) return;
+
+	for (auto it = leaveLines.begin(); it != leaveLines.end(); )
+	{
+		bool isNextLine = true;
+		switch (line->CheckLinked(*it))
+		{
+		case 0:
+		case 1:
+			isNextLine == false;
+			nextLines.push_back({ *it,this });
+			break;
+		}
+
+		if (isNextLine)
+		{
+			it++;
+		}
+		else
+		{
+			it = leaveLines.erase(it);
+		}
+	}
+
+	for (auto& it : nextLines)
+	{
+		it.CycleLineCheck(leaveLines, endLinkLine, cycleDots);
+	}
+}
+
+vector<const cDot*> cMesh::CycleLine::GetDotsToParents()
+{
+	vector<const cDot*> dots;
+
+	CycleLine* currLine = this;
+	while (true)
+	{
+		if (currLine->parentLine == nullptr)
+		{
+			break;
+		}
+
+		switch (currLine->line->CheckLinked(currLine->parentLine->line))
+		{
+		case 0:
+			if (dots.empty())
+			{
+				dots.push_back(currLine->line->GetSecondDot());
+			}
+
+			dots.push_back(currLine->line->GetFirstDot());
+			break;
+		case 1:
+			if (dots.empty())
+			{
+				dots.push_back(currLine->line->GetFirstDot());
+			}
+
+			dots.push_back(currLine->line->GetSecondDot());
+			break;
+		default:
+			assert(false);
+			break;
+		}
+
+		currLine = currLine->parentLine;
+	}
+
+	assert(dots.size());
+	return dots;
 }
 
 UINT cMesh::SetDrawItems(DrawItems * drawItem)
@@ -134,5 +272,4 @@ cObject * cDrawMesh::AddElement()
 	m_objects.push_back(move(addObejct));
 	return m_objects.back().get();
 }
-
 
