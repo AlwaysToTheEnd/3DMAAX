@@ -24,6 +24,7 @@ public:
 
 	template<typename T>
 	vector<T*> GetObjectsPtr();
+	void DeleteObject(cObject* object);
 
 protected:
 	shared_ptr<cRenderItem>		m_renderItem;

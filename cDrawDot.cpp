@@ -32,16 +32,6 @@ bool XM_CALLCONV cDot::Picking(PICKRAY ray, float & distance)
 	return sphere.Intersects(ray.origin,ray.ray,distance);
 }
 
-void cDot::SetNextDots(cDot * dot)
-{
-	for (auto& it : m_nextDots)
-	{
-		if (dot == it) return;
-	}
-
-	m_nextDots.push_back(dot);
-}
-
 void cDrawDot::MeshSetUp()
 {
 	GeometryGenerator gen;

@@ -31,9 +31,6 @@
     <Filter Include="Objects">
       <UniqueIdentifier>{b5fb56ba-0e4a-4c6c-a811-c774bb0ac8f7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\MeshObject">
-      <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Objects\ElementObject">
       <UniqueIdentifier>{a48e8c07-d0ec-4ebd-b60f-eb44946d9f64}</UniqueIdentifier>
     </Filter>
@@ -58,9 +55,6 @@
     <Filter Include="D12App\D12D3Maaax\cCamera">
       <UniqueIdentifier>{39310a70-d4d4-4197-92f1-423419117506}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\ElementObject\Childs">
-      <UniqueIdentifier>{74b12965-073b-4868-b2f8-eb3f5436c60c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="cOperation\MainOper">
       <UniqueIdentifier>{60a113f6-e3a4-4c3c-90e3-7bc3cfdaf40f}</UniqueIdentifier>
     </Filter>
@@ -75,6 +69,12 @@
     </Filter>
     <Filter Include="cOperation\DrawOper">
       <UniqueIdentifier>{6db0a8e6-c16b-4100-8230-a2dc1f4961d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ElementObject\Draws">
+      <UniqueIdentifier>{74b12965-073b-4868-b2f8-eb3f5436c60c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ElementObject\Meshs">
+      <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -160,13 +160,13 @@
       <Filter>ManagedClass</Filter>
     </ClInclude>
     <ClInclude Include="cDrawDot.h">
-      <Filter>Objects\ElementObject\Childs</Filter>
+      <Filter>Objects\ElementObject\Draws</Filter>
     </ClInclude>
     <ClInclude Include="cDrawLines.h">
-      <Filter>Objects\ElementObject\Childs</Filter>
+      <Filter>Objects\ElementObject\Draws</Filter>
     </ClInclude>
     <ClInclude Include="cDrawPlane.h">
-      <Filter>Objects\ElementObject\Childs</Filter>
+      <Filter>Objects\ElementObject\Draws</Filter>
     </ClInclude>
     <ClInclude Include="cOper_Add_Draws.h">
       <Filter>cOperation\MainOper</Filter>
@@ -190,7 +190,7 @@
       <Filter>cOperation\MeshOper</Filter>
     </ClInclude>
     <ClInclude Include="cDrawMesh.h">
-      <Filter>Objects\MeshObject</Filter>
+      <Filter>Objects\ElementObject\Meshs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -267,13 +267,13 @@
       <Filter>ManagedClass</Filter>
     </ClCompile>
     <ClCompile Include="cDrawDot.cpp">
-      <Filter>Objects\ElementObject\Childs</Filter>
+      <Filter>Objects\ElementObject\Draws</Filter>
     </ClCompile>
     <ClCompile Include="cDrawLines.cpp">
-      <Filter>Objects\ElementObject\Childs</Filter>
+      <Filter>Objects\ElementObject\Draws</Filter>
     </ClCompile>
     <ClCompile Include="cDrawPlane.cpp">
-      <Filter>Objects\ElementObject\Childs</Filter>
+      <Filter>Objects\ElementObject\Draws</Filter>
     </ClCompile>
     <ClCompile Include="cOper_Add_Draws.cpp">
       <Filter>cOperation\MainOper</Filter>
@@ -297,7 +297,7 @@
       <Filter>cOperation\MeshOper</Filter>
     </ClCompile>
     <ClCompile Include="cDrawMesh.cpp">
-      <Filter>Objects\MeshObject</Filter>
+      <Filter>Objects\ElementObject\Meshs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

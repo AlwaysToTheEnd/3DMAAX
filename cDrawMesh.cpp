@@ -4,7 +4,7 @@ const string cDrawMesh::m_meshRenderName = "baseMesh";
 
 cMesh::cMesh()
 	:m_geo(nullptr)
-	,m_renderItem(nullptr)
+	, m_renderItem(nullptr)
 {
 }
 
@@ -30,19 +30,66 @@ bool XM_CALLCONV cMesh::Picking(PICKRAY ray, float & distance)
 
 bool cMesh::VertexCircleCheck(UINT drawItemIndex)
 {
-	vector<cDot*> dots = m_draws[drawItemIndex]->m_draws[DRAW_DOTS]->GetObjectsPtr<cDot>();
-	
-	size_t dotsNum = dots.size();
-	if (dotsNum < 3)
+	vector<cLine*> lines = m_draws[drawItemIndex]->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
+
+	size_t linesNum = lines.size();
+	if (linesNum < 3)
 	{
 		return false;
 	}
 
-	vector<cDot*> circleDots;
+	vector<const cDot*> circleDots;
 
-	for (auto& it: dots)
+	for (size_t i = 0; i < lines.size(); i++)
 	{
-		while (it)
+		vector<cLine*> checkLines;
+		const cDot* endLinkDot = nullptr;
+		const cDot* nextPivotDot = nullptr;
+
+		for (size_t j = 0; j < lines.size(); j++)
+		{
+			if (i == j) continue;
+
+			switch (lines[i]->CheckLinked(lines[j]))
+			{
+			case -1:
+				m_draws[drawItemIndex]->m_draws[DRAW_LINES]->DeleteObject(lines[j--]);
+				lines = m_draws[drawItemIndex]->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
+				break;
+			case 0:
+				if (endLinkDot == nullptr)
+				{
+					endLinkDot = lines[i]->GetSecondDot();
+					checkLines.push_back(lines[j]);
+					nextPivotDot = lines[i]->GetFirstDot();
+				}
+				else
+				{
+					if (nextPivotDot == lines[i]->GetFirstDot())
+					{
+						checkLines.push_back(lines[j]);
+					}
+				}
+				break;
+			case 1:
+				if (endLinkDot == nullptr)
+				{
+					endLinkDot = lines[i]->GetFirstDot();
+					checkLines.push_back(lines[j]);
+					nextPivotDot = lines[i]->GetSecondDot();
+				}
+				else
+				{
+					if (nextPivotDot == lines[i]->GetSecondDot())
+					{
+						checkLines.push_back(lines[j]);
+					}
+				}
+				break;
+			}
+		}
+
+		for (size_t j = 0; j < checkLines.size(); j++)
 		{
 
 		}

@@ -45,7 +45,7 @@ void cOper_Add_Line::DrawElementOperation(DrawItems* drawItems)
 		{
 			cLine* line = AddLine(drawItems->m_draws);
 			line->SetFirstDot(m_firstDot);
-			line->SetSecendDot(secendDot);
+			line->SetSecondDot(secendDot);
 			m_firstDot = nullptr;
 			m_operationText->printString = L"Select First Dot";
 			EndOperation();

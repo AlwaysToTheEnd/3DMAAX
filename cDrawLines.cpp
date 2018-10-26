@@ -41,6 +41,27 @@ bool XM_CALLCONV cLine::Picking(PICKRAY ray, float & distance)
 	return false;
 }
 
+int cLine::CheckLinked(const cLine * line)
+{
+	if ((m_hostObject[0] == line->m_hostObject[0] && m_hostObject[1] == line->m_hostObject[1]) ||
+		(m_hostObject[0] == line->m_hostObject[1] && m_hostObject[1] == line->m_hostObject[0]))
+	{
+		return -1;
+	}
+
+	if (m_hostObject[0] == line->m_hostObject[0] ||
+		m_hostObject[0] == line->m_hostObject[1])
+	{
+		return 0;
+	}
+
+	if (m_hostObject[1] == line->m_hostObject[0] ||
+		m_hostObject[1] == line->m_hostObject[1])
+	{
+		return 1;
+	}
+}
+
 void cDrawLines::MeshSetUp()
 {
 	vector<C_Vertex> colorVertex;
@@ -54,7 +75,7 @@ void cDrawLines::MeshSetUp()
 	indices.push_back(1);
 
 	m_geo = MESHMG->AddMeshGeometry("line", colorVertex.data(), indices.data(),
-		sizeof(C_Vertex), (UINT)colorVertex.size() * sizeof(C_Vertex), 
+		sizeof(C_Vertex), (UINT)colorVertex.size() * sizeof(C_Vertex),
 		DXGI_FORMAT_R16_UINT, (UINT)indices.size() * sizeof(UINT16), false);
 }
 

@@ -10,11 +10,17 @@ public:
 
 	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
-	void SetFirstDot(cDot* object) { m_hostObject[0] = object; }
-	void SetSecendDot(cDot* object) { m_hostObject[0]->SetNextDots(object); m_hostObject[1] = object; }
+
+public:
+	void SetFirstDot(const cDot* object) { m_hostObject[0] = object; }
+	void SetSecondDot(const cDot* object) { m_hostObject[1] = object; }
+
+	int CheckLinked(const cLine* line);
+	const cDot* GetFirstDot() { return m_hostObject[0]; }
+	const cDot* GetSecondDot() { return m_hostObject[1]; }
 private:
-	cDot *	m_hostObject[2];
-	float	m_lineDistacne;
+	const cDot*	m_hostObject[2];
+	float		m_lineDistacne;
 };
 
 class cDrawLines : public cDrawElement

@@ -59,3 +59,18 @@ void cDrawElement::SetPickRender(UINT key)
 	}
 }
 
+void cDrawElement::DeleteObject(cObject * object)
+{
+	for (auto it = m_objects.begin(); it != m_objects.end(); )
+	{
+		if (object == it->get())
+		{
+			it = m_objects.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
+
