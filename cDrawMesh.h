@@ -20,7 +20,7 @@ private:
 		}
 
 		void CycleLineCheck(list<cLine*>& leaveLines, 
-			cLine* endLinkLine, list<vector<const cDot*>>& cycleDots);
+			cLine* endLinkLine, int endLinkPoint, list<vector<const cDot*>>& cycleDots);
 
 		vector<const cDot*> GetDotsToParents();
 	};
@@ -36,10 +36,11 @@ public:
 	virtual void IsRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
 	
 public:
-	bool LineCycleCheck(UINT drawItemIndex);
+	list<vector<const cDot*>> LineCycleCheck(UINT drawItemIndex);
 
 private:
 	void OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
+	bool EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs);
 
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }

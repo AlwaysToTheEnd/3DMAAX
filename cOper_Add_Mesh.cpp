@@ -31,6 +31,11 @@ DrawItems * cOper_Add_Mesh::MeshSelectOperation(
 	{
 	case cOper_Add_Mesh::SETUI:
 	{
+		if (*mesh == nullptr)
+		{
+			*mesh = static_cast<cMesh*>(drawMesh.AddElement());
+		}
+
 		m_operationText->isRender = true;
 		m_operControl.ClearParameters();
 		m_selectDrawsIndex = -1;
@@ -53,6 +58,7 @@ DrawItems * cOper_Add_Mesh::MeshSelectOperation(
 			{
 				if (m_selectDrawsIndex == i)
 				{
+					(*mesh)->SetDrawItems(&it.second);
 					cOperation::EndOperation();
 					return &it.second;
 				}
@@ -60,7 +66,7 @@ DrawItems * cOper_Add_Mesh::MeshSelectOperation(
 				i++;
 			}
 		}
-		else
+		/*else
 		{
 			cObject* pickMesh = nullptr;
 			if (drawMesh.Picking(&pickMesh))
@@ -69,7 +75,7 @@ DrawItems * cOper_Add_Mesh::MeshSelectOperation(
 				cOperation::EndOperation();
 				return nullptr;
 			}
-		}
+		}*/
 
 		m_operControl.Update(XMMatrixIdentity());
 	}

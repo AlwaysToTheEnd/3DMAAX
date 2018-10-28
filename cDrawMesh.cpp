@@ -28,7 +28,7 @@ bool XM_CALLCONV cMesh::Picking(PICKRAY ray, float & distance)
 	return false;
 }
 
-bool cMesh::LineCycleCheck(UINT drawItemIndex)
+list<vector<const cDot*>> cMesh::LineCycleCheck(UINT drawItemIndex)
 {
 	vector<cLine*> lines = m_draws[drawItemIndex]->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
 
@@ -51,7 +51,7 @@ bool cMesh::LineCycleCheck(UINT drawItemIndex)
 	size_t linesNum = lines.size();
 	if (linesNum < 3)
 	{
-		return false;
+		return list<vector<const cDot*>>();
 	}
 
 	list<cLine*> leaveLines;
@@ -64,10 +64,13 @@ bool cMesh::LineCycleCheck(UINT drawItemIndex)
 		CycleLine rootLine;
 		rootLine.line = lines[i];
 
-		for (int j = 0; j < lines.size(); j++)
+		for (int j = i + 1; j < lines.size(); j++)
 		{
-			if (j == i) continue;
+			leaveLines.push_back(lines[j]);
+		}
 
+		for (int j = 0; j < i; j++)
+		{
 			leaveLines.push_back(lines[j]);
 		}
 
@@ -75,122 +78,135 @@ bool cMesh::LineCycleCheck(UINT drawItemIndex)
 
 		for (auto it = leaveLines.begin(); it != leaveLines.end(); )
 		{
-			bool isNextLine = true;
+			bool addNextLine = false;
 			switch (rootLine.line->CheckLinked(*it))
 			{
 			case 0:
 			{
-				if (nexSpotindex = -1)
+				if (nexSpotindex == -1)
 				{
 					nexSpotindex = 0;
 				}
 
 				if (nexSpotindex == 0)
 				{
-					isNextLine == false;
+					addNextLine = true;
 				}
 			}
 			break;
 			case 1:
 			{
-				if (nexSpotindex = -1)
+				if (nexSpotindex == -1)
 				{
 					nexSpotindex = 1;
 				}
 
 				if (nexSpotindex == 1)
 				{
-					isNextLine == false;
+					addNextLine = true;
 				}
 			}
 			break;
 			}
 
-			if (isNextLine)
-			{
-				it++;
-			}
-			else
+			if (addNextLine)
 			{
 				rootLine.nextLines.push_back({ *it, &rootLine });
 				it = leaveLines.erase(it);
+			}
+			else
+			{
+				it++;
 			}
 		}
 
 		if (rootLine.nextLines.empty()) continue;
 
+		if (leaveLines.empty())
+		{
+
+		}
+
 		for (auto& it : rootLine.nextLines)
 		{
-			it.CycleLineCheck(leaveLines, rootLine.line, cycleDots);
+			it.CycleLineCheck(leaveLines, rootLine.line, nexSpotindex, cycleDots);
 		}
 	}
 
 	OverLapCycleDotsCheck(cycleDots);
 
+	return cycleDots;
 }
 
 void cMesh::OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist)
 {
+
 	for (auto it1 = dotslist.begin(); it1 != dotslist.end(); it1++)
 	{
 		vector<const cDot*> pivotDots = *it1;
-		for (auto it2 = dotslist.begin(); it2 != dotslist.end();)
+		auto it2 = it1;
+		it2++;
+		for (it2; it2 != dotslist.end();)
 		{
-			if (it1 == it2 || it1->size() != it2->size()) continue;
-
-			vector<const cDot*>& dots = *it2;
-
-			int equalStartIndex = -1;
-
-			for (size_t i = 0; i < pivotDots.size(); i++)
+			if (it1->size() != it2->size())
 			{
-				if (equalStartIndex == -1)
-				{
-					if (pivotDots[0] == dots[i])
-					{
-						equalStartIndex = i;
-					}
-				}
-				else
-				{
-					if (pivotDots[i - equalStartIndex] != dots[i])
-					{
-						it2 = dotslist.erase(it2);
-						continue;
-					}
-				}
-			}
-
-			if (equalStartIndex == -1)
-			{
-				it2 = dotslist.erase(it2);
+				it2++;
 				continue;
 			}
 
-			for (size_t i = 0; i < equalStartIndex; i++)
+			vector<const cDot*>& dots = *it2;
+
+			if (EqualCheck(pivotDots, dots))
 			{
-				if (pivotDots[equalStartIndex + i] != dots[i])
-				{
-					it2 = dotslist.erase(it2);
-					continue;
-				}
+				it2 = dotslist.erase(it2);
+			}
+			else
+			{
+				it2++;
 			}
 		}
 	}
 }
 
-
-void cMesh::CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
-	cLine * endLinkLine, list<vector<const cDot*>>& cycleDots)
+bool cMesh::EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs)
 {
-	int endcheck = line->CheckLinked(endLinkLine);
-	if (endcheck == 0 || endcheck == 1)
+	for (int i = 0; i < lhs.size(); i++)
 	{
-		cycleDots.push_back(GetDotsToParents());
-		return;
+		bool isEqual = false;
+		for (int j = 0; j < lhs.size(); j++)
+		{
+			if (lhs[i] == rhs[j])
+			{
+				isEqual = true;
+			}
+		}
+
+		if (isEqual == false)
+		{
+			return false;
+		}
 	}
 
-	if (leaveLines.empty()) return;
+	return true;
+}
+
+
+void cMesh::CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
+	cLine * endLinkLine, int endLinkPoint, list<vector<const cDot*>>& cycleDots)
+{
+	int endcheck = endLinkLine->CheckLinked(line);
+
+	switch (endcheck)
+	{
+	case 0:
+	case 1:
+		if (endcheck != endLinkPoint)
+		{
+			cycleDots.push_back(GetDotsToParents());
+		}
+		break;
+	}
+
 
 	for (auto it = leaveLines.begin(); it != leaveLines.end(); )
 	{
@@ -199,7 +215,7 @@ void cMesh::CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
 		{
 		case 0:
 		case 1:
-			isNextLine == false;
+			isNextLine = false;
 			nextLines.push_back({ *it,this });
 			break;
 		}
@@ -216,7 +232,7 @@ void cMesh::CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
 
 	for (auto& it : nextLines)
 	{
-		it.CycleLineCheck(leaveLines, endLinkLine, cycleDots);
+		it.CycleLineCheck(leaveLines, endLinkLine, endLinkPoint, cycleDots);
 	}
 }
 

@@ -160,7 +160,7 @@ void cOperator::Update()
 			m_currOperation->DrawElementOperation(m_currDraws);
 			break;
 		case OPER_PUSH_MESH:
-			m_currOperation->MeshOperation(m_meshs, m_currDraws, &m_currMesh);
+			m_currOperation->MeshOperation(m_currMesh);
 			break;
 		case OPER_DRAWOPER:
 		{
@@ -182,14 +182,9 @@ void cOperator::Update()
 		break;
 		case OPER_MESHOPER:
 		{
-			cMesh* pickMesh = nullptr;
-			DrawItems * draws = m_currOperation->MeshSelectOperation(m_drawItems, m_meshs, &pickMesh);
+			DrawItems * draws = m_currOperation->MeshSelectOperation(m_drawItems, m_meshs, &m_currMesh);
 
-			if (pickMesh)
-			{
-				m_currMesh = pickMesh;
-			}
-			else if (draws)
+			if (draws)
 			{
 				draws->SetPickRender(2);
 				CAMERA.SetTarget(draws->m_plane);
