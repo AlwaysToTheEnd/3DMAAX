@@ -70,7 +70,6 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 		{
 			m_currDrawCycleDotsList.clear();
 			m_draws = currMesh->GetDraws()[m_selectDrawsIndex];
-			m_operControl.IsRenderState(false);
 			m_currDrawCycleDotsList = currMesh->LineCycleCheck(m_selectDrawsIndex);
 
 			if (m_currDrawCycleDotsList.empty())
@@ -96,6 +95,8 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 	break;
 	case cOper_Push_Mesh::CYCLE_SELECT:
 	{
+		m_operControl.Update(XMMatrixIdentity());
+
 		if (m_cycleIndex != -1)
 		{
 			PrevMeshCreate(currMesh);
