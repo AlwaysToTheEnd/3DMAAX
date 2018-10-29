@@ -55,7 +55,7 @@ struct DrawItems
 class cOperation
 {
 public:
-	static void SetOperatorUIRender(shared_ptr<cRenderItem> renderItem);
+	static void OperationsBaseSetup(shared_ptr<cRenderItem> renderItem);
 
 public:
 	cOperation(OPERATIONTYPE type)
@@ -90,8 +90,12 @@ protected:
 	bool PickPlane(cDrawPlane* planes, cPlane** plane);
 	cDot * AddDotAtCurrPlane(DrawItems* drawItems);
 
+	virtual void PrevMeshCreate(cMesh* currMesh) { assert(false); }
 protected:
-	static shared_ptr<cRenderItem> m_OperatorUi;
+	static shared_ptr<cRenderItem>		m_OperatorUi;
+	static shared_ptr<cRenderItem>		m_prevViewRender;
+	static shared_ptr<RenderInstance>	m_prevViewRenderInstance;
+	static MeshGeometry*	m_previewGeo;
 
 	shared_ptr<RenderFont>	m_operationText;
 	const OPERATIONTYPE		m_operType;

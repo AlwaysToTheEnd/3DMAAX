@@ -18,6 +18,7 @@ public:
 	XMFLOAT4X4 GetMatrix() const { return m_renderInstance->instanceData.World; }
 	XMMATRIX XM_CALLCONV GetXMMatrix() const { return XMLoadFloat4x4(&m_renderInstance->instanceData.World); }
 	XMFLOAT3& GetPos() { return m_pos; }
+	const XMFLOAT3& GetPosC() const { return m_pos; }
 	XMFLOAT4& GetQuaternion() { return m_quaternion; }
 	XMFLOAT4 GetQuaternionInstance() const { return m_quaternion; }
 	XMFLOAT3& GetScale() { return m_scale; }

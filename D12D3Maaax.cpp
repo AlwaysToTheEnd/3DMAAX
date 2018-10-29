@@ -433,7 +433,7 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	cOperation::SetOperatorUIRender(RENDERITEMMG->AddRenderItem("ui"));
+	cOperation::OperationsBaseSetup(RENDERITEMMG->AddRenderItem("ui"));
 	m_operator = make_unique<cOperator>();
 	m_operator->SetUp();
 

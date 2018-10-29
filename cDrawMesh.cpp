@@ -3,9 +3,10 @@
 const string cDrawMesh::m_meshRenderName = "baseMesh";
 
 cMesh::cMesh()
-	:m_geo(nullptr)
+	: m_geo(nullptr)
 	, m_renderItem(nullptr)
 {
+	
 }
 
 cMesh::~cMesh()

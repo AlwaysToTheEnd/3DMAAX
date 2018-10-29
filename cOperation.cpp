@@ -1,11 +1,19 @@
 #include "stdafx.h"
 
 shared_ptr<cRenderItem> cOperation::m_OperatorUi = nullptr;
+shared_ptr<cRenderItem> cOperation::m_prevViewRender = nullptr;
+shared_ptr<RenderInstance> cOperation::m_prevViewRenderInstance = nullptr;
+MeshGeometry* cOperation::m_previewGeo = nullptr;
 
-void cOperation::SetOperatorUIRender(shared_ptr<cRenderItem> renderItem)
+void cOperation::OperationsBaseSetup(shared_ptr<cRenderItem> renderItem)
 {
 	m_OperatorUi = renderItem;
 	cUIObject::SetGeoAtRenderItem(renderItem);
+
+	m_previewGeo = MESHMG->AddTemporaryMesh("previewGeo");
+	m_prevViewRender = RENDERITEMMG->AddRenderItem(cDrawMesh::m_meshRenderName);
+	m_prevViewRenderInstance = m_prevViewRender->GetRenderIsntance();
+	m_prevViewRenderInstance->m_isRenderOK = false;
 }
 
 void cOperation::EndOperation()

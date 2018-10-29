@@ -19,8 +19,8 @@ private:
 			this->parentLine = parentLine;
 		}
 
-		void CycleLineCheck(list<cLine*>& leaveLines, 
-			cLine* endLinkLine, int endLinkPoint, list<vector<const cDot*>>& cycleDots);
+		void CycleLineCheck(list<cLine*>& leaveLines,
+			cLine * endLinkLine, int endLinkPoint, list<vector<const cDot*>>& cycleDots);
 
 		vector<const cDot*> GetDotsToParents();
 	};
@@ -38,14 +38,14 @@ public:
 public:
 	list<vector<const cDot*>> LineCycleCheck(UINT drawItemIndex);
 
-private:
-	void OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
-	bool EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs);
-
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }
 	UINT SetDrawItems(DrawItems* drawItem);
 	vector<DrawItems*>& GetDraws() { return m_draws; }
+
+private:
+	void OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
+	bool EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs);
 
 private:
 	MeshGeometry*			m_geo;
