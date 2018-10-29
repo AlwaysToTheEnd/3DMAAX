@@ -12,8 +12,10 @@ void cOperation::OperationsBaseSetup(shared_ptr<cRenderItem> renderItem)
 
 	m_previewGeo = MESHMG->AddTemporaryMesh("previewGeo");
 	m_prevViewRender = RENDERITEMMG->AddRenderItem(cDrawMesh::m_meshRenderName);
+	m_prevViewRender->SetGeometry(m_previewGeo, m_previewGeo->name);
 	m_prevViewRenderInstance = m_prevViewRender->GetRenderIsntance();
 	m_prevViewRenderInstance->m_isRenderOK = false;
+	m_prevViewRender->SetRenderOK(false);
 }
 
 void cOperation::EndOperation()

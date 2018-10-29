@@ -31,6 +31,8 @@ void cOper_Push_Mesh::SetUp()
 
 void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 {
+	m_operControl.Update(XMMatrixIdentity());
+
 	switch (m_worksSate)
 	{
 	case cOper_Push_Mesh::ADD_MESH_QUERY:
@@ -64,8 +66,6 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 	break;
 	case cOper_Push_Mesh::DRAW_SELECT:
 	{
-		m_operControl.Update(XMMatrixIdentity());
-
 		if (m_selectDrawsIndex != -1)
 		{
 			m_currDrawCycleDotsList.clear();
@@ -95,14 +95,11 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 	break;
 	case cOper_Push_Mesh::CYCLE_SELECT:
 	{
-		m_operControl.Update(XMMatrixIdentity());
-
 		if (m_cycleIndex != -1)
 		{
 			PrevMeshCreate(currMesh);
 			m_operControl.ClearParameters();
-			m_operControl.AddParameter(L"Mesh Hegith value : " + to_wstring(m_meshHeight),
-				DXGI_FORMAT_R32_FLOAT, &m_meshHeight);
+			m_operControl.AddParameter(L"Hegith value : ", DXGI_FORMAT_R32_FLOAT, &m_meshHeight);
 			m_worksSate = MESH_HEIGHT_INPUT;
 		}
 	}
@@ -164,7 +161,7 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 		XMVECTOR tryVector2 = XMLoadFloat3(&vertices[nextDotIndex2].pos) - originVector;
 
 		XMVECTOR crossVector = XMVector3Cross(tryVector1, tryVector2);
-
+		
 		if (crossVector.m128_f32[2] > 0)
 		{
 			indices.push_back(firstDotsIndex);
@@ -184,8 +181,30 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 			currIndex = (currIndex + 1) % earClipingIndex.size();
 		}
 
-		if (earClipingIndex.size() < 3)
+		if (earClipingIndex.size() <= 3)
 		{
+			if (earClipingIndex.size() == 3)
+			{
+				originVector = XMLoadFloat3(&vertices[earClipingIndex[0]].pos);
+				tryVector1 = XMLoadFloat3(&vertices[earClipingIndex[1]].pos) - originVector;
+				tryVector2 = XMLoadFloat3(&vertices[earClipingIndex[2]].pos) - originVector;
+
+				crossVector = XMVector3Cross(tryVector1, tryVector2);
+
+				if (crossVector.m128_f32[2] < 0)
+				{
+					indices.push_back(earClipingIndex[0]);
+					indices.push_back(earClipingIndex[2]);
+					indices.push_back(earClipingIndex[1]);
+				}
+				else
+				{
+					indices.push_back(earClipingIndex[0]);
+					indices.push_back(earClipingIndex[1]);
+					indices.push_back(earClipingIndex[2]);
+				}
+			}
+
 			break;
 		}
 	}
@@ -197,16 +216,17 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 		indices.push_back(indices[i] + cycleDotsNum);
 	}
 
-	for (size_t i = 0; i < cycleDotsNum - 1; i++)
+	for (size_t i = 0; i < cycleDotsNum; i++)
 	{
 		indices.push_back(i);
 		indices.push_back(i + cycleDotsNum);
-		indices.push_back(i + cycleDotsNum + 1);
+		indices.push_back((i + 1)% cycleDotsNum + cycleDotsNum );
 
 		indices.push_back(i);
-		indices.push_back(i + cycleDotsNum + 1);
-		indices.push_back(i + 1);
+		indices.push_back((i + 1) % cycleDotsNum + cycleDotsNum);
+		indices.push_back((i + 1) % cycleDotsNum);
 	}
+
 
 	MESHMG->ChangeMeshGeometryData(m_previewGeo->name, vertices.data(), indices.data(),
 		sizeof(NT_Vertex), sizeof(NT_Vertex)*vertices.size(),
@@ -215,6 +235,8 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 	XMMATRIX planeMat = XMLoadFloat4x4(&currMesh->GetDraws()[m_selectDrawsIndex]->m_plane->GetMatrix());
 	XMMATRIX scaleMat = XMMatrixScaling(1, 1, 0.01f);
 
+	m_prevViewRender->SetGeometry(m_previewGeo, m_previewGeo->name);
+	m_prevViewRender->SetRenderOK(true);
 	m_prevViewRenderInstance->m_isRenderOK = true;
 	m_prevViewRenderInstance->numFramesDirty = gNumFrameResources;
 	XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, scaleMat*planeMat);

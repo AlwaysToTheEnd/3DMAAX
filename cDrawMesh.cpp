@@ -276,7 +276,16 @@ vector<const cDot*> cMesh::CycleLine::GetDotsToParents()
 	}
 
 	assert(dots.size());
-	return dots;
+
+	vector<const cDot*> result;
+
+	while (dots.size())
+	{
+		result.push_back(dots.back());
+		dots.pop_back();
+	}
+
+	return result;
 }
 
 UINT cMesh::SetDrawItems(DrawItems * drawItem)

@@ -75,8 +75,6 @@ void D12D3Maaax::Update()
 		CloseHandle(eventHandle);
 	}
 
-	MESHMG->MeshBuildUpGPU(m_Fence, m_CurrentFence);
-
 	m_Camera.Update();
 	UpdateMainPassCB();
 	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
@@ -84,6 +82,7 @@ void D12D3Maaax::Update()
 	m_operator->Update();
 	OBJCOORD->Update();
 
+	MESHMG->MeshBuildUpGPU(m_Fence, m_CurrentFence);
 	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
 }
@@ -103,7 +102,7 @@ void D12D3Maaax::Draw()
 	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::Black, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LimeGreen, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -129,6 +128,7 @@ void D12D3Maaax::Draw()
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
 	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
 	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
+	RENDERITEMMG->Render(m_CommandList.Get(), cDrawMesh::m_meshRenderName);
 
 	m_CommandList->SetPipelineState(m_PSOs["planes"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
