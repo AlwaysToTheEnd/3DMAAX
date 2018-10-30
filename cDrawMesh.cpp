@@ -65,7 +65,7 @@ list<vector<const cDot*>> cMesh::LineCycleCheck(UINT drawItemIndex)
 		CycleLine rootLine;
 		rootLine.line = lines[i];
 
-		for (int j = i + 1; j < lines.size(); j++)
+		for (size_t j = i + 1; j < lines.size(); j++)
 		{
 			leaveLines.push_back(lines[j]);
 		}

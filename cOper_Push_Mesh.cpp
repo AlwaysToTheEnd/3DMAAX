@@ -99,7 +99,7 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 	{
 		if (m_cycleIndex != -1)
 		{
-			PreviewMeshCreate(currMesh);
+			PreviewPushMeshCreate(currMesh);
 			m_operControl.ClearParameters();
 			m_operControl.AddParameter(L"Hegith value : ", DXGI_FORMAT_R32_FLOAT, &m_meshHeight);
 			m_worksSate = MESH_HEIGHT_INPUT;
@@ -123,25 +123,25 @@ void cOper_Push_Mesh::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 	EndOperation();
 }
 
-void cOper_Push_Mesh::PreviewMeshCreate(cMesh* currMesh)
+void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 {
 	auto iter = m_currDrawCycleDotsList.begin();
 	for (int i = 0; i < m_cycleIndex; i++) iter++;
 	auto& cycleDots = *iter;
 	
-	size_t cycleDotsNum = cycleDots.size();
+	UINT cycleDotsNum = (UINT)cycleDots.size();
 	assert(cycleDotsNum > 2);
 
 	vector<NT_Vertex> vertices(cycleDotsNum * 2);
 	vector<UINT> indices;
 
-	for (int i = 0; i < cycleDotsNum; i++)
+	for (UINT i = 0; i < cycleDotsNum; i++)
 	{
 		vertices[i].pos = cycleDots[i]->GetPosC();
 		vertices[i].uv = { 0,0 };
 	}
 
-	for (int i = cycleDotsNum; i < vertices.size(); i++)
+	for (size_t i = cycleDotsNum; i < vertices.size(); i++)
 	{
 		vertices[i].pos = cycleDots[i%cycleDotsNum]->GetPosC();
 		vertices[i].pos.z -= 1.0f;
@@ -211,17 +211,17 @@ void cOper_Push_Mesh::PreviewMeshCreate(cMesh* currMesh)
 		}
 	}
 
-	size_t indicesNum = indices.size();
+	UINT indicesNum = (UINT)indices.size();
 
 	for (size_t i = 0; i < indicesNum; i++)
 	{
 		indices.push_back(indices[i] + cycleDotsNum);
 	}
 
-	size_t sideTryangleStartIndex = vertices.size();
+	UINT sideTryangleStartIndex = (UINT)vertices.size();
 	vertices.insert(vertices.end(), vertices.begin(), vertices.end());
 
-	for (size_t i = sideTryangleStartIndex; i < sideTryangleStartIndex + cycleDotsNum; i++)
+	for (UINT i = sideTryangleStartIndex; i < sideTryangleStartIndex + cycleDotsNum; i++)
 	{
 		indices.push_back(i);
 		indices.push_back(i + cycleDotsNum);
@@ -244,8 +244,8 @@ void cOper_Push_Mesh::PreviewMeshCreate(cMesh* currMesh)
 	}
 
 	MESHMG->ChangeMeshGeometryData(m_previewGeo->name, vertices.data(), indices.data(),
-		sizeof(NT_Vertex), sizeof(NT_Vertex)*vertices.size(),
-		DXGI_FORMAT_R32_UINT, sizeof(UINT)*indices.size(), false);
+		sizeof(NT_Vertex), sizeof(NT_Vertex)*(UINT)vertices.size(),
+		DXGI_FORMAT_R32_UINT, sizeof(UINT)*(UINT)indices.size(), false);
 
 	XMMATRIX planeMat = XMLoadFloat4x4(&currMesh->GetDraws()[m_selectDrawsIndex]->m_plane->GetMatrix());
 	XMMATRIX scaleMat = XMMatrixScaling(1, 1, 0.01f);
