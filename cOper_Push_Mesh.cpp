@@ -88,6 +88,8 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 					i++;
 				}
 
+				m_operControl.IsRenderState(true);
+		
 				m_worksSate = CYCLE_SELECT;
 			}
 		}
@@ -97,7 +99,7 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 	{
 		if (m_cycleIndex != -1)
 		{
-			PrevMeshCreate(currMesh);
+			PreviewMeshCreate(currMesh);
 			m_operControl.ClearParameters();
 			m_operControl.AddParameter(L"Hegith value : ", DXGI_FORMAT_R32_FLOAT, &m_meshHeight);
 			m_worksSate = MESH_HEIGHT_INPUT;
@@ -121,12 +123,12 @@ void cOper_Push_Mesh::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
 	EndOperation();
 }
 
-void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
+void cOper_Push_Mesh::PreviewMeshCreate(cMesh* currMesh)
 {
 	auto iter = m_currDrawCycleDotsList.begin();
 	for (int i = 0; i < m_cycleIndex; i++) iter++;
 	auto& cycleDots = *iter;
-
+	
 	size_t cycleDotsNum = cycleDots.size();
 	assert(cycleDotsNum > 2);
 
@@ -136,14 +138,14 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 	for (int i = 0; i < cycleDotsNum; i++)
 	{
 		vertices[i].pos = cycleDots[i]->GetPosC();
-		vertices[i].normal = { 0,0,1 };
+		vertices[i].uv = { 0,0 };
 	}
 
 	for (int i = cycleDotsNum; i < vertices.size(); i++)
 	{
 		vertices[i].pos = cycleDots[i%cycleDotsNum]->GetPosC();
 		vertices[i].pos.z -= 1.0f;
-		vertices[i].normal = { 0,0,-1 };
+		vertices[i].uv = { 0,0 };
 	}
 
 	vector<UINT> earClipingIndex(cycleDotsNum);
@@ -216,7 +218,10 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 		indices.push_back(indices[i] + cycleDotsNum);
 	}
 
-	for (size_t i = 0; i < cycleDotsNum; i++)
+	size_t sideTryangleStartIndex = vertices.size();
+	vertices.insert(vertices.end(), vertices.begin(), vertices.end());
+
+	for (size_t i = sideTryangleStartIndex; i < sideTryangleStartIndex + cycleDotsNum; i++)
 	{
 		indices.push_back(i);
 		indices.push_back(i + cycleDotsNum);
@@ -227,6 +232,16 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 		indices.push_back((i + 1) % cycleDotsNum);
 	}
 
+	for (size_t i = 0; i < indices.size(); i += 3)
+	{
+		XMFLOAT3 normalVector(0, 0, 0);
+		XMStoreFloat3(&normalVector, 
+			GetNormalFromTryangle(vertices[indices[i]].pos, vertices[indices[i+1]].pos, vertices[indices[i+2]].pos));
+
+		vertices[indices[i]].normal = normalVector;
+		vertices[indices[i+1]].normal = normalVector;
+		vertices[indices[i+2]].normal = normalVector;
+	}
 
 	MESHMG->ChangeMeshGeometryData(m_previewGeo->name, vertices.data(), indices.data(),
 		sizeof(NT_Vertex), sizeof(NT_Vertex)*vertices.size(),
@@ -240,4 +255,13 @@ void cOper_Push_Mesh::PrevMeshCreate(cMesh* currMesh)
 	m_prevViewRenderInstance->m_isRenderOK = true;
 	m_prevViewRenderInstance->numFramesDirty = gNumFrameResources;
 	XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, scaleMat*planeMat);
+}
+
+XMVECTOR XM_CALLCONV cOper_Push_Mesh::GetNormalFromTryangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)
+{
+	XMVECTOR originVector = XMLoadFloat3(&pos1);
+	XMVECTOR tryVector1 = XMLoadFloat3(&pos2) - originVector;
+	XMVECTOR tryVector2 = XMLoadFloat3(&pos3) - originVector;
+	
+	return XMVector3Normalize(XMVector3Cross(tryVector1, tryVector2));
 }

@@ -21,7 +21,8 @@ public:
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw);
 
 private:
-	virtual void PrevMeshCreate(cMesh* currMesh) override;
+	void PreviewMeshCreate(cMesh* currMesh);
+	XMVECTOR XM_CALLCONV GetNormalFromTryangle(const XMFLOAT3& pos1, const XMFLOAT3& pos2, const XMFLOAT3& pos3);
 
 private:
 	DrawItems*	m_draws;

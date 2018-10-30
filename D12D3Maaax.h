@@ -49,5 +49,6 @@ private:
 	XMFLOAT4X4		m_2DProj = MathHelper::Identity4x4();
 
 private:
-	unique_ptr<cOperator>				m_operator =nullptr;
+	unique_ptr<cOperator>	m_operator =nullptr;
+	bool					m_isBaseWireFrameMode = false;
 };

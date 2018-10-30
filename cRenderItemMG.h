@@ -11,6 +11,7 @@ struct RenderInstance
 
 class cRenderItem
 {
+	friend class RenderItemMG;
 public:
 	static void SetDevice(ID3D12Device* device) { m_device = device; }
 
@@ -21,8 +22,6 @@ public:
 	shared_ptr<RenderInstance> GetRenderIsntance();
 
 private:
-	friend class RenderItemMG;
-
 	void Update();
 	void Render(ID3D12GraphicsCommandList * cmdList);
 	void SetUploadBufferSize(UINT numInstance);

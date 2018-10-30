@@ -85,6 +85,11 @@ void D12D3Maaax::Update()
 	MESHMG->MeshBuildUpGPU(m_Fence, m_CurrentFence);
 	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
+
+	if (GetAsyncKeyState(VK_F2)&0x0001)
+	{
+		m_isBaseWireFrameMode = !m_isBaseWireFrameMode;
+	}
 }
 
 void D12D3Maaax::Draw()
@@ -122,13 +127,19 @@ void D12D3Maaax::Draw()
 
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
+
+	if (m_isBaseWireFrameMode)
+	{
+		m_CommandList->SetPipelineState(m_PSOs["baseWF"].Get());
+	}
+
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
+	RENDERITEMMG->Render(m_CommandList.Get(), cDrawMesh::m_meshRenderName);
 
 	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
 	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
 	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
-	RENDERITEMMG->Render(m_CommandList.Get(), cDrawMesh::m_meshRenderName);
 
 	m_CommandList->SetPipelineState(m_PSOs["planes"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
@@ -327,6 +338,10 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.SampleDesc.Quality = m_4xMsaaState ? (m_4xmsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["base"])));
+
+	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["baseWF"])));
+	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;

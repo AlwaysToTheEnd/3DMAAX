@@ -58,6 +58,7 @@ private:
 	vector<UINT>			m_indices;
 };
 
+
 class cDrawMesh : public cDrawElement
 {
 public:

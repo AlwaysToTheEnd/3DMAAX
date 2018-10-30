@@ -90,7 +90,6 @@ protected:
 	bool PickPlane(cDrawPlane* planes, cPlane** plane);
 	cDot * AddDotAtCurrPlane(DrawItems* drawItems);
 
-	virtual void PrevMeshCreate(cMesh* currMesh) { assert(false); }
 protected:
 	static shared_ptr<cRenderItem>		m_OperatorUi;
 	static shared_ptr<cRenderItem>		m_prevViewRender;
