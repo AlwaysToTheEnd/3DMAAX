@@ -89,6 +89,8 @@ void cUIOperWindow::UIUpdate()
 
 		switch (m_operParameters[i].dataFormat)
 		{
+		case DXGI_FORMAT_UNKNOWN:
+			break;
 		case DXGI_FORMAT_D32_FLOAT:
 			dataStr = to_wstring(*((float*)m_operParameters[i].data));
 			break;
@@ -132,6 +134,13 @@ void cUIOperWindow::UIUpdate()
 				{
 					m_currInputData.pop_back();
 				}
+			}
+
+			if (m_operParameters[i].dataFormat== DXGI_FORMAT_UNKNOWN)
+			{
+				*(bool*)(m_operParameters[i].data) = !(*(bool*)(m_operParameters[i].data));
+				m_currParameterIndex = -1;
+				return;
 			}
 
 			if (GetAsyncKeyState(VK_RETURN) & 0x0001)

@@ -29,6 +29,7 @@ private:
 	int			m_selectDrawsIndex;
 	int			m_cycleIndex;
 	float		m_meshHeight;
+	bool		m_isCreateMesh;
 	list<vector<const cDot*>> m_currDrawCycleDotsList;
 };
 

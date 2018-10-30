@@ -29,6 +29,8 @@ public:
 		UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU,
 		const unordered_map<string, SubMeshGeometry>* subMeshs = nullptr);
 
+	void CopyData(MeshGeometry* destGeo, const MeshGeometry* src, bool isLeaveCPUData=false);
+
 	void MeshBuildUpGPU(ComPtr<ID3D12Fence> fence, UINT64& currentFenc);
 	void DisposUploadBuffers();
 

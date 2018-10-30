@@ -121,9 +121,8 @@ void cMeshgeometryMG::ChangeMeshGeometryData(const string & name, const void * v
 		ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
 		m_needMeshBuildUp = true;
 	}
-
+	
 	MeshGeometry* geo = iter->second.get();
-
 	geo->vertexBufferCPU = nullptr;
 	geo->indexBufferCPU = nullptr;
 	geo->vertexBufferGPU = nullptr;
@@ -173,6 +172,38 @@ void cMeshgeometryMG::ChangeMeshGeometryData(const string & name, const void * v
 	else
 	{
 		geo->DrawArgs = *subMeshs;
+	}
+}
+
+void cMeshgeometryMG::CopyData(MeshGeometry * destGeo, const MeshGeometry * src, bool isLeaveCPUData)
+{
+	assert(destGeo != src);
+	assert(destGeo->name!="");
+
+	destGeo->vertexBufferCPU = nullptr;
+	destGeo->indexBufferCPU = nullptr;
+	destGeo->vertexBufferGPU = nullptr;
+	destGeo->indexBufferGPU = nullptr;
+	destGeo->vertexUploadBuffer = nullptr;
+	destGeo->indexUploadBuffer = nullptr;
+	destGeo->octree = nullptr;
+	destGeo->DrawArgs.clear();
+
+	destGeo->vertexBufferByteSize = src->vertexBufferByteSize;
+	destGeo->indexBufferByteSize = src->indexBufferByteSize;
+	destGeo->vertexByteStride = src->vertexByteStride;
+	destGeo->indexFormat = src->indexFormat;
+
+	if (isLeaveCPUData)
+	{
+		assert(src->vertexBufferCPU);
+		ChangeMeshGeometryData(destGeo->name, src->vertexBufferCPU->GetBufferPointer(),
+			src->indexBufferCPU->GetBufferPointer(), src->vertexByteStride, src->vertexBufferByteSize,
+			src->indexFormat, src->indexBufferByteSize, true);
+	}
+	else
+	{
+
 	}
 }
 

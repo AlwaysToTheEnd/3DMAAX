@@ -23,6 +23,7 @@ void cOperation::EndOperation()
 	m_operState = false; 
 	m_operControl.IsRenderState(false); 
 	m_operControl.ClearParameters();
+	m_prevViewRender->SetRenderOK(false);
 	OBJCOORD->ObjectRegistration(nullptr);
 
 	if (m_operationText)
