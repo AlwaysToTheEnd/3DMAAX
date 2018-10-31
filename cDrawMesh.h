@@ -2,6 +2,8 @@
 
 struct DrawItems;
 
+
+
 class cMesh :public cObject
 {
 private:
@@ -25,7 +27,6 @@ private:
 		vector<const cDot*> GetDotsToParents();
 	};
 
-
 public:
 	cMesh();
 	virtual ~cMesh();
@@ -37,6 +38,7 @@ public:
 	
 public:
 	list<vector<const cDot*>> LineCycleCheck(UINT drawItemIndex);
+	void CopyGeometry(const MeshGeometry* geo);
 
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }

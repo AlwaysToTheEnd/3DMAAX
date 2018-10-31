@@ -113,8 +113,7 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 	{
 		if (m_isCreateMesh)
 		{
-
-
+			currMesh->CopyGeometry(m_previewGeo);
 			EndOperation();
 		}
 		else
@@ -209,6 +208,11 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 				}
 
 				earClipingIndex.erase(it);
+
+				if (earClipingIndex.size() == currIndex)
+				{
+					currIndex --;
+				}
 			}
 			else
 			{

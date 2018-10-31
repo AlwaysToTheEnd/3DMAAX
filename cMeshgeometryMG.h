@@ -29,7 +29,7 @@ public:
 		UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU,
 		const unordered_map<string, SubMeshGeometry>* subMeshs = nullptr);
 
-	void CopyData(MeshGeometry* destGeo, const MeshGeometry* src, bool isLeaveCPUData=false);
+	void CopyData(MeshGeometry* destGeo, const MeshGeometry* src);
 
 	void MeshBuildUpGPU(ComPtr<ID3D12Fence> fence, UINT64& currentFenc);
 	void DisposUploadBuffers();
@@ -39,6 +39,10 @@ public:
 private:
 	cMeshgeometryMG();
 	void FlushCommandQueue(ComPtr<ID3D12Fence> fence, UINT64& currentFenc);
+	void ClearGeometry(MeshGeometry* geo);
+	void DataInputGeometry(MeshGeometry* geo, const void* vertexData, const void* indexData, UINT vertexByteStride,
+		UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU,
+		const unordered_map<string, SubMeshGeometry>* subMeshs);
 
 private:
 	static cMeshgeometryMG*				instance;

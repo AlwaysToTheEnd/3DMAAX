@@ -136,10 +136,12 @@ void D12D3Maaax::Draw()
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 	RENDERITEMMG->Render(m_CommandList.Get(), cDrawMesh::m_meshRenderName);
 
-	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
+	m_CommandList->SetPipelineState(m_PSOs["drawLine"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
-	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
+
+	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
+	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
 
 	m_CommandList->SetPipelineState(m_PSOs["planes"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
@@ -386,6 +388,10 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(),(UINT)m_CVertexInputLayout.size() };
 
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawElement"])));
+
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawLine"])));
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	opaquePsoDesc.BlendState.RenderTarget[0].BlendEnable = true;
 	opaquePsoDesc.BlendState.RenderTarget[0].LogicOpEnable = false;

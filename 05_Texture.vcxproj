@@ -153,6 +153,7 @@
     <ClInclude Include="05_Texture.h" />
     <ClInclude Include="cButtonCollector.h" />
     <ClInclude Include="cCamera.h" />
+    <ClInclude Include="cCSGObject.h" />
     <ClInclude Include="cDrawElement.h" />
     <ClInclude Include="cDrawLines.h" />
     <ClInclude Include="cDrawMesh.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="05_Texture.cpp" />
     <ClCompile Include="cButtonCollector.cpp" />
     <ClCompile Include="cCamera.cpp" />
+    <ClCompile Include="cCSGObject.cpp" />
     <ClCompile Include="cDrawElement.cpp" />
     <ClCompile Include="cDrawLines.cpp" />
     <ClCompile Include="cDrawMesh.cpp" />

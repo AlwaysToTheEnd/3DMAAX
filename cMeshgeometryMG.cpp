@@ -46,46 +46,8 @@ MeshGeometry* cMeshgeometryMG::AddMeshGeometry(const string& name, const void * 
 	unique_ptr<MeshGeometry> geo = make_unique<MeshGeometry>();
 	geo->name = name;
 
-	geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
-		vertexData, vertexBufferByteSize, geo->vertexUploadBuffer);
-
-	geo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
-		indexData, indexBufferByteSize, geo->indexUploadBuffer);
-
-	if (leaveDataInCPU)
-	{
-		D3DCreateBlob(vertexBufferByteSize, geo->vertexBufferCPU.GetAddressOf());
-		memcpy(geo->vertexBufferCPU->GetBufferPointer(), vertexData, vertexBufferByteSize);
-
-		D3DCreateBlob(indexBufferByteSize, geo->indexBufferCPU.GetAddressOf());
-		memcpy(geo->indexBufferCPU->GetBufferPointer(), indexData, indexBufferByteSize);
-	}
-
-	geo->indexFormat = indexFormat;
-	geo->indexBufferByteSize = indexBufferByteSize;
-	geo->vertexBufferByteSize = vertexBufferByteSize;
-	geo->vertexByteStride = vertexByteStride;
-
-	if (subMeshs == nullptr)
-	{
-		SubMeshGeometry sub;
-		sub.baseVertexLocation = 0;
-		sub.startIndexLocation = 0;
-		if (indexFormat == DXGI_FORMAT_R16_UINT)
-		{
-			sub.indexCount = indexBufferByteSize / sizeof(UINT16);
-		}
-		else if (indexFormat == DXGI_FORMAT_R32_UINT)
-		{
-			sub.indexCount = indexBufferByteSize / sizeof(UINT32);
-		}
-
-		geo->DrawArgs[name] = sub;
-	}
-	else
-	{
-		geo->DrawArgs = *subMeshs;
-	}
+	DataInputGeometry(geo.get(), vertexData, indexData, vertexByteStride,
+		vertexBufferByteSize, indexFormat, indexBufferByteSize, leaveDataInCPU, subMeshs);
 
 	m_Meshgometrys.insert({ name, move(geo) });
 
@@ -111,7 +73,9 @@ MeshGeometry * cMeshgeometryMG::AddTemporaryMesh(const string & name)
 	return m_Meshgometrys[name].get();
 }
 
-void cMeshgeometryMG::ChangeMeshGeometryData(const string & name, const void * vertexData, const void * indexData, UINT vertexByteStride, UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU, const unordered_map<string, SubMeshGeometry>* subMeshs)
+void cMeshgeometryMG::ChangeMeshGeometryData(const string & name, const void * vertexData, const void * indexData,
+	UINT vertexByteStride, UINT vertexBufferByteSize, DXGI_FORMAT indexFormat,
+	UINT indexBufferByteSize, bool leaveDataInCPU, const unordered_map<string, SubMeshGeometry>* subMeshs)
 {
 	auto iter = m_Meshgometrys.find(name);
 	assert(iter != m_Meshgometrys.end());
@@ -121,89 +85,39 @@ void cMeshgeometryMG::ChangeMeshGeometryData(const string & name, const void * v
 		ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
 		m_needMeshBuildUp = true;
 	}
-	
+
 	MeshGeometry* geo = iter->second.get();
-	geo->vertexBufferCPU = nullptr;
-	geo->indexBufferCPU = nullptr;
-	geo->vertexBufferGPU = nullptr;
-	geo->indexBufferGPU = nullptr;
-	geo->vertexUploadBuffer = nullptr;
-	geo->indexUploadBuffer = nullptr;
-	geo->octree = nullptr;
-	geo->DrawArgs.clear();
 
+	ClearGeometry(geo);
 
-	geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
-		vertexData, vertexBufferByteSize, geo->vertexUploadBuffer);
-
-	geo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
-		indexData, indexBufferByteSize, geo->indexUploadBuffer);
-
-	if (leaveDataInCPU)
-	{
-		D3DCreateBlob(vertexBufferByteSize, geo->vertexBufferCPU.GetAddressOf());
-		memcpy(geo->vertexBufferCPU->GetBufferPointer(), vertexData, vertexBufferByteSize);
-
-		D3DCreateBlob(indexBufferByteSize, geo->indexBufferCPU.GetAddressOf());
-		memcpy(geo->indexBufferCPU->GetBufferPointer(), indexData, indexBufferByteSize);
-	}
-
-	geo->indexFormat = indexFormat;
-	geo->indexBufferByteSize = indexBufferByteSize;
-	geo->vertexBufferByteSize = vertexBufferByteSize;
-	geo->vertexByteStride = vertexByteStride;
-
-	if (subMeshs == nullptr)
-	{
-		SubMeshGeometry sub;
-		sub.baseVertexLocation = 0;
-		sub.startIndexLocation = 0;
-		if (indexFormat == DXGI_FORMAT_R16_UINT)
-		{
-			sub.indexCount = indexBufferByteSize / sizeof(UINT16);
-		}
-		else if (indexFormat == DXGI_FORMAT_R32_UINT)
-		{
-			sub.indexCount = indexBufferByteSize / sizeof(UINT32);
-		}
-
-		geo->DrawArgs[name] = sub;
-	}
-	else
-	{
-		geo->DrawArgs = *subMeshs;
-	}
+	DataInputGeometry(geo, vertexData, indexData, vertexByteStride,
+		vertexBufferByteSize, indexFormat, indexBufferByteSize, leaveDataInCPU, subMeshs);
 }
 
-void cMeshgeometryMG::CopyData(MeshGeometry * destGeo, const MeshGeometry * src, bool isLeaveCPUData)
+void cMeshgeometryMG::CopyData(MeshGeometry * destGeo, const MeshGeometry * src)
 {
 	assert(destGeo != src);
-	assert(destGeo->name!="");
+	assert(destGeo);
+	assert(destGeo->name != "");
 
-	destGeo->vertexBufferCPU = nullptr;
-	destGeo->indexBufferCPU = nullptr;
-	destGeo->vertexBufferGPU = nullptr;
-	destGeo->indexBufferGPU = nullptr;
-	destGeo->vertexUploadBuffer = nullptr;
-	destGeo->indexUploadBuffer = nullptr;
-	destGeo->octree = nullptr;
-	destGeo->DrawArgs.clear();
-
-	destGeo->vertexBufferByteSize = src->vertexBufferByteSize;
-	destGeo->indexBufferByteSize = src->indexBufferByteSize;
-	destGeo->vertexByteStride = src->vertexByteStride;
-	destGeo->indexFormat = src->indexFormat;
-
-	if (isLeaveCPUData)
+	if (m_needMeshBuildUp == false)
 	{
-		assert(src->vertexBufferCPU);
-		ChangeMeshGeometryData(destGeo->name, src->vertexBufferCPU->GetBufferPointer(),
-			src->indexBufferCPU->GetBufferPointer(), src->vertexByteStride, src->vertexBufferByteSize,
-			src->indexFormat, src->indexBufferByteSize, true);
+		ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
+		m_needMeshBuildUp = true;
 	}
-	else
-	{
 
+	ClearGeometry(destGeo);
+
+	assert(src->vertexBufferCPU);
+	DataInputGeometry(destGeo, src->vertexBufferCPU->GetBufferPointer(), src->indexBufferCPU->GetBufferPointer(),
+		src->vertexByteStride, src->vertexBufferByteSize,
+		src->indexFormat, src->indexBufferByteSize, false, &src->DrawArgs);
+
+	if (destGeo->DrawArgs.size() == 1)
+	{
+		auto drawArg = destGeo->DrawArgs.begin()->second;
+		destGeo->DrawArgs.clear();
+		destGeo->DrawArgs.insert({ destGeo->name, drawArg });
 	}
 }
 
@@ -238,6 +152,62 @@ void cMeshgeometryMG::FlushCommandQueue(ComPtr<ID3D12Fence> fence, UINT64 & curr
 
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
+	}
+}
+
+void cMeshgeometryMG::ClearGeometry(MeshGeometry * geo)
+{
+	geo->vertexBufferCPU = nullptr;
+	geo->indexBufferCPU = nullptr;
+	geo->vertexBufferGPU = nullptr;
+	geo->indexBufferGPU = nullptr;
+	geo->vertexUploadBuffer = nullptr;
+	geo->indexUploadBuffer = nullptr;
+	geo->octree = nullptr;
+	geo->DrawArgs.clear();
+}
+
+void cMeshgeometryMG::DataInputGeometry(MeshGeometry * geo, const void * vertexData, const void * indexData, UINT vertexByteStride, UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU, const unordered_map<string, SubMeshGeometry>* subMeshs)
+{
+	geo->vertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
+		vertexData, vertexBufferByteSize, geo->vertexUploadBuffer);
+
+	geo->indexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device, m_CommandList.Get(),
+		indexData, indexBufferByteSize, geo->indexUploadBuffer);
+
+	if (leaveDataInCPU)
+	{
+		D3DCreateBlob(vertexBufferByteSize, geo->vertexBufferCPU.GetAddressOf());
+		memcpy(geo->vertexBufferCPU->GetBufferPointer(), vertexData, vertexBufferByteSize);
+
+		D3DCreateBlob(indexBufferByteSize, geo->indexBufferCPU.GetAddressOf());
+		memcpy(geo->indexBufferCPU->GetBufferPointer(), indexData, indexBufferByteSize);
+	}
+
+	geo->indexFormat = indexFormat;
+	geo->indexBufferByteSize = indexBufferByteSize;
+	geo->vertexBufferByteSize = vertexBufferByteSize;
+	geo->vertexByteStride = vertexByteStride;
+
+	if (subMeshs == nullptr)
+	{
+		SubMeshGeometry sub;
+		sub.baseVertexLocation = 0;
+		sub.startIndexLocation = 0;
+		if (indexFormat == DXGI_FORMAT_R16_UINT)
+		{
+			sub.indexCount = indexBufferByteSize / sizeof(UINT16);
+		}
+		else if (indexFormat == DXGI_FORMAT_R32_UINT)
+		{
+			sub.indexCount = indexBufferByteSize / sizeof(UINT32);
+		}
+
+		geo->DrawArgs[geo->name] = sub;
+	}
+	else
+	{
+		geo->DrawArgs = *subMeshs;
 	}
 }
 

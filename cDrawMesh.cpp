@@ -139,6 +139,14 @@ list<vector<const cDot*>> cMesh::LineCycleCheck(UINT drawItemIndex)
 	return cycleDots;
 }
 
+void cMesh::CopyGeometry(const MeshGeometry * geo)
+{
+	MESHMG->CopyData(m_geo, geo);
+
+	m_renderItem->SetGeometry(m_geo, m_geo->name);
+	m_renderItem->SetRenderOK(true);
+}
+
 void cMesh::OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist)
 {
 

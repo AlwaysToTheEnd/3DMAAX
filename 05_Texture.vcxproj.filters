@@ -192,6 +192,9 @@
     <ClInclude Include="cDrawMesh.h">
       <Filter>Objects\ElementObject\Meshs</Filter>
     </ClInclude>
+    <ClInclude Include="cCSGObject.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -298,6 +301,9 @@
     </ClCompile>
     <ClCompile Include="cDrawMesh.cpp">
       <Filter>Objects\ElementObject\Meshs</Filter>
+    </ClCompile>
+    <ClCompile Include="cCSGObject.cpp">
+      <Filter>Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
