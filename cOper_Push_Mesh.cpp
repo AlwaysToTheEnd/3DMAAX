@@ -175,15 +175,22 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 			bool isInsertDot = false;
 			float tryVector1Length = XMVector3Length(tryVector1).m128_f32[0];
 			float tryVector2Length = XMVector3Length(tryVector2).m128_f32[0];
+			XMVECTOR normaTryVector1 = XMVector3Normalize(tryVector1);
+			XMVECTOR normaTryVector2 = XMVector3Normalize(tryVector2);
+
 			for (size_t i = 0; i < vertices.size(); i++)
 			{
 				if (i != firstDotsIndex && i != nextDotIndex1 && i != nextDotIndex2)
 				{
 					XMVECTOR insertCheckVector = XMLoadFloat3(&vertices[i].pos) - originVector;
-					float u = XMVector3Dot(insertCheckVector, tryVector1).m128_f32[0]/ tryVector1Length;
-					float v = XMVector3Dot(insertCheckVector, tryVector2).m128_f32[0]/ tryVector2Length;
+					float try1dot; 
+					float try2dot;
+					XMStoreFloat(&try1dot, XMVector3Dot(insertCheckVector, normaTryVector1));
+					XMStoreFloat(&try2dot, XMVector3Dot(insertCheckVector, normaTryVector2));
+					float u = try1dot / tryVector1Length;
+					float v = try2dot / tryVector2Length;
 
-					if (u + v <= 1.0f && u >= 0 && v >= 0)
+					if (u >= 0 && v >= 0 && u<=1.0f && v<=1.0f)
 					{
 						if (XMVector3Cross(tryVector1, insertCheckVector).m128_f32[2] > 0 &&
 							XMVector3Cross(tryVector2, insertCheckVector).m128_f32[2] < 0)
@@ -264,9 +271,11 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 
 	UINT indicesNum = (UINT)indices.size();
 
-	for (size_t i = 0; i < indicesNum; i++)
+	for (size_t i = 0; i < indicesNum; i+=3)
 	{
 		indices.push_back(indices[i] + cycleDotsNum);
+		indices.push_back(indices[i+2] + cycleDotsNum);
+		indices.push_back(indices[i+1] + cycleDotsNum);
 	}
 
 	UINT sideTryangleStartIndex = (UINT)vertices.size();

@@ -56,6 +56,7 @@ private:
 	vector<DrawItems*>		m_draws;
 
 	vector<SubMeshGeometry> m_drawArgs;
+	cCSGObject				m_rootCSG;
 	vector<NT_Vertex>		m_vertices;
 	vector<UINT>			m_indices;
 };
