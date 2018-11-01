@@ -43,16 +43,16 @@ void cCSGObject::AddChild(CSGWORKTYPE type, unique_ptr<cCSGObject> object)
 
 void cCSGObject::ObjectUnion(const cCSGObject * src)
 {
-	const auto& srcVertices = src->m_vertices;
-	const auto& srcIndices = src->m_indices;
+	auto srcVertices = src->m_vertices;
+	auto srcTriangles = src->m_triangles;
 
 	UINT srcVerticesSize = (UINT)srcVertices.size();
-	UINT srcIndicesSize = (UINT)srcIndices.size();
+	UINT srcTriangleSize = (UINT)srcTriangles.size();
 
 	if (m_vertices.empty())
 	{
 		m_vertices.assign(srcVertices.cbegin(), srcVertices.cend());
-		m_indices.assign(srcIndices.cbegin(), srcIndices.cend());
+		m_triangles.assign(srcTriangles.cbegin(), srcTriangles.cend());
 		return;
 	}
 
@@ -60,36 +60,31 @@ void cCSGObject::ObjectUnion(const cCSGObject * src)
 	{
 		//for()
 	}
-
-
 }
 
 void cCSGObject::ObjectDifference(const cCSGObject * src)
 {
 	if (m_vertices.empty()) return;
 
-	const auto& srcVertices = src->m_vertices;
-	const auto& srcIndices = src->m_indices;
+	auto srcVertices = src->m_vertices;
+	auto srcTriangles = src->m_triangles;
+
+	for (auto& it : srcTriangles)
+	{
+		it.ccw = !it.ccw;
+	}
 
 	UINT srcVerticesSize = (UINT)srcVertices.size();
-	UINT srcIndicesSize = (UINT)srcIndices.size();
+	UINT srcTriangleSize = (UINT)srcTriangles.size();
 
 	m_vertices.insert(m_vertices.end(), srcVertices.cbegin(), srcVertices.cend());
 
 	list<UINT> modifiedIndex;
 
-	for (UINT i = 0; i < srcIndicesSize; i+=3)
+	for (UINT i = 0; i < srcTriangleSize; i++)
 	{
-		UINT tryIndex1 = srcIndices[i];
-		UINT tryIndex2 = srcIndices[i+1];
-		UINT tryIndex3 = srcIndices[i+2];
-
-		for (UINT j = 0; j < srcIndicesSize; j+=3)
+		for (UINT j = 0; j < srcTriangleSize; j++)
 		{
-			UINT srcTryIndex1 = srcIndices[j];
-			UINT srcTryIndex2 = srcIndices[j + 1];
-			UINT srcTryIndex3 = srcIndices[j + 2];
-
 			
 		}
 	}
@@ -99,17 +94,29 @@ void cCSGObject::ObjectInterSection(const cCSGObject * src)
 {
 	if (m_vertices.empty()) return;
 
-	const auto& srcVertices = src->m_vertices;
-	const auto& srcIndices = src->m_indices;
+	auto srcVertices = src->m_vertices;
+	auto srcTriangles = src->m_triangles;
 
 	UINT srcVerticesSize = (UINT)srcVertices.size();
-	UINT srcIndicesSize = (UINT)srcIndices.size();
+	UINT srcTriangleSize = (UINT)srcTriangles.size();
 }
 
-bool cCSGObject::TryangleCollision(const XMFLOAT3 & destPos1, const XMFLOAT3 & destPos2, const XMFLOAT3 & destPos3, const XMFLOAT3 & srcPos1, const XMFLOAT3 & srcPos2, const XMFLOAT3 & srcPos3, int collisionLine[])
+bool XM_CALLCONV cCSGObject::TriangleCollision( FXMVECTOR destPos1, FXMVECTOR destPos2, FXMVECTOR destPos3, 
+												GXMVECTOR srcPos1, HXMVECTOR srcPos2, HXMVECTOR srcPos3, 
+												bool collisionLine[])
 {
+
+	XMVECTOR destRay1 = destPos2 - destPos1;
+	XMVECTOR destRay2 = destPos3 - destPos1;
+	XMVECTOR destRay3 = destPos3 - destPos2;
+
+	XMVECTOR srcRay1 = srcPos2 - srcPos1;
+	XMVECTOR srcRay2 = srcPos3 - srcPos1;
+	XMVECTOR srcRay3 = srcPos3 - srcPos2;
+
+
+
 
 	return false;
 }
-
 

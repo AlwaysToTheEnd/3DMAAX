@@ -278,10 +278,10 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 		indices.push_back(indices[i+1] + cycleDotsNum);
 	}
 
-	UINT sideTryangleStartIndex = (UINT)vertices.size();
+	UINT sideTriangleStartIndex = (UINT)vertices.size();
 	vertices.insert(vertices.end(), vertices.begin(), vertices.end());
 
-	for (UINT i = sideTryangleStartIndex; i < sideTryangleStartIndex + cycleDotsNum; i++)
+	for (UINT i = sideTriangleStartIndex; i < sideTriangleStartIndex + cycleDotsNum; i++)
 	{
 		indices.push_back(i);
 		indices.push_back(i + cycleDotsNum);
@@ -296,7 +296,7 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 	{
 		XMFLOAT3 normalVector(0, 0, 0);
 		XMStoreFloat3(&normalVector,
-			GetNormalFromTryangle(vertices[indices[i]].pos, vertices[indices[i + 1]].pos, vertices[indices[i + 2]].pos));
+			GetNormalFromTriangle(vertices[indices[i]].pos, vertices[indices[i + 1]].pos, vertices[indices[i + 2]].pos));
 
 		vertices[indices[i]].normal = normalVector;
 		vertices[indices[i + 1]].normal = normalVector;
@@ -317,7 +317,7 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 	XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, scaleMat*planeMat);
 }
 
-XMVECTOR XM_CALLCONV cOper_Push_Mesh::GetNormalFromTryangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)
+XMVECTOR XM_CALLCONV cOper_Push_Mesh::GetNormalFromTriangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)
 {
 	XMVECTOR originVector = XMLoadFloat3(&pos1);
 	XMVECTOR tryVector1 = XMLoadFloat3(&pos2) - originVector;

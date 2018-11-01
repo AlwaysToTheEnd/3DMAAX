@@ -186,9 +186,9 @@ void cOcTree::OctreeNode::CreateChildNode()
 	m_triAngles = nullptr;
 }
 
-bool cOcTree::OctreeNode::InterSect(int tryangleNum)
+bool cOcTree::OctreeNode::InterSect(int triangleNum)
 {
-	if (tryangleNum < 0) return false;
+	if (triangleNum < 0) return false;
 
 	BYTE* vertexs = reinterpret_cast<BYTE*>(m_geo->vertexBufferCPU->GetBufferPointer());
 	BYTE* indices = reinterpret_cast<BYTE*>(m_geo->indexBufferCPU->GetBufferPointer());
@@ -205,14 +205,14 @@ bool cOcTree::OctreeNode::InterSect(int tryangleNum)
 		{
 		case DXGI_FORMAT_R16_UINT:
 		{
-			UINT16* currIndex = reinterpret_cast<UINT16*>(indices + tryangleNum * 3 * sizeof(UINT16));
+			UINT16* currIndex = reinterpret_cast<UINT16*>(indices + triangleNum * 3 * sizeof(UINT16));
 			currIndex += i;
 			vertexPosition = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
 		}
 		break;
 		case DXGI_FORMAT_R32_UINT:
 		{
-			UINT* currIndex = reinterpret_cast<UINT*>(indices + tryangleNum * 3 * sizeof(UINT));
+			UINT* currIndex = reinterpret_cast<UINT*>(indices + triangleNum * 3 * sizeof(UINT));
 			currIndex += i;
 			vertexPosition = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
 		}

@@ -10,6 +10,13 @@ enum CSGWORKTYPE
 
 class cCSGObject
 {
+	struct TriangleInfo
+	{
+		XMFLOAT3	normal = {};
+		UINT		index[3] = {};
+		bool		ccw = true;
+	};
+
 public:
 	cCSGObject();
 	virtual ~cCSGObject();
@@ -23,15 +30,15 @@ private:
 	void ObjectInterSection(const cCSGObject* src);
 
 private:
-	bool TriangleCollision(	const XMFLOAT3& destPos1, const XMFLOAT3& destPos2, const XMFLOAT3& destPos3,
-							const XMFLOAT3& srcPos1, const XMFLOAT3& srcPos2, const XMFLOAT3& srcPos3,
-							bool collisionLine[]);
+	bool XM_CALLCONV TriangleCollision(	FXMVECTOR destPos1, FXMVECTOR destPos2, FXMVECTOR destPos3,
+										GXMVECTOR srcPos1, HXMVECTOR srcPos2, HXMVECTOR srcPos3,
+										bool collisionLine[]);
 
 private:
-	CSGWORKTYPE			m_type;
-	const DrawItems*	m_draws;
-	vector<NT_Vertex>	m_vertices;
-	vector<UINT>		m_indices;
+	CSGWORKTYPE				m_type;
+	const DrawItems*		m_draws;
+	vector<NT_Vertex>		m_vertices;
+	vector<TriangleInfo>	m_triangles;
 	list<unique_ptr<cCSGObject>> m_childs;
 };
 

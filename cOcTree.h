@@ -16,7 +16,7 @@ private:
 		
 	private:
 		void CreateChildNode();
-		bool InterSect(int tryangleNum);
+		bool InterSect(int triangleNum);
 		void AddTriangle(UINT num,int maxRecursion);
 
 		bool XM_CALLCONV Picking(PICKRAY ray, float& dist);
