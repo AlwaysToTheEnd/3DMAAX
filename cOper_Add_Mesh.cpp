@@ -45,7 +45,7 @@ DrawItems * cOper_Add_Mesh::MeshSelectOperation(
 			m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_selectDrawsIndex);
 		}
 
-		m_operControl.IsRenderState(true);
+		m_operControl.SetRenderState(true);
 		m_worksSate = cOper_Add_Mesh::PICK;
 	}
 	break;

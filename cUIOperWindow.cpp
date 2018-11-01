@@ -20,7 +20,7 @@ void cUIOperWindow::Build(shared_ptr<cRenderItem> renderItem)
 	m_renderInstance->m_isRenderOK = false;
 }
 
-void cUIOperWindow::IsRenderState(bool value)
+void cUIOperWindow::SetRenderState(bool value)
 {
 	if (m_renderInstance)
 	{
@@ -140,6 +140,16 @@ void cUIOperWindow::UIUpdate()
 			{
 				*(bool*)(m_operParameters[i].data) = !(*(bool*)(m_operParameters[i].data));
 				m_currParameterIndex = -1;
+				if (*(bool*)(m_operParameters[i].data)==true)
+				{
+					m_operFonts[i]->color = Colors::Red;
+				}
+				else
+				{
+					m_operFonts[i]->color = Colors::Black;
+				}
+
+				m_operFonts[i]->printString = m_operParameters[i].dataName;
 				return;
 			}
 

@@ -139,12 +139,34 @@ list<vector<const cDot*>> cMesh::LineCycleCheck(UINT drawItemIndex)
 	return cycleDots;
 }
 
-void cMesh::CopyGeometry(const MeshGeometry * geo)
+void cMesh::SubObjectSubAbsorption()
 {
-	MESHMG->CopyData(m_geo, geo);
+	m_rootCSG.SubObjectSubAbsorption();
+	m_rootCSG.GetData(m_vertices, m_indices);
 
+	MESHMG->ChangeMeshGeometryData(m_geo->name, m_vertices.data(), m_indices.data(), sizeof(NT_Vertex),
+		sizeof(NT_Vertex)*(UINT)m_vertices.size(), DXGI_FORMAT_R32_UINT, sizeof(UINT)*(UINT)m_indices.size(),
+		true);
+
+	m_geo->octree = nullptr;
+	m_geo->SetOctree(0);
 	m_renderItem->SetGeometry(m_geo, m_geo->name);
 	m_renderItem->SetRenderOK(true);
+}
+
+void cMesh::AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object)
+{
+	m_rootCSG.AddChild(work, move(object));
+}
+
+bool XM_CALLCONV cMesh::GetPickTriangleRotation(PICKRAY ray, XMFLOAT4 * quaternion)
+{
+	XMFLOAT3 pos0, pos1, pos2;
+	float dist = FLT_MAX;
+	m_geo->octree->GetPickTriangle(ray, dist, pos0, pos1, pos2);
+
+
+	return false;
 }
 
 void cMesh::OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist)

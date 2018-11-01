@@ -9,7 +9,6 @@ cOper_Push_Mesh::cOper_Push_Mesh()
 	, m_meshHeight(0)
 	, m_isCreateMesh(false)
 {
-
 }
 
 
@@ -52,6 +51,7 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 		int i = 0;
 		for (auto& it : meshDraws)
 		{
+			it->SetRenderState(true);
 			m_operControl.AddParameter(L"Draws" + to_wstring(i), DXGI_FORMAT_R32_SINT, &m_selectDrawsIndex);
 			i++;
 		}
@@ -62,7 +62,7 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 			return;
 		}
 
-		m_operControl.IsRenderState(true);
+		m_operControl.SetRenderState(true);
 		m_worksSate = DRAW_SELECT;
 	}
 	break;
@@ -90,8 +90,19 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 					i++;
 				}
 
-				m_operControl.IsRenderState(true);
+				i = 0;
+				vector<DrawItems*>& meshDraws = currMesh->GetDraws();
+				for (auto& it : meshDraws)
+				{
+					if (i != m_selectDrawsIndex)
+					{
+						it->SetRenderState(false);
+					}
 
+					i++;
+				}
+
+				m_operControl.SetRenderState(true);
 				m_worksSate = CYCLE_SELECT;
 			}
 		}
@@ -111,16 +122,23 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 	break;
 	case cOper_Push_Mesh::MESH_HEIGHT_INPUT:
 	{
+		XMMATRIX planeMat = XMLoadFloat4x4(&currMesh->GetDraws()[m_selectDrawsIndex]->m_plane->GetMatrix());
+		XMMATRIX scaleMat = XMMatrixScaling(1, 1, m_meshHeight);
+
 		if (m_isCreateMesh)
 		{
-			currMesh->CopyGeometry(m_previewGeo);
+			if (m_meshHeight == 0) return;
+
+			auto scgObject = make_unique<cCSGObject>();
+			scgObject->SetData(m_vertices, m_indices, scaleMat*planeMat);
+			currMesh->AddCSGObject(CSG_UNION, move(scgObject));
+			currMesh->SubObjectSubAbsorption();
+			currMesh->GetDraws()[m_selectDrawsIndex]->SetRenderState(false);
 			EndOperation();
 		}
 		else
 		{
-			XMMATRIX planeMat = XMLoadFloat4x4(&currMesh->GetDraws()[m_selectDrawsIndex]->m_plane->GetMatrix());
-			XMMATRIX scaleMat = XMMatrixScaling(1, 1, m_meshHeight + 0.0001f);
-
+			scaleMat = XMMatrixScaling(1, 1, m_meshHeight+0.001f);
 			m_prevViewRenderInstance->numFramesDirty = gNumFrameResources;
 			XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, scaleMat*planeMat);
 		}
@@ -143,13 +161,14 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 	UINT cycleDotsNum = (UINT)cycleDots.size();
 	assert(cycleDotsNum > 2);
 
-	vector<NT_Vertex> vertices(cycleDotsNum);
-	vector<UINT> indices;
+	m_vertices.clear();
+	m_indices.clear();
 
 	for (UINT i = 0; i < cycleDotsNum; i++)
 	{
-		vertices[i].pos = cycleDots[i]->GetPosC();
-		vertices[i].uv = { 0,0 };
+		m_vertices.push_back({});
+		m_vertices.back().pos = cycleDots[i]->GetPosC();
+		m_vertices.back().uv = { 0,0 };
 	}
 
 	vector<UINT> earClipingIndex(cycleDotsNum);
@@ -162,9 +181,9 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 		UINT nextDotIndex1 = earClipingIndex[(currIndex + 1) % earClipingIndex.size()];
 		UINT nextDotIndex2 = earClipingIndex[(currIndex + 2) % earClipingIndex.size()];
 
-		XMVECTOR originVector = XMLoadFloat3(&vertices[firstDotsIndex].pos);
-		XMVECTOR tryVector1 = XMLoadFloat3(&vertices[nextDotIndex1].pos) - originVector;
-		XMVECTOR tryVector2 = XMLoadFloat3(&vertices[nextDotIndex2].pos) - originVector;
+		XMVECTOR originVector = XMLoadFloat3(&m_vertices[firstDotsIndex].pos);
+		XMVECTOR tryVector1 = XMLoadFloat3(&m_vertices[nextDotIndex1].pos) - originVector;
+		XMVECTOR tryVector2 = XMLoadFloat3(&m_vertices[nextDotIndex2].pos) - originVector;
 
 		XMVECTOR crossVector = XMVector3Cross(tryVector1, tryVector2);
 
@@ -178,11 +197,11 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 			XMVECTOR normaTryVector1 = XMVector3Normalize(tryVector1);
 			XMVECTOR normaTryVector2 = XMVector3Normalize(tryVector2);
 
-			for (size_t i = 0; i < vertices.size(); i++)
+			for (size_t i = 0; i < m_vertices.size(); i++)
 			{
 				if (i != firstDotsIndex && i != nextDotIndex1 && i != nextDotIndex2)
 				{
-					XMVECTOR insertCheckVector = XMLoadFloat3(&vertices[i].pos) - originVector;
+					XMVECTOR insertCheckVector = XMLoadFloat3(&m_vertices[i].pos) - originVector;
 					float try1dot; 
 					float try2dot;
 					XMStoreFloat(&try1dot, XMVector3Dot(insertCheckVector, normaTryVector1));
@@ -204,9 +223,9 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 
 			if (!isInsertDot)
 			{
-				indices.push_back(firstDotsIndex);
-				indices.push_back(nextDotIndex1);
-				indices.push_back(nextDotIndex2);
+				m_indices.push_back(firstDotsIndex);
+				m_indices.push_back(nextDotIndex1);
+				m_indices.push_back(nextDotIndex2);
 
 				auto it = earClipingIndex.begin();
 				for (int i = 0; i < (currIndex + 1) % earClipingIndex.size(); i++)
@@ -235,23 +254,23 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 		{
 			if (earClipingIndex.size() == 3)
 			{
-				originVector = XMLoadFloat3(&vertices[earClipingIndex[0]].pos);
-				tryVector1 = XMLoadFloat3(&vertices[earClipingIndex[1]].pos) - originVector;
-				tryVector2 = XMLoadFloat3(&vertices[earClipingIndex[2]].pos) - originVector;
+				originVector = XMLoadFloat3(&m_vertices[earClipingIndex[0]].pos);
+				tryVector1 = XMLoadFloat3(&m_vertices[earClipingIndex[1]].pos) - originVector;
+				tryVector2 = XMLoadFloat3(&m_vertices[earClipingIndex[2]].pos) - originVector;
 
 				crossVector = XMVector3Cross(tryVector1, tryVector2);
 
 				if (crossVector.m128_f32[2] < 0)
 				{
-					indices.push_back(earClipingIndex[0]);
-					indices.push_back(earClipingIndex[2]);
-					indices.push_back(earClipingIndex[1]);
+					m_indices.push_back(earClipingIndex[0]);
+					m_indices.push_back(earClipingIndex[2]);
+					m_indices.push_back(earClipingIndex[1]);
 				}
 				else
 				{
-					indices.push_back(earClipingIndex[0]);
-					indices.push_back(earClipingIndex[1]);
-					indices.push_back(earClipingIndex[2]);
+					m_indices.push_back(earClipingIndex[0]);
+					m_indices.push_back(earClipingIndex[1]);
+					m_indices.push_back(earClipingIndex[2]);
 				}
 			}
 
@@ -266,55 +285,54 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 		vertex.pos.z -= 1.0f;
 		vertex.uv = { 0,0 };
 
-		vertices.push_back(vertex);
+		m_vertices.push_back(vertex);
 	}
 
-	UINT indicesNum = (UINT)indices.size();
+	UINT indicesNum = (UINT)m_indices.size();
 
 	for (size_t i = 0; i < indicesNum; i+=3)
 	{
-		indices.push_back(indices[i] + cycleDotsNum);
-		indices.push_back(indices[i+2] + cycleDotsNum);
-		indices.push_back(indices[i+1] + cycleDotsNum);
+		m_indices.push_back(m_indices[i] + cycleDotsNum);
+		m_indices.push_back(m_indices[i+2] + cycleDotsNum);
+		m_indices.push_back(m_indices[i+1] + cycleDotsNum);
 	}
 
-	UINT sideTriangleStartIndex = (UINT)vertices.size();
-	vertices.insert(vertices.end(), vertices.begin(), vertices.end());
+	UINT sideTriangleStartIndex = (UINT)m_vertices.size();
+	m_vertices.insert(m_vertices.end(), m_vertices.begin(), m_vertices.end());
 
 	for (UINT i = sideTriangleStartIndex; i < sideTriangleStartIndex + cycleDotsNum; i++)
 	{
-		indices.push_back(i);
-		indices.push_back(i + cycleDotsNum);
-		indices.push_back((i + 1) % cycleDotsNum + cycleDotsNum);
+		m_indices.push_back(i);
+		m_indices.push_back(i + cycleDotsNum);
+		m_indices.push_back((i + 1) % cycleDotsNum + cycleDotsNum);
 
-		indices.push_back(i);
-		indices.push_back((i + 1) % cycleDotsNum + cycleDotsNum);
-		indices.push_back((i + 1) % cycleDotsNum);
+		m_indices.push_back(i);
+		m_indices.push_back((i + 1) % cycleDotsNum + cycleDotsNum);
+		m_indices.push_back((i + 1) % cycleDotsNum);
 	}
 
-	for (size_t i = 0; i < indices.size(); i += 3)
+	for (size_t i = 0; i < m_indices.size(); i += 3)
 	{
 		XMFLOAT3 normalVector(0, 0, 0);
 		XMStoreFloat3(&normalVector,
-			GetNormalFromTriangle(vertices[indices[i]].pos, vertices[indices[i + 1]].pos, vertices[indices[i + 2]].pos));
+			GetNormalFromTriangle(m_vertices[m_indices[i]].pos, m_vertices[m_indices[i + 1]].pos, m_vertices[m_indices[i + 2]].pos));
 
-		vertices[indices[i]].normal = normalVector;
-		vertices[indices[i + 1]].normal = normalVector;
-		vertices[indices[i + 2]].normal = normalVector;
+		m_vertices[m_indices[i]].normal = normalVector;
+		m_vertices[m_indices[i + 1]].normal = normalVector;
+		m_vertices[m_indices[i + 2]].normal = normalVector;
 	}
 
-	MESHMG->ChangeMeshGeometryData(m_previewGeo->name, vertices.data(), indices.data(),
-		sizeof(NT_Vertex), sizeof(NT_Vertex)*(UINT)vertices.size(),
-		DXGI_FORMAT_R32_UINT, sizeof(UINT)*(UINT)indices.size(), true);
+	MESHMG->ChangeMeshGeometryData(m_previewGeo->name, m_vertices.data(), m_indices.data(),
+		sizeof(NT_Vertex), sizeof(NT_Vertex)*(UINT)m_vertices.size(),
+		DXGI_FORMAT_R32_UINT, sizeof(UINT)*(UINT)m_indices.size(), false);
 
 	XMMATRIX planeMat = XMLoadFloat4x4(&currMesh->GetDraws()[m_selectDrawsIndex]->m_plane->GetMatrix());
-	XMMATRIX scaleMat = XMMatrixScaling(1, 1, 0.01f);
 
 	m_prevViewRender->SetGeometry(m_previewGeo, m_previewGeo->name);
 	m_prevViewRender->SetRenderOK(true);
 	m_prevViewRenderInstance->m_isRenderOK = true;
 	m_prevViewRenderInstance->numFramesDirty = gNumFrameResources;
-	XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, scaleMat*planeMat);
+	XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, planeMat);
 }
 
 XMVECTOR XM_CALLCONV cOper_Push_Mesh::GetNormalFromTriangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)

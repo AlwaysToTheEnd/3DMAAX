@@ -17,7 +17,7 @@ void cCSGObject::SubObjectSubAbsorption()
 	{
 		it->SubObjectSubAbsorption();
 
-		switch (m_type)
+		switch (it->m_type)
 		{
 		case CSG_UNION:
 			ObjectUnion(it.get());
@@ -55,11 +55,29 @@ void cCSGObject::ObjectUnion(const cCSGObject * src)
 		m_triangles.assign(srcTriangles.cbegin(), srcTriangles.cend());
 		return;
 	}
-
-	for (UINT i = 0; i < srcVerticesSize; i++)
+	else
 	{
-		//for()
+		UINT addVertexStartIndex = (UINT)m_vertices.size();
+		m_triangles.reserve(m_triangles.size() + srcTriangles.size());
+		m_vertices.insert(m_vertices.end(), srcVertices.begin(), srcVertices.end());
+		m_triangles.insert(m_triangles.begin(), srcTriangles.begin(), srcTriangles.end());
+
+		UINT i = 0;
+		for (auto& it : srcTriangles)
+		{
+			UINT currIndex = i + addVertexStartIndex;
+			m_triangles[currIndex].index[0] = addVertexStartIndex + it.index[0];
+			m_triangles[currIndex].index[0] = addVertexStartIndex + it.index[1];
+			m_triangles[currIndex].index[0] = addVertexStartIndex + it.index[2];
+
+			i++;
+		}
 	}
+
+	//for (UINT i = 0; i < srcVerticesSize; i++)
+	//{
+	//	//for()
+	//}
 }
 
 void cCSGObject::ObjectDifference(const cCSGObject * src)
@@ -99,6 +117,83 @@ void cCSGObject::ObjectInterSection(const cCSGObject * src)
 
 	UINT srcVerticesSize = (UINT)srcVertices.size();
 	UINT srcTriangleSize = (UINT)srcTriangles.size();
+}
+
+void cCSGObject::GetData(vector<NT_Vertex>& vertices, vector<UINT>& indices)
+{
+	vertices.clear();
+	indices.clear();
+	vertices.assign(m_vertices.begin(), m_vertices.end());
+	
+	for (auto& it : m_triangles)
+	{
+		indices.push_back(it.index[0]);
+
+		if (it.ccw)
+		{
+			indices.push_back(it.index[2]);
+			indices.push_back(it.index[1]);
+		}
+		else
+		{
+			indices.push_back(it.index[1]);
+			indices.push_back(it.index[2]);
+		}
+	}
+}
+
+void XM_CALLCONV cCSGObject::SetData(const vector<NT_Vertex>& vertices, const vector<UINT>& indices, FXMMATRIX mat)
+{
+	assert(indices.size() % 3 == 0);
+	m_vertices.clear();
+	m_triangles.clear();
+
+	if (m_vertices.capacity() < vertices.size())
+	{
+		m_vertices.reserve(vertices.size());
+	}
+
+	XMMATRIX transMatrix = mat;
+
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		NT_Vertex vertex;
+		vertex.uv = vertices[i].uv;
+		XMStoreFloat3(&vertex.pos, XMVector3TransformCoord(XMLoadFloat3(&vertices[i].pos), transMatrix));
+		XMStoreFloat3(&vertex.normal, XMVector3TransformNormal(XMLoadFloat3(&vertices[i].normal), transMatrix));
+		m_vertices.push_back(vertex);
+	}
+
+	TriangleInfo triangle;
+	for (size_t i = 0; i < indices.size(); i += 3)
+	{
+		triangle.index[0] = indices[i];
+		triangle.index[1] = indices[i + 1];
+		triangle.index[2] = indices[i + 2];
+
+		triangle.normal = vertices[indices[i]].normal;
+
+		XMVECTOR originVector = XMLoadFloat3(&vertices[indices[i]].pos);
+		XMVECTOR tryVector1 = XMLoadFloat3(&vertices[indices[i + 1]].pos) - originVector;
+		XMVECTOR tryVector2 = XMLoadFloat3(&vertices[indices[i + 2]].pos) - originVector;
+
+		XMVECTOR crossVector = XMVector3Normalize(XMVector3Cross(tryVector1, tryVector2));
+		XMVECTOR normal = XMLoadFloat3(&triangle.normal);
+
+		float dot = 0; 
+		XMStoreFloat(&dot,XMVector3Dot(crossVector, normal));
+
+		if (dot < 0)
+		{
+			triangle.ccw = true;
+		}
+		else
+		{
+			triangle.ccw = false;
+		}
+
+		m_triangles.push_back(triangle);
+	}
 }
 
 bool XM_CALLCONV cCSGObject::TriangleCollision( FXMVECTOR destPos1, FXMVECTOR destPos2, FXMVECTOR destPos3, 

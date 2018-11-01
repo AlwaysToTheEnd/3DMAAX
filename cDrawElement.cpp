@@ -74,3 +74,11 @@ void cDrawElement::DeleteObject(cObject * object)
 	}
 }
 
+void cDrawElement::SetRenderState(bool value)
+{
+	if (m_renderItem)
+	{
+		m_renderItem->SetRenderOK(value);
+	}
+}
+

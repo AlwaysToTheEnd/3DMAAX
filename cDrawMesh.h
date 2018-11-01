@@ -38,7 +38,9 @@ public:
 	
 public:
 	list<vector<const cDot*>> LineCycleCheck(UINT drawItemIndex);
-	void CopyGeometry(const MeshGeometry* geo);
+	void SubObjectSubAbsorption();
+	void AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object);
+	bool XM_CALLCONV GetPickTriangleRotation(PICKRAY ray, XMFLOAT4* quaternion);
 
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }

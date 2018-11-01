@@ -14,10 +14,11 @@ public:
 	virtual ~cOper_Add_Plane();
 
 	virtual void SetUp() override;
-	virtual void PlaneAddOperation(cDrawPlane& planes) override;
+	virtual void PlaneAddOperation(cDrawPlane& planes, cMesh* currMesh) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 
 private:
-	cDrawPlane * m_planes;
+	cDrawPlane *	m_planes;
+	cObject*		m_currPlane;
 };
 

@@ -153,7 +153,7 @@ void cOperator::Update()
 		switch (m_currOperation->GetOperType())
 		{
 		case OPER_ADD_PLANE:
-			m_currOperation->PlaneAddOperation(m_planes);
+			m_currOperation->PlaneAddOperation(m_planes,m_currMesh);
 			break;
 		case OPER_ADD_LINE:
 		case OPER_ADD_DOT:

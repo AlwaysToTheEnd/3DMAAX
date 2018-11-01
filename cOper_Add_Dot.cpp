@@ -47,7 +47,7 @@ void cOper_Add_Dot::DrawElementOperation(DrawItems* drawItems)
 			m_operControl.ClearParameters();
 			m_operControl.AddParameter(L"pos    X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currDot->GetPos().x);
 			m_operControl.AddParameter(L"pos    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currDot->GetPos().y);
-			m_operControl.IsRenderState(1);
+			m_operControl.SetRenderState(1);
 
 			m_currDot->SetPickRender(1);
 		}

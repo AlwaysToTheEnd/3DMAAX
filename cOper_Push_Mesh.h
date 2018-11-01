@@ -30,6 +30,9 @@ private:
 	int			m_cycleIndex;
 	float		m_meshHeight;
 	bool		m_isCreateMesh;
-	list<vector<const cDot*>> m_currDrawCycleDotsList;
+
+	vector<NT_Vertex>			m_vertices;
+	vector<UINT>				m_indices;
+	list<vector<const cDot*>>	m_currDrawCycleDotsList;
 };
 

@@ -50,6 +50,6 @@ void cButtonCollector::SetRenderState(bool value)
 {
 	for (auto& it : m_buttons)
 	{
-		it->IsRenderState(value);
+		it->SetRenderState(value);
 	}
 }

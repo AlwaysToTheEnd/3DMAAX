@@ -25,6 +25,7 @@ public:
 	template<typename T>
 	vector<T*> GetObjectsPtr();
 	void DeleteObject(cObject* object);
+	void SetRenderState(bool value);
 
 protected:
 	shared_ptr<cRenderItem>		m_renderItem;
@@ -56,6 +57,14 @@ struct DrawItems
 	DrawItems(cPlane* plane)
 	{
 		m_plane = plane;
+	}
+
+	void SetRenderState(bool value)
+	{
+		for (auto& it : m_draws)
+		{
+			it->SetRenderState(value);
+		}
 	}
 
 	/*DrawItems(DrawItems& rhs)

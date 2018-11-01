@@ -20,6 +20,7 @@ private:
 		void AddTriangle(UINT num,int maxRecursion);
 
 		bool XM_CALLCONV Picking(PICKRAY ray, float& dist);
+		bool XM_CALLCONV GetPickTriangle(PICKRAY ray, float& dist, XMFLOAT3& triPos0, XMFLOAT3& triPos1, XMFLOAT3& triPos2);
 
 	private:
 		array<unique_ptr<OctreeNode>, OCTREE_TREENUM> m_nodes = {};
@@ -33,6 +34,7 @@ public:
 
 	static cOcTree* CreateOcTree(const MeshGeometry* geo, int maxRecursion);
 	bool XM_CALLCONV Picking(PICKRAY ray, float& dist);
+	bool XM_CALLCONV GetPickTriangle(PICKRAY ray, float& dist, XMFLOAT3& triPos0, XMFLOAT3& triPos1, XMFLOAT3& triPos2);
 
 private:
 	cOcTree();

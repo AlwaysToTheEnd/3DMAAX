@@ -32,7 +32,7 @@ public:
 	virtual ~cOperation() {}
 	virtual void SetUp() = 0;
 	virtual void DrawElementOperation(DrawItems* drawItems) { assert(false); }
-	virtual void PlaneAddOperation(cDrawPlane& planes) { assert(false); }
+	virtual void PlaneAddOperation(cDrawPlane& planes, cMesh* currMesh) { assert(false); }
 	virtual void MeshOperation(cMesh* currMesh) { assert(false); }
 	virtual DrawItems* DrawsAddOperatioin(unordered_map<wstring, DrawItems>& drawItems, cDrawPlane& planes) { assert(false); return nullptr; }
 	virtual DrawItems* MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh, cMesh** mesh) { assert(false); return nullptr; }
@@ -41,7 +41,7 @@ public:
 	virtual void EndOperation();
 
 public:
-	void StartOperation() { m_operState = true; m_operControl.IsRenderState(true); }
+	void StartOperation() { m_operState = true; m_operControl.SetRenderState(true); }
 
 	bool GetOperState() const { return m_operState; }
 	OPERATIONTYPE GetOperType() const { return m_operType; }

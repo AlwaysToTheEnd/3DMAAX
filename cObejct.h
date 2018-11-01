@@ -10,7 +10,7 @@ public:
 	virtual void Build(shared_ptr<cRenderItem> renderItem);
 	virtual void XM_CALLCONV Update(FXMMATRIX mat);
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) { assert(false); return false; }
-	virtual void IsRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
+	virtual void SetRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
 
 	void SetMatrialIndex(UINT index) { m_renderInstance->instanceData.MaterialIndex = index; }
 	void SetSizeScale(float scale) { m_renderInstance->instanceData.sizeScale = scale; }

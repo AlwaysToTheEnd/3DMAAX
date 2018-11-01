@@ -16,7 +16,7 @@ public:
 	virtual ~cUIOperWindow();
 
 	virtual void Build(shared_ptr<cRenderItem> renderItem) override;
-	virtual void IsRenderState(bool value) override;
+	virtual void SetRenderState(bool value) override;
 	 
 	void AddParameter(wstring dataName, DXGI_FORMAT format,void* pData);
 	void ClearParameters() { m_operParameters.clear(); m_currParameterIndex = -1; }
