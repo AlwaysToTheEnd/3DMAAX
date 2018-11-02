@@ -58,6 +58,7 @@ void cCSGObject::ObjectUnion(const cCSGObject * src)
 	else
 	{
 		UINT addVertexStartIndex = (UINT)m_vertices.size();
+		UINT addTriangleStartIndex = (UINT)m_triangles.size();
 		m_triangles.reserve(m_triangles.size() + srcTriangles.size());
 		m_vertices.insert(m_vertices.end(), srcVertices.begin(), srcVertices.end());
 		m_triangles.insert(m_triangles.begin(), srcTriangles.begin(), srcTriangles.end());
@@ -65,10 +66,10 @@ void cCSGObject::ObjectUnion(const cCSGObject * src)
 		UINT i = 0;
 		for (auto& it : srcTriangles)
 		{
-			UINT currIndex = i + addVertexStartIndex;
+			UINT currIndex = i + addTriangleStartIndex;
 			m_triangles[currIndex].index[0] = addVertexStartIndex + it.index[0];
-			m_triangles[currIndex].index[0] = addVertexStartIndex + it.index[1];
-			m_triangles[currIndex].index[0] = addVertexStartIndex + it.index[2];
+			m_triangles[currIndex].index[1] = addVertexStartIndex + it.index[1];
+			m_triangles[currIndex].index[2] = addVertexStartIndex + it.index[2];
 
 			i++;
 		}

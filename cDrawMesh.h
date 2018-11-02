@@ -40,7 +40,7 @@ public:
 	list<vector<const cDot*>> LineCycleCheck(UINT drawItemIndex);
 	void SubObjectSubAbsorption();
 	void AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object);
-	bool XM_CALLCONV GetPickTriangleRotation(PICKRAY ray, XMFLOAT4* quaternion);
+	bool XM_CALLCONV GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4* quaternion);
 
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }

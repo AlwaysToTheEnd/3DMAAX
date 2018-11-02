@@ -6,7 +6,7 @@ cMesh::cMesh()
 	: m_geo(nullptr)
 	, m_renderItem(nullptr)
 {
-	
+
 }
 
 cMesh::~cMesh()
@@ -159,12 +159,39 @@ void cMesh::AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object)
 	m_rootCSG.AddChild(work, move(object));
 }
 
-bool XM_CALLCONV cMesh::GetPickTriangleRotation(PICKRAY ray, XMFLOAT4 * quaternion)
+bool XM_CALLCONV cMesh::GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4 * quaternion)
 {
 	XMFLOAT3 pos0, pos1, pos2;
-	float dist = FLT_MAX;
-	m_geo->octree->GetPickTriangle(ray, dist, pos0, pos1, pos2);
 
+	if (m_geo->octree->GetPickTriangle(ray, dist, pos0, pos1, pos2))
+	{
+		XMVECTOR _pos0 = XMLoadFloat3(&pos0);
+		XMVECTOR _pos1 = XMLoadFloat3(&pos1);
+		XMVECTOR _pos2 = XMLoadFloat3(&pos2);
+
+		if (quaternion)
+		{
+			XMVECTOR v1 = _pos1 - _pos0;
+			XMVECTOR v2 = _pos2 - _pos0;
+			XMVECTOR triangleNormal = XMVector3Cross(v1, v2);
+			XMVECTOR frontDir = baseDir;
+			XMVECTOR quaternionAxis = XMVector3Cross(frontDir, triangleNormal);
+			
+			float angle = 0;
+			XMStoreFloat(&angle, XMVector3AngleBetweenVectors(frontDir, triangleNormal));
+
+			if (XMVector3Equal(quaternionAxis, XMVectorZero()))
+			{
+				XMMATRIX rotationMat = XMMatrixRotationX(XM_PIDIV2);
+				quaternionAxis = XMVector3TransformNormal(baseDir, rotationMat);
+			}
+
+			XMVECTOR TriangleQuaternion = XMQuaternionRotationAxis(quaternionAxis, angle);
+			XMStoreFloat4(quaternion, TriangleQuaternion);
+		}
+
+		return true;
+	}
 
 	return false;
 }

@@ -125,4 +125,6 @@ void cOper_Add_Draws::SetDraws(DrawItems & drawItems)
 			break;
 		}
 	}
+
+	drawItems.SetRenderState(true);
 }

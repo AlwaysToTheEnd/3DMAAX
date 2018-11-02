@@ -49,9 +49,22 @@ void cOper_Add_Plane::PlaneAddOperation(cDrawPlane & planes, cMesh* currMesh)
 		{
 			if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 			{
-				float dist = FLT_MAX;
 				PICKRAY ray = INPUTMG->GetMousePickLay();
-				currMesh->GetPickTriangleRotation(ray, &m_currPlane->GetQuaternion());
+				XMMATRIX invObjectMat = XMMatrixInverse(&XMVECTOR(),currMesh->GetXMMatrix());
+
+				PICKRAY objectLocalRay;
+				objectLocalRay.origin = XMVector3TransformCoord(ray.origin, invObjectMat);
+				objectLocalRay.ray = XMVector3Normalize(XMVector3TransformNormal(ray.ray, invObjectMat));
+
+				float dist = FLT_MAX;
+				XMFLOAT4 quaternion;
+
+				if (currMesh->GetPickTriangleInfo(objectLocalRay, XMVectorSet(0, 0, -1, 0), dist, &quaternion))
+				{
+					m_currPlane->GetQuaternion() = quaternion;
+					XMVECTOR pickPos = ray.origin + ray.ray*dist;
+					XMStoreFloat3(&m_currPlane->GetPos(), pickPos);
+				}
 			}
 		}
 	}
