@@ -93,7 +93,6 @@ void cOperator::Update()
 			if (m_currDraws)
 			{
 				m_currDraws->SetPickRender(2);
-				CAMERA.SetTarget(m_currDraws->m_plane);
 			}
 
 			m_currOperation = nullptr;
@@ -169,7 +168,6 @@ void cOperator::Update()
 			if (draws)
 			{
 				draws->SetPickRender(2);
-				CAMERA.SetTarget(draws->m_plane);
 
 				if (m_currDraws)
 				{
@@ -187,7 +185,6 @@ void cOperator::Update()
 			if (draws)
 			{
 				draws->SetPickRender(2);
-				CAMERA.SetTarget(draws->m_plane);
 
 				if (m_currDraws)
 				{
@@ -260,17 +257,17 @@ void cOperator::OperationStart(int index)
 
 void cOperator::OperTypeButtonSelect(int num)
 {
-	m_drawButtons.SetRenderState(false);
-	m_meshButtons.SetRenderState(false);
-
+	
 	switch (num)
 	{
 	case 0:
 		m_currButtons = &m_drawButtons;
+		m_meshButtons.SetRenderState(false);
 		m_currButtons->SetRenderState(true);
 		break;
 	case 1:
 		m_currButtons = &m_meshButtons;
+		m_drawButtons.SetRenderState(false);
 		m_currButtons->SetRenderState(true);
 		break;
 	default:

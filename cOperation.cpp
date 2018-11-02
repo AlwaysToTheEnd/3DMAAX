@@ -82,7 +82,7 @@ cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
 				XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), drawItems->m_plane->GetXMMatrix());
 				XMVECTOR pos = ray.origin + ray.ray*distance;
 				pos = XMVector3TransformCoord(pos, planeInvMat);
-				pos.m128_f32[2] = -0.001f;
+				pos.m128_f32[2] = 0;
 				cDot* dot = AddDot(drawItems->m_draws);
 				dot->SetHostObject(drawItems->m_plane);
 				XMStoreFloat3(&dot->GetPos(), pos);

@@ -16,7 +16,7 @@ void XM_CALLCONV cDot::Update(FXMMATRIX mat)
 {
 	XMMATRIX localMat = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) *
 		XMMatrixRotationQuaternion(XMLoadFloat4(&m_quaternion))*
-		XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+		XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z-0.001f);
 	XMMATRIX worldMat = localMat * mat * XMLoadFloat4x4(&m_hostObject->GetMatrix());
 
 	XMStoreFloat4x4(&m_renderInstance->instanceData.World, worldMat);

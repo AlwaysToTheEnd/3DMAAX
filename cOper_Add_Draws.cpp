@@ -71,6 +71,7 @@ DrawItems* cOper_Add_Draws::DrawsAddOperatioin(unordered_map<wstring, DrawItems>
 				if (m_selectDrawsIndex == i)
 				{
 					cOperation::EndOperation();
+					CAMERA.SetTarget(it.second.m_plane);
 					return &it.second;
 				}
 
@@ -86,7 +87,7 @@ DrawItems* cOper_Add_Draws::DrawsAddOperatioin(unordered_map<wstring, DrawItems>
 				wstring name = L"drawItems" + to_wstring(drawItems.size());
 				drawItems.insert({ name, DrawItems(plane) });
 				SetDraws(drawItems[name]);
-
+				CAMERA.SetTarget(plane);
 				cOperation::EndOperation();
 				return &drawItems[name];
 			}

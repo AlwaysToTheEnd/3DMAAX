@@ -17,7 +17,7 @@ public:
 		return instance;
 	}
 
-	void Build(ID3D12Device* device ,ComPtr<ID3D12CommandQueue> commandQueue);
+	void Build(ID3D12Device* device ,ComPtr<ID3D12CommandQueue> commandQueue, ComPtr<ID3D12Fence> fence, UINT64* currFence);
 
 	MeshGeometry* AddMeshGeometry(const string& name,const void* vertexData,const void* indexData, UINT vertexByteStride,
 		UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU,
@@ -31,14 +31,14 @@ public:
 
 	void CopyData(MeshGeometry* destGeo, const MeshGeometry* src);
 
-	void MeshBuildUpGPU(ComPtr<ID3D12Fence> fence, UINT64& currentFenc);
+	void MeshBuildUpGPU();
 	void DisposUploadBuffers();
 
 	MeshGeometry* GetMeshGeometry(string name);
 
 private:
 	cMeshgeometryMG();
-	void FlushCommandQueue(ComPtr<ID3D12Fence> fence, UINT64& currentFenc);
+	void FlushCommandQueue();
 	void ClearGeometry(MeshGeometry* geo);
 	void DataInputGeometry(MeshGeometry* geo, const void* vertexData, const void* indexData, UINT vertexByteStride,
 		UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU,
@@ -51,6 +51,8 @@ private:
 	ComPtr<ID3D12CommandQueue>			m_CommandQueue;
 	ComPtr<ID3D12CommandAllocator>		m_DirectCmdListAlloc;
 	ComPtr<ID3D12GraphicsCommandList>	m_CommandList;
+	ComPtr<ID3D12Fence>					m_fence;
+	UINT64*								m_currFence;
 	unordered_map<string, unique_ptr<MeshGeometry>> m_Meshgometrys;
 };
 

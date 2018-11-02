@@ -22,6 +22,7 @@ public:
 
 private:
 	void PreviewPushMeshCreate(cMesh* currMesh);
+	bool CheckCWCycle(vector<const cDot*>& cycle);
 	XMVECTOR XM_CALLCONV GetNormalFromTriangle(const XMFLOAT3& pos1, const XMFLOAT3& pos2, const XMFLOAT3& pos3);
 
 private:

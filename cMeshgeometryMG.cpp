@@ -16,10 +16,12 @@ cMeshgeometryMG::~cMeshgeometryMG()
 {
 }
 
-void cMeshgeometryMG::Build(ID3D12Device* device, ComPtr<ID3D12CommandQueue> commandQueue)
+void cMeshgeometryMG::Build(ID3D12Device* device, ComPtr<ID3D12CommandQueue> commandQueue, ComPtr<ID3D12Fence> fence, UINT64* currFence)
 {
 	m_device = device;
 	m_CommandQueue = commandQueue;
+	m_fence = fence;
+	m_currFence = currFence;
 
 	ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 		IID_PPV_ARGS(m_DirectCmdListAlloc.GetAddressOf())));
@@ -121,34 +123,34 @@ void cMeshgeometryMG::CopyData(MeshGeometry * destGeo, const MeshGeometry * src)
 	}
 }
 
-void cMeshgeometryMG::MeshBuildUpGPU(ComPtr<ID3D12Fence> fence, UINT64 & currentFenc)
+void cMeshgeometryMG::MeshBuildUpGPU()
 {
 	if (m_needMeshBuildUp)
 	{
-		FlushCommandQueue(fence, currentFenc);
+		FlushCommandQueue();
 
 		ThrowIfFailed(m_CommandList->Close());
 		ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
 		m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 
-		FlushCommandQueue(fence, currentFenc);
+		FlushCommandQueue();
 		DisposUploadBuffers();
 
 		m_needMeshBuildUp = false;
 	}
 }
 
-void cMeshgeometryMG::FlushCommandQueue(ComPtr<ID3D12Fence> fence, UINT64 & currentFenc)
+void cMeshgeometryMG::FlushCommandQueue()
 {
-	currentFenc++;
+	(*m_currFence)++;
 
-	ThrowIfFailed(m_CommandQueue->Signal(fence.Get(), currentFenc));
+	ThrowIfFailed(m_CommandQueue->Signal(m_fence.Get(), *m_currFence));
 
-	if (fence->GetCompletedValue() < currentFenc)
+	if (m_fence->GetCompletedValue() < *m_currFence)
 	{
 		HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
 
-		ThrowIfFailed(fence->SetEventOnCompletion(currentFenc, eventHandle));
+		ThrowIfFailed(m_fence->SetEventOnCompletion(*m_currFence, eventHandle));
 
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
@@ -157,6 +159,7 @@ void cMeshgeometryMG::FlushCommandQueue(ComPtr<ID3D12Fence> fence, UINT64 & curr
 
 void cMeshgeometryMG::ClearGeometry(MeshGeometry * geo)
 {
+	FlushCommandQueue();
 	geo->vertexBufferCPU = nullptr;
 	geo->indexBufferCPU = nullptr;
 	geo->vertexBufferGPU = nullptr;
