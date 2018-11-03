@@ -25,12 +25,13 @@ public:
 		, m_operationText(nullptr)
 		, m_operState(false)
 		, m_worksSate(0)
+		, m_currObjectControlParam(-2)
 	{
 
 	}
 
 	virtual ~cOperation() {}
-	virtual void SetUp() = 0;
+	virtual void SetUp();
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) { assert(false); }
 
@@ -44,10 +45,17 @@ public:
 	OPERATIONTYPE GetOperType() const { return m_operType; }
 
 protected:
+	bool CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawItems, DrawItems*& currDrawItems);
 	cDot* AddDot(vector<unique_ptr<cDrawElement>>& draw);
 	cLine* AddLine(vector<unique_ptr<cDrawElement>>& draw);
 	bool PickPlane(cDrawPlane* planes, cPlane** plane);
 	cDot* AddDotAtCurrPlane(DrawItems* drawItems);
+
+protected:
+	bool CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMesh*& currMesh);
+	list<vector<const cDot*>> LineCycleCheck(DrawItems* drawItem);
+	void OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
+	bool EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs);
 
 protected:
 	static shared_ptr<cRenderItem>		m_OperatorUi;
@@ -60,4 +68,5 @@ protected:
 	cUIOperWindow			m_operControl;
 	bool					m_operState;
 	UINT					m_worksSate;
+	int						m_currObjectControlParam;
 };

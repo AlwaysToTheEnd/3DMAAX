@@ -38,33 +38,29 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 	{
 	case cOper_Push_Mesh::ADD_MESH_QUERY:
 	{
-		if (currMesh == nullptr)
+		if (CurrMeshCheckAndPick(meshs, currMesh))
 		{
-			EndOperation();
-			return;
+			m_isCreateMesh = false;
+			m_draws = nullptr;
+			m_selectDrawsIndex = -1;
+
+			int i = 0;
+			for (auto& it : drawItems)
+			{
+				it.second.SetRenderState(true);
+				m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_selectDrawsIndex);
+				i++;
+			}
+
+			if (i == 0)
+			{
+				EndOperation();
+				return;
+			}
+
+			m_operControl.SetRenderState(true);
+			m_worksSate = DRAW_SELECT;
 		}
-
-		m_isCreateMesh = false;
-		m_draws = nullptr;
-		m_selectDrawsIndex = -1;
-
-		vector<DrawItems*>& meshDraws = currMesh->GetDraws();
-		int i = 0;
-		for (auto& it : meshDraws)
-		{
-			it->SetRenderState(true);
-			m_operControl.AddParameter(L"Draws" + to_wstring(i), DXGI_FORMAT_R32_SINT, &m_selectDrawsIndex);
-			i++;
-		}
-
-		if (i == 0)
-		{
-			EndOperation();
-			return;
-		}
-
-		m_operControl.SetRenderState(true);
-		m_worksSate = DRAW_SELECT;
 	}
 	break;
 	case cOper_Push_Mesh::DRAW_SELECT:
@@ -72,7 +68,12 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 		if (m_selectDrawsIndex != -1)
 		{
 			m_currDrawCycleDotsList.clear();
-			m_draws = currMesh->GetDraws()[m_selectDrawsIndex];
+			auto it = drawItems.begin();
+			for (int i = 0; i < m_selectDrawsIndex; i++)
+			{
+				it++;
+			}
+			m_draws = &it->second;
 			m_currDrawCycleDotsList = currMesh->LineCycleCheck(m_selectDrawsIndex);
 			CAMERA.SetTarget(m_draws->m_plane);
 
@@ -95,7 +96,7 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 				vector<DrawItems*>& meshDraws = currMesh->GetDraws();
 				for (auto& it : meshDraws)
 				{
-					if (it!=m_draws)
+					if (it != m_draws)
 					{
 						it->SetRenderState(false);
 					}

@@ -30,15 +30,15 @@ void cMesh::Build(shared_ptr<cRenderItem> renderItem)
 
 void XM_CALLCONV cMesh::Update(FXMMATRIX mat)
 {
-
+	cObject::Update(mat);
 }
 
 bool XM_CALLCONV cMesh::Picking(PICKRAY ray, float & distance)
 {
-	return false;
+	return m_geo->octree->Picking(ray, distance);
 }
 
-list<vector<const cDot*>> cMesh::LineCycleCheck(UINT drawItemIndex)
+list<vector<const cDot*>> cMesh::LineCycleCheck(DrawItems* drawItem)
 {
 	vector<cLine*> lines = m_draws[drawItemIndex]->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
 
@@ -366,30 +366,3 @@ UINT cMesh::SetDrawItems(DrawItems * drawItem)
 	m_draws.push_back(drawItem);
 	return indexNum;
 }
-
-
-cDrawMesh::cDrawMesh()
-{
-
-}
-
-
-cDrawMesh::~cDrawMesh()
-{
-}
-
-cObject * cDrawMesh::AddElement()
-{
-	auto renderItem = RENDERITEMMG->AddRenderItem(m_meshRenderName);
-	auto geometry = MESHMG->AddTemporaryMesh(m_meshRenderName + to_string(m_objects.size()));
-	renderItem->SetGeometry(geometry, m_meshRenderName + to_string(m_objects.size()));
-	renderItem->SetRenderOK(false);
-
-	auto addObejct = make_unique<cMesh>();
-	addObejct->Build(renderItem);
-	addObejct->SetGeometry(geometry);
-
-	m_objects.push_back(move(addObejct));
-	return m_objects.back().get();
-}
-

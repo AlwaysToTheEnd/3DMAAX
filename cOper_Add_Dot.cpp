@@ -16,22 +16,22 @@ cOper_Add_Dot::~cOper_Add_Dot()
 {
 }
 
-void cOper_Add_Dot::SetUp()
-{
-	m_operControl.Build(m_OperatorUi);
-	m_operControl.SetPos({ 650,100,0 });
-	m_operationText = FONTMANAGER->GetFont("baseFont");
-	m_operationText->isRender = false;
-	m_operationText->color = Colors::Red;
-	m_operationText->printString = L"Set dot Time";
-	m_operationText->pos = { 30,30,0 };
-}
 
 UINT cOper_Add_Dot::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	switch (m_worksSate)
 	{
+	case cOper_Add_Dot::CURR_DRAW_CHECK:
+
+		if (CurrDrawCheckAndPick(drawItems, currDrawItems))
+		{
+			m_worksSate = SET_DOTS;
+			m_operationText->isRender = true;
+			m_operationText->printString = L"set dot time";
+		}
+
+		break;
 	case cOper_Add_Dot::SET_DOTS:
 	{
 		cDot* addDot = AddDotAtCurrPlane(currDrawItems);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cDrawMesh.h"
+#include "cMesh.h"
 
 class cOper_Add_Mesh : public cOperation
 {
@@ -14,7 +14,6 @@ public:
 	cOper_Add_Mesh();
 	virtual ~cOper_Add_Mesh();
 
-	virtual void SetUp() override;
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;

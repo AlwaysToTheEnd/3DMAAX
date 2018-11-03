@@ -14,14 +14,8 @@ cOper_Add_Draws::~cOper_Add_Draws()
 
 void cOper_Add_Draws::SetUp()
 {
-	m_operControl.Build(m_OperatorUi);
-	m_operControl.SetPos({ 730,100,0 });
-
-	m_operationText = FONTMANAGER->GetFont("baseFont");
-	m_operationText->isRender = false;
-	m_operationText->color = Colors::Red;
+	cOperation::SetUp();
 	m_operationText->printString = L"Select Plane or Draws";
-	m_operationText->pos = { 30,30,0 };
 
 	for (int i = 0; i < DRAWOBJECTSPLACE::OBJECTS_COUNT; i++)
 	{
@@ -73,7 +67,8 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 				{
 					cOperation::EndOperation();
 					CAMERA.SetTarget(it.second.m_plane);
-					return &it.second;
+					currDrawItems = &it.second;
+					return;
 				}
 
 				i++;
@@ -90,7 +85,8 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 				SetDraws(drawItems[name]);
 				CAMERA.SetTarget(plane);
 				cOperation::EndOperation();
-				return &drawItems[name];
+				currDrawItems = &drawItems[name];
+				return;
 			}
 		}
 

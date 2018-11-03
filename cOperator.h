@@ -13,7 +13,7 @@ public:
 	void SetRenderState(bool value);
 
 private:
-	void OperationCheck();
+	bool OperationCheck();
 	void OperationStart(int type);
 
 private:

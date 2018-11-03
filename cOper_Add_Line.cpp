@@ -12,20 +12,21 @@ cOper_Add_Line::~cOper_Add_Line()
 
 }
 
-void cOper_Add_Line::SetUp()
-{
-	m_operationText = FONTMANAGER->GetFont("baseFont");
-	m_operationText->isRender = false;
-	m_operationText->color = Colors::Red;
-	m_operationText->printString = L"Select First Dot";
-	m_operationText->pos = { 30,30,0 };
-}
-
 UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	switch (m_worksSate)
 	{
+	case cOper_Add_Line::CURR_DRAW_CHECK:
+	{
+		if (CurrDrawCheckAndPick(drawItems, currDrawItems))
+		{
+			m_operationText->isRender + true;
+			m_operationText->printString = L"Select First Dot";
+			m_worksSate = FIRST_DOT_PICK;
+		}
+	}
+	break;
 	case cOper_Add_Line::FIRST_DOT_PICK:
 	{
 		m_operationText->isRender = true;
@@ -42,7 +43,7 @@ UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 	{
 		cDot* secendDot = AddDotAtCurrPlane(currDrawItems);
 
-		if (secendDot)
+		if (secendDot&& secendDot != m_firstDot)
 		{
 			cLine* line = AddLine(currDrawItems->m_draws);
 			line->SetFirstDot(m_firstDot);
