@@ -21,7 +21,7 @@ UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 	{
 		if (CurrDrawCheckAndPick(drawItems, currDrawItems))
 		{
-			m_operationText->isRender + true;
+			m_operationText->isRender = true;
 			m_operationText->printString = L"Select First Dot";
 			m_worksSate = FIRST_DOT_PICK;
 		}
@@ -59,16 +59,20 @@ UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 	return 0;
 }
 
-void cOper_Add_Line::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Line::CancleOperation(DrawItems* draw)
 {
-	draw[DRAW_LINES]->DeleteBackObject();
-
-	if (m_firstDot)
+	if (draw)
 	{
-		draw[DRAW_DOTS]->DeleteBackObject();
+		draw->m_draws[DRAW_LINES]->DeleteBackObject();
+
+		if (m_firstDot)
+		{
+			draw->m_draws[DRAW_DOTS]->DeleteBackObject();
+		}
+
+		m_firstDot = nullptr;
 	}
 
-	m_firstDot = nullptr;
 	EndOperation();
 }
 

@@ -134,7 +134,7 @@ void D12D3Maaax::Draw()
 	}
 
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
-	RENDERITEMMG->Render(m_CommandList.Get(), cDrawMesh::m_meshRenderName);
+	RENDERITEMMG->Render(m_CommandList.Get(), cMesh::m_meshRenderName);
 
 	m_CommandList->SetPipelineState(m_PSOs["drawLine"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
@@ -412,7 +412,7 @@ void D12D3Maaax::BuildPSOs()
 	RENDERITEMMG->AddRenderSet("line");
 	RENDERITEMMG->AddRenderSet("dot");
 	RENDERITEMMG->AddRenderSet("ui");
-	RENDERITEMMG->AddRenderSet(cDrawMesh::m_meshRenderName);
+	RENDERITEMMG->AddRenderSet(cMesh::m_meshRenderName);
 }
 
 void D12D3Maaax::BuildTextures()

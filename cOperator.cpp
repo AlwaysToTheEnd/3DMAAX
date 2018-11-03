@@ -61,6 +61,14 @@ void cOperator::Update()
 		m_currOperation->OperationUpdate(m_drawItems, m_planes, m_mesh, m_currDraws, m_currMesh);
 	}
 
+	if (m_currDraws)
+	{
+		for (auto& it : m_currDraws->m_draws)
+		{
+			it->Update();
+		}
+	}
+
 	m_operSelectButtons.Update();
 	m_planes.Update();
 }
@@ -92,7 +100,7 @@ bool cOperator::OperationCheck()
 			}
 			else if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 			{
-				m_currOperation->CancleOperation(m_currDraws->m_draws);
+				m_currOperation->CancleOperation(m_currDraws);
 				m_currOperation = nullptr;
 			}
 		}
@@ -112,7 +120,7 @@ bool cOperator::OperationCheck()
 		if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 		{
 			m_currDraws = nullptr;
-			CAMERA.SetTarget(nullptr);
+			CAMERA.SetTargetAndSettingAngle(nullptr);
 		}
 	}
 
@@ -135,7 +143,7 @@ void cOperator::OperationStart(int index)
 
 	if (m_currOperation)
 	{
-		m_currOperation->CancleOperation(m_currDraws->m_draws);
+		m_currOperation->CancleOperation(m_currDraws);
 	}
 
 	m_currOperation = m_operations[index].get();

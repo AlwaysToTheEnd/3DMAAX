@@ -69,13 +69,13 @@ UINT cOper_Add_Dot::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems
 	return 0;
 }
 
-void cOper_Add_Dot::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Dot::CancleOperation(DrawItems* draw)
 {
 	EndOperation();
 
 	for (UINT i = 0; i < m_addDotCount; i++)
 	{
-		draw[DRAW_DOTS]->DeleteBackObject();
+		draw->m_draws[DRAW_DOTS]->DeleteBackObject();
 	}
 }
 

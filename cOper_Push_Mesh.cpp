@@ -55,7 +55,7 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 			if (i == 0)
 			{
 				EndOperation();
-				return;
+				return 0;
 			}
 
 			m_operControl.SetRenderState(true);
@@ -74,8 +74,8 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 				it++;
 			}
 			m_draws = &it->second;
-			m_currDrawCycleDotsList = currMesh->LineCycleCheck(m_selectDrawsIndex);
-			CAMERA.SetTarget(m_draws->m_plane);
+			m_currDrawCycleDotsList = LineCycleCheck(m_draws);
+			CAMERA.SetTargetAndSettingAngle(m_draws->m_plane);
 
 			if (m_currDrawCycleDotsList.empty())
 			{
@@ -93,12 +93,11 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 					i++;
 				}
 
-				vector<DrawItems*>& meshDraws = currMesh->GetDraws();
-				for (auto& it : meshDraws)
+				for (auto& it : drawItems)
 				{
-					if (it != m_draws)
+					if (&it.second != m_draws)
 					{
-						it->SetRenderState(false);
+						it.second.SetRenderState(false);
 					}
 
 				}
@@ -123,7 +122,7 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 	break;
 	case cOper_Push_Mesh::MESH_HEIGHT_INPUT:
 	{
-		XMMATRIX planeMat = XMLoadFloat4x4(&currMesh->GetDraws()[m_selectDrawsIndex]->m_plane->GetMatrix());
+		XMMATRIX planeMat = XMLoadFloat4x4(&m_draws->m_plane->GetMatrix());
 		XMMATRIX scaleMat;
 		XMMATRIX translationMat = XMMatrixIdentity();
 
@@ -143,13 +142,14 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 
 		if (m_isCreateMesh)
 		{
-			if (m_meshHeight == 0) return;
+			if (m_meshHeight == 0) return 0;
 
-			auto scgObject = make_unique<cCSGObject>();
+
+			unique_ptr<cCSGObject> scgObject(new cCSGObject);
 			scgObject->SetData(m_vertices, m_indices, scaleMat*translationMat*planeMat);
 			currMesh->AddCSGObject(CSG_UNION, move(scgObject));
 			currMesh->SubObjectSubAbsorption();
-			currMesh->GetDraws()[m_selectDrawsIndex]->SetRenderState(false);
+			m_draws->SetRenderState(false);
 			EndOperation();
 		}
 		else
@@ -160,9 +160,11 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 	}
 	break;
 	}
+
+	return 0;
 }
 
-void cOper_Push_Mesh::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Push_Mesh::CancleOperation(DrawItems* draw)
 {
 	EndOperation();
 }
@@ -353,56 +355,11 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 		sizeof(NT_Vertex), sizeof(NT_Vertex)*(UINT)m_vertices.size(),
 		DXGI_FORMAT_R32_UINT, sizeof(UINT)*(UINT)m_indices.size(), false);
 
-	XMMATRIX planeMat = XMLoadFloat4x4(&currMesh->GetDraws()[m_selectDrawsIndex]->m_plane->GetMatrix());
+	XMMATRIX planeMat = XMLoadFloat4x4(&m_draws->m_plane->GetMatrix());
 
 	m_prevViewRender->SetGeometry(m_previewGeo, m_previewGeo->name);
 	m_prevViewRender->SetRenderOK(true);
 	m_prevViewRenderInstance->m_isRenderOK = true;
 	m_prevViewRenderInstance->numFramesDirty = gNumFrameResources;
 	XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, planeMat);
-}
-
-bool cOper_Push_Mesh::CheckCWCycle(vector<const cDot*>& cycle)
-{
-	bool isRightCycle = false;
-
-	XMVECTOR currDot = XMLoadFloat3(&cycle[0]->GetPosC());
-	XMVECTOR nextDot = XMLoadFloat3(&cycle[1]->GetPosC());
-	XMVECTOR line0Dir = XMVector3Normalize(nextDot - currDot);
-
-	float allAngle = 0;
-	for (size_t i = 0; i < cycle.size() - 1; i++)
-	{
-		XMVECTOR endDot = XMLoadFloat3(&cycle[(i + 2) % (UINT)cycle.size()]->GetPosC());
-		XMVECTOR line1Dir = XMVector3Normalize(endDot - nextDot);
-
-		float angle = 0;
-		XMStoreFloat(&angle, XMVector3AngleBetweenNormals(line0Dir, line1Dir));
-
-		XMVECTOR cross = XMVector3Cross(line0Dir, line1Dir);
-
-		if (cross.m128_f32[2] > 0)
-		{
-			allAngle -= angle;
-		}
-		else
-		{
-			allAngle += angle;
-		}
-
-		currDot = nextDot;
-		nextDot = endDot;
-		line0Dir = line1Dir;
-	}
-
-	return allAngle >= 0;
-}
-
-XMVECTOR XM_CALLCONV cOper_Push_Mesh::GetNormalFromTriangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)
-{
-	XMVECTOR originVector = XMLoadFloat3(&pos1);
-	XMVECTOR tryVector1 = XMLoadFloat3(&pos2) - originVector;
-	XMVECTOR tryVector2 = XMLoadFloat3(&pos3) - originVector;
-
-	return XMVector3Normalize(XMVector3Cross(tryVector1, tryVector2));
 }

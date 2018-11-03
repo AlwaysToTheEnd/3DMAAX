@@ -14,6 +14,26 @@ enum OPERATIONTYPE
 	OPER_COUNT,
 };
 
+struct CycleLine
+{
+	cLine* line = nullptr;
+	CycleLine* parentLine = nullptr;
+
+	vector<CycleLine> nextLines;
+
+	CycleLine() {}
+	CycleLine(cLine* line, CycleLine* parentLine)
+	{
+		this->line = line;
+		this->parentLine = parentLine;
+	}
+
+	void CycleLineCheck(list<cLine*>& leaveLines,
+		cLine * endLinkLine, int endLinkPoint, list<vector<const cDot*>>& cycleDots);
+
+	vector<const cDot*> GetDotsToParents();
+};
+
 class cOperation
 {
 public:
@@ -33,9 +53,9 @@ public:
 	virtual ~cOperation() {}
 	virtual void SetUp();
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
-		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) { assert(false); }
+		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) { assert(false); return 0; }
 
-	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
+	virtual void CancleOperation(DrawItems* draw) = 0;
 	virtual void EndOperation();
 
 public:
@@ -56,6 +76,8 @@ protected:
 	list<vector<const cDot*>> LineCycleCheck(DrawItems* drawItem);
 	void OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
 	bool EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs);
+	bool CheckCWCycle(vector<const cDot*>& cycle);
+	XMVECTOR XM_CALLCONV GetNormalFromTriangle(const XMFLOAT3& pos1, const XMFLOAT3& pos2, const XMFLOAT3& pos3);
 
 protected:
 	static shared_ptr<cRenderItem>		m_OperatorUi;

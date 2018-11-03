@@ -19,12 +19,10 @@ public:
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
 
-	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw);
+	virtual void CancleOperation(DrawItems* draw);
 
 private:
 	void PreviewPushMeshCreate(cMesh* currMesh);
-	bool CheckCWCycle(vector<const cDot*>& cycle);
-	XMVECTOR XM_CALLCONV GetNormalFromTriangle(const XMFLOAT3& pos1, const XMFLOAT3& pos2, const XMFLOAT3& pos3);
 
 private:
 	DrawItems*	m_draws;

@@ -74,10 +74,12 @@ UINT cOper_Add_Plane::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 	default:
 		break;
 	}
+
+	return 0;
 }
 
 
-void cOper_Add_Plane::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Plane::CancleOperation(DrawItems* draw)
 {
 	if (m_planes)
 	{

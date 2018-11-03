@@ -66,9 +66,9 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 				if (m_selectDrawsIndex == i)
 				{
 					cOperation::EndOperation();
-					CAMERA.SetTarget(it.second.m_plane);
+					CAMERA.SetTargetAndSettingAngle(it.second.m_plane);
 					currDrawItems = &it.second;
-					return;
+					return 0;
 				}
 
 				i++;
@@ -83,10 +83,9 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 				wstring name = L"drawItems" + to_wstring(drawItems.size());
 				drawItems.insert({ name, DrawItems(plane) });
 				SetDraws(drawItems[name]);
-				CAMERA.SetTarget(plane);
 				cOperation::EndOperation();
 				currDrawItems = &drawItems[name];
-				return;
+				return 0;
 			}
 		}
 
@@ -99,7 +98,7 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 }
 
 
-void cOper_Add_Draws::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Draws::CancleOperation(DrawItems* draw)
 {
 	cOperation::EndOperation();
 }

@@ -5,6 +5,103 @@ shared_ptr<cRenderItem> cOperation::m_prevViewRender = nullptr;
 shared_ptr<RenderInstance> cOperation::m_prevViewRenderInstance = nullptr;
 MeshGeometry* cOperation::m_previewGeo = nullptr;
 
+void CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
+	cLine * endLinkLine, int endLinkPoint, list<vector<const cDot*>>& cycleDots)
+{
+	int endcheck = endLinkLine->CheckLinked(line);
+
+	switch (endcheck)
+	{
+	case 0:
+	case 1:
+		if (endcheck != endLinkPoint)
+		{
+			cycleDots.push_back(GetDotsToParents());
+		}
+		break;
+	}
+
+
+	for (auto it = leaveLines.begin(); it != leaveLines.end(); )
+	{
+		bool isNextLine = true;
+		switch (line->CheckLinked(*it))
+		{
+		case 0:
+		case 1:
+			isNextLine = false;
+			nextLines.push_back({ *it,this });
+			break;
+		}
+
+		if (isNextLine)
+		{
+			it++;
+		}
+		else
+		{
+			it = leaveLines.erase(it);
+		}
+	}
+
+	for (auto& it : nextLines)
+	{
+		it.CycleLineCheck(leaveLines, endLinkLine, endLinkPoint, cycleDots);
+	}
+}
+
+vector<const cDot*> CycleLine::GetDotsToParents()
+{
+	vector<const cDot*> dots;
+
+	CycleLine* currLine = this;
+	while (true)
+	{
+		if (currLine->parentLine == nullptr)
+		{
+			break;
+		}
+
+		switch (currLine->line->CheckLinked(currLine->parentLine->line))
+		{
+		case 0:
+			if (dots.empty())
+			{
+				dots.push_back(currLine->line->GetSecondDot());
+			}
+
+			dots.push_back(currLine->line->GetFirstDot());
+			break;
+		case 1:
+			if (dots.empty())
+			{
+				dots.push_back(currLine->line->GetFirstDot());
+			}
+
+			dots.push_back(currLine->line->GetSecondDot());
+			break;
+		default:
+			assert(false);
+			break;
+		}
+
+		currLine = currLine->parentLine;
+	}
+
+	assert(dots.size());
+
+	vector<const cDot*> result;
+
+	while (dots.size())
+	{
+		result.push_back(dots.back());
+		dots.pop_back();
+	}
+
+	return result;
+}
+
+
 void cOperation::OperationsBaseSetup(shared_ptr<cRenderItem> renderItem)
 {
 	m_OperatorUi = renderItem;
@@ -142,6 +239,212 @@ bool cOperation::CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMes
 	}
 
 	return false;
+}
+
+list<vector<const cDot*>> cOperation::LineCycleCheck(DrawItems * drawItem)
+{
+	vector<cLine*> lines = drawItem->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
+
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		for (size_t j = 0; j < lines.size(); j++)
+		{
+			if (i == j) continue;
+
+			switch (lines[i]->CheckLinked(lines[j]))
+			{
+			case -1:
+				drawItem->m_draws[DRAW_LINES]->DeleteObject(lines[j--]);
+				lines = drawItem->m_draws[DRAW_LINES]->GetObjectsPtr<cLine>();
+				break;
+			}
+		}
+	}
+
+	size_t linesNum = lines.size();
+	if (linesNum < 3)
+	{
+		return list<vector<const cDot*>>();
+	}
+
+	list<cLine*> leaveLines;
+	list<vector<const cDot*>> cycleDots;
+
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		leaveLines.clear();
+
+		CycleLine rootLine;
+		rootLine.line = lines[i];
+
+		for (size_t j = i + 1; j < lines.size(); j++)
+		{
+			leaveLines.push_back(lines[j]);
+		}
+
+		for (int j = 0; j < i; j++)
+		{
+			leaveLines.push_back(lines[j]);
+		}
+
+		int nexSpotindex = -1;
+
+		for (auto it = leaveLines.begin(); it != leaveLines.end(); )
+		{
+			bool addNextLine = false;
+			switch (rootLine.line->CheckLinked(*it))
+			{
+			case 0:
+			{
+				if (nexSpotindex == -1)
+				{
+					nexSpotindex = 0;
+				}
+
+				if (nexSpotindex == 0)
+				{
+					addNextLine = true;
+				}
+			}
+			break;
+			case 1:
+			{
+				if (nexSpotindex == -1)
+				{
+					nexSpotindex = 1;
+				}
+
+				if (nexSpotindex == 1)
+				{
+					addNextLine = true;
+				}
+			}
+			break;
+			}
+
+			if (addNextLine)
+			{
+				rootLine.nextLines.push_back({ *it, &rootLine });
+				it = leaveLines.erase(it);
+			}
+			else
+			{
+				it++;
+			}
+		}
+
+		if (rootLine.nextLines.empty()) continue;
+
+		if (leaveLines.empty())
+		{
+
+		}
+
+		for (auto& it : rootLine.nextLines)
+		{
+			it.CycleLineCheck(leaveLines, rootLine.line, nexSpotindex, cycleDots);
+		}
+	}
+
+	OverLapCycleDotsCheck(cycleDots);
+
+	return cycleDots;
+}
+
+void cOperation::OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist)
+{
+	for (auto it1 = dotslist.begin(); it1 != dotslist.end(); it1++)
+	{
+		vector<const cDot*> pivotDots = *it1;
+		auto it2 = it1;
+		it2++;
+		for (it2; it2 != dotslist.end();)
+		{
+			if (it1->size() != it2->size())
+			{
+				it2++;
+				continue;
+			}
+
+			vector<const cDot*>& dots = *it2;
+
+			if (EqualCheck(pivotDots, dots))
+			{
+				it2 = dotslist.erase(it2);
+			}
+			else
+			{
+				it2++;
+			}
+		}
+	}
+}
+
+bool cOperation::EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs)
+{
+	for (int i = 0; i < lhs.size(); i++)
+	{
+		bool isEqual = false;
+		for (int j = 0; j < lhs.size(); j++)
+		{
+			if (lhs[i] == rhs[j])
+			{
+				isEqual = true;
+			}
+		}
+
+		if (isEqual == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool cOperation::CheckCWCycle(vector<const cDot*>& cycle)
+{
+	bool isRightCycle = false;
+
+	XMVECTOR currDot = XMLoadFloat3(&cycle[0]->GetPosC());
+	XMVECTOR nextDot = XMLoadFloat3(&cycle[1]->GetPosC());
+	XMVECTOR line0Dir = XMVector3Normalize(nextDot - currDot);
+
+	float allAngle = 0;
+	for (size_t i = 0; i < cycle.size() - 1; i++)
+	{
+		XMVECTOR endDot = XMLoadFloat3(&cycle[(i + 2) % (UINT)cycle.size()]->GetPosC());
+		XMVECTOR line1Dir = XMVector3Normalize(endDot - nextDot);
+
+		float angle = 0;
+		XMStoreFloat(&angle, XMVector3AngleBetweenNormals(line0Dir, line1Dir));
+
+		XMVECTOR cross = XMVector3Cross(line0Dir, line1Dir);
+
+		if (cross.m128_f32[2] > 0)
+		{
+			allAngle -= angle;
+		}
+		else
+		{
+			allAngle += angle;
+		}
+
+		currDot = nextDot;
+		nextDot = endDot;
+		line0Dir = line1Dir;
+	}
+
+	return allAngle >= 0;
+}
+
+XMVECTOR XM_CALLCONV cOperation::GetNormalFromTriangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)
+{
+	XMVECTOR originVector = XMLoadFloat3(&pos1);
+	XMVECTOR tryVector1 = XMLoadFloat3(&pos2) - originVector;
+	XMVECTOR tryVector2 = XMLoadFloat3(&pos3) - originVector;
+
+	return XMVector3Normalize(XMVector3Cross(tryVector1, tryVector2));
 }
 
 cDot * cOperation::AddDot(vector<unique_ptr<cDrawElement>>& draw)

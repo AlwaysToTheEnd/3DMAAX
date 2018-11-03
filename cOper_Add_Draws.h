@@ -16,7 +16,7 @@ public:
 	virtual void SetUp() override;
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
-	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
+	virtual void CancleOperation(DrawItems* draw) override;
 
 private:
 	void SetDraws(DrawItems& drawItems);

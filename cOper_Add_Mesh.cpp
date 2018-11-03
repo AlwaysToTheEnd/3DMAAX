@@ -19,8 +19,8 @@ UINT cOper_Add_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 	{
 		if (meshs.empty())
 		{
-			meshs.insert({ L"mesh_0",{} });
 			currMesh = &meshs[L"mesh_0"];
+			currMesh->Build(nullptr);
 		}
 
 		EndOperation();
@@ -88,7 +88,7 @@ UINT cOper_Add_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 	return 0;
 }
 
-void cOper_Add_Mesh::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Mesh::CancleOperation(DrawItems* draw)
 {
 	cOperation::EndOperation();
 }
