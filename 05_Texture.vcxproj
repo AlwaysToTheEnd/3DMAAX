@@ -153,19 +153,26 @@
     <ClInclude Include="05_Texture.h" />
     <ClInclude Include="cButtonCollector.h" />
     <ClInclude Include="cCamera.h" />
+    <ClInclude Include="cCSGObject.h" />
     <ClInclude Include="cDrawElement.h" />
     <ClInclude Include="cDrawLines.h" />
+    <ClInclude Include="cMesh.h" />
     <ClInclude Include="cDrawPlane.h" />
     <ClInclude Include="cDrawDot.h" />
     <ClInclude Include="cFontManager.h" />
     <ClInclude Include="cInputDeviceMG.h" />
+    <ClInclude Include="cMeshgeometryMG.h" />
     <ClInclude Include="cObejct.h" />
     <ClInclude Include="cObjectCoordinator.h" />
     <ClInclude Include="cOcTree.h" />
     <ClInclude Include="cOperation.h" />
     <ClInclude Include="cOperator.h" />
+    <ClInclude Include="cOper_Add_Dot.h" />
+    <ClInclude Include="cOper_Add_Draws.h" />
     <ClInclude Include="cOper_Add_Line.h" />
+    <ClInclude Include="cOper_Add_Mesh.h" />
     <ClInclude Include="cOper_Add_Plane.h" />
+    <ClInclude Include="cOper_Push_Mesh.h" />
     <ClInclude Include="cPercentageValueSet.h" />
     <ClInclude Include="cRenderItemMG.h" />
     <ClInclude Include="cTextureHeap.h" />
@@ -187,19 +194,26 @@
     <ClCompile Include="05_Texture.cpp" />
     <ClCompile Include="cButtonCollector.cpp" />
     <ClCompile Include="cCamera.cpp" />
+    <ClCompile Include="cCSGObject.cpp" />
     <ClCompile Include="cDrawElement.cpp" />
     <ClCompile Include="cDrawLines.cpp" />
+    <ClCompile Include="cMesh.cpp" />
     <ClCompile Include="cDrawPlane.cpp" />
     <ClCompile Include="cDrawDot.cpp" />
     <ClCompile Include="cFontManager.cpp" />
     <ClCompile Include="cInputDeviceMG.cpp" />
+    <ClCompile Include="cMeshgeometryMG.cpp" />
     <ClCompile Include="cObejct.cpp" />
     <ClCompile Include="cObjectCoordinator.cpp" />
     <ClCompile Include="cOcTree.cpp" />
     <ClCompile Include="cOperation.cpp" />
     <ClCompile Include="cOperator.cpp" />
+    <ClCompile Include="cOper_Add_Dot.cpp" />
+    <ClCompile Include="cOper_Add_Draws.cpp" />
     <ClCompile Include="cOper_Add_Line.cpp" />
+    <ClCompile Include="cOper_Add_Mesh.cpp" />
     <ClCompile Include="cOper_Add_Plane.cpp" />
+    <ClCompile Include="cOper_Push_Mesh.cpp" />
     <ClCompile Include="cPercentageValueSet.cpp" />
     <ClCompile Include="cRenderItemMG.cpp" />
     <ClCompile Include="cTextureHeap.cpp" />
@@ -227,13 +241,26 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="BezierGeometry.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shaders\Common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\DrawElementSahder.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="ShadowShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -246,6 +273,7 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Default.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

@@ -7,21 +7,27 @@ public:
 	cOperator();
 	~cOperator();
 
-	void SetUp(shared_ptr<cRenderItem> buttonRenderItem);
-	void Update(vector<unique_ptr<cDrawElement>>& draws);
+	void SetUp();
+	void Update();
+
+	void SetRenderState(bool value);
 
 private:
+	bool OperationCheck();
 	void OperationStart(int type);
 
 private:
-	static const int m_ButtonMtlTexBaseIndex = 0;
-	vector<unique_ptr<cDrawElement>>* m_draws;
+	const int						m_ButtonMtlTexBaseIndex = 0;
+	shared_ptr<cRenderItem>			m_buttonRenderItem;
+	cButtonCollector				m_operSelectButtons;
 
-	cOperation* m_currOperation;
-	vector<unique_ptr<cOperation>> m_operations;
+	vector<unique_ptr<cOperation>>	m_operations;
+	cOperation*						m_currOperation;
 
-	shared_ptr<cRenderItem> m_buttonRenderItem;
-	cButtonCollector m_drawButtonCollector;
-	cButtonCollector m_meshButtonCollector;
+	cDrawPlane							m_planes;
+	unordered_map<wstring, cMesh>		m_mesh;
+	unordered_map<wstring, DrawItems>	m_drawItems;
+	DrawItems*							m_currDraws;
+	cMesh*								m_currMesh;
 };
 

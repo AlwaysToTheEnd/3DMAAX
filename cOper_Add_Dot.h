@@ -1,25 +1,27 @@
 #pragma once
 
-class cOper_Add_Line : public cOperation
+class cOper_Add_Dot :public cOperation
 {
 private:
 	enum STATE
 	{
 		CURR_DRAW_CHECK,
-		FIRST_DOT_PICK,
-		SECEND_DOT_PICK,
+		SET_DOTS,
 	};
 
 public:
-	cOper_Add_Line();
-	virtual ~cOper_Add_Line();
+	cOper_Add_Dot();
+	virtual ~cOper_Add_Dot();
 
-	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems, 
 		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
 	virtual void CancleOperation(DrawItems* draw) override;
 	virtual void EndOperation() override;
 
 private:
-	cDot*					m_firstDot;
+	cPlane*		m_currPlane;
+	cDot*		m_currDot;
+	UINT		m_addDotCount;
+	UINT		m_existingDotNum;
 };
 

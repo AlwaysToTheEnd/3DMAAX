@@ -1,25 +1,24 @@
 #pragma once
 
-class cOper_Add_Line : public cOperation
+#include "cMesh.h"
+
+class cOper_Add_Mesh : public cOperation
 {
-private:
 	enum STATE
 	{
-		CURR_DRAW_CHECK,
-		FIRST_DOT_PICK,
-		SECEND_DOT_PICK,
+		SETUI,
+		PICK,
 	};
 
 public:
-	cOper_Add_Line();
-	virtual ~cOper_Add_Line();
+	cOper_Add_Mesh();
+	virtual ~cOper_Add_Mesh();
 
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
 	virtual void CancleOperation(DrawItems* draw) override;
-	virtual void EndOperation() override;
 
 private:
-	cDot*					m_firstDot;
+	int m_selectDrawsIndex;
 };
 

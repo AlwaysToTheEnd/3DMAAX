@@ -10,24 +10,30 @@ public:
 
 	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
-	void SetFirstDot(cObject* object) { m_hostObject[0] = object; }
-	void SetSecendDot(cObject* object) { m_hostObject[1] = object; }
+
+public:
+	void SetFirstDot(const cDot* object) { m_hostObject[0] = object; }
+	void SetSecondDot(const cDot* object) { m_hostObject[1] = object; }
+
+	int CheckLinked(const cLine* line);
+	const cDot* GetFirstDot() { return m_hostObject[0]; }
+	const cDot* GetSecondDot() { return m_hostObject[1]; }
 private:
-	cObject* m_hostObject[2];
+	const cDot*	m_hostObject[2];
+	float		m_lineDistacne;
 };
 
 class cDrawLines : public cDrawElement
 {
 public:
-	static void MeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-	static void DisPosUploaders() { m_geo->DisPosUploaders(); }
+	static void MeshSetUp();
 
 private:
-	static unique_ptr<MeshGeometry> m_geo;
+	static MeshGeometry* m_geo;
 
 public:
 	cDrawLines();
-	~cDrawLines();
+	virtual ~cDrawLines();
 
 	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) override;
 	virtual bool Picking(cObject** ppObject) override;

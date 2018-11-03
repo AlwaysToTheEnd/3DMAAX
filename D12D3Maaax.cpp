@@ -9,6 +9,7 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 D12D3Maaax::~D12D3Maaax()
 {
 	m_operator = nullptr;
+	delete MESHMG;
 	delete RENDERITEMMG;
 	delete OBJCOORD;
 	delete INPUTMG;
@@ -27,6 +28,7 @@ bool D12D3Maaax::Initialize()
 	cRenderItem::SetDevice(m_D3dDevice.Get());
 
 	FONTMANAGER->Build(m_D3dDevice.Get(), m_CommandQueue.Get());
+	MESHMG->Build(m_D3dDevice.Get(), m_CommandQueue, m_Fence, &m_CurrentFence);
 	ThrowIfFailed(m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr));
 	BuildTextures();
 	BuildRootSignature();
@@ -41,11 +43,7 @@ bool D12D3Maaax::Initialize()
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
 
-	cDrawLines::DisPosUploaders();
-	cDrawDot::DisPosUploaders();
-	cDrawPlane::DisPosUploaders();
-	cUIObject::DisPosUploaders();
-	cObjectCoordinator::DisPosUploaders();
+	MESHMG->MeshBuildUpGPU();
 	
 	OnResize();
 
@@ -58,7 +56,7 @@ void D12D3Maaax::OnResize()
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&m_3DProj, P);
-	P = XMMatrixOrthographicOffCenterLH(0, m_ClientWidth, m_ClientHeight, 0, -1, 1);
+	P = XMMatrixOrthographicOffCenterLH(0, (float)m_ClientWidth, (float)m_ClientHeight, 0, -1, 1);
 	XMStoreFloat4x4(&m_2DProj, P);
 
 	FONTMANAGER->Resize(m_ClientWidth, m_ClientHeight);
@@ -79,14 +77,19 @@ void D12D3Maaax::Update()
 
 	m_Camera.Update();
 	UpdateMainPassCB();
-	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, m_ClientWidth, m_ClientHeight);
+	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
 	
-	m_operator->Update(m_drawElements);
+	m_operator->Update();
 	OBJCOORD->Update();
-	UpdateDrawElement();
 
+	MESHMG->MeshBuildUpGPU();
 	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
+
+	if (GetAsyncKeyState(VK_F2)&0x0001)
+	{
+		m_isBaseWireFrameMode = !m_isBaseWireFrameMode;
+	}
 }
 
 void D12D3Maaax::Draw()
@@ -104,7 +107,7 @@ void D12D3Maaax::Draw()
 	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::Black, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LimeGreen, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -124,13 +127,24 @@ void D12D3Maaax::Draw()
 
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
+
+	if (m_isBaseWireFrameMode)
+	{
+		m_CommandList->SetPipelineState(m_PSOs["baseWF"].Get());
+	}
+
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
-	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
-	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
+	RENDERITEMMG->Render(m_CommandList.Get(), cMesh::m_meshRenderName);
+
+	m_CommandList->SetPipelineState(m_PSOs["drawLine"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "line");
 
 	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
-	RENDERITEMMG->Render(m_CommandList.Get(), "line");
+	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
+
+	m_CommandList->SetPipelineState(m_PSOs["planes"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
 
 	passCBAddress += d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
@@ -158,14 +172,6 @@ void D12D3Maaax::Draw()
 	m_CommandQueue->Signal(m_Fence.Get(), m_CurrentFence);
 }
 
-
-void D12D3Maaax::UpdateDrawElement()
-{
-	for (auto& it : m_drawElements)
-	{
-		it->Update();
-	}
-}
 
 void D12D3Maaax::UpdateMaterialCBs()
 {
@@ -298,11 +304,11 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 
 void D12D3Maaax::BuildGeometry()
 {
-	cDrawPlane::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cDrawLines::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cDrawDot::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cUIObject::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
-	cObjectCoordinator::MeshSetUp(m_D3dDevice.Get(), m_CommandList.Get());
+	cDrawPlane::MeshSetUp();
+	cDrawLines::MeshSetUp();
+	cDrawDot::MeshSetUp();
+	cUIObject::MeshSetUp();
+	cObjectCoordinator::MeshSetUp();
 }
 
 void D12D3Maaax::BuildPSOs()
@@ -323,7 +329,7 @@ void D12D3Maaax::BuildPSOs()
 		m_Shaders["basePS"]->GetBufferSize()
 	};
 	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	opaquePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	//opaquePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.SampleMask = UINT_MAX;
@@ -334,6 +340,10 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.SampleDesc.Quality = m_4xMsaaState ? (m_4xmsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["base"])));
+
+	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["baseWF"])));
+	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
@@ -364,7 +374,6 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&m_PSOs["ui"])));
 
 	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	//opaquePsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	opaquePsoDesc.InputLayout = { m_CVertexInputLayout.data(), (UINT)m_CVertexInputLayout.size() };
 	opaquePsoDesc.VS =
 	{
@@ -380,12 +389,30 @@ void D12D3Maaax::BuildPSOs()
 
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawElement"])));
 
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["drawLine"])));
+	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+	opaquePsoDesc.BlendState.RenderTarget[0].BlendEnable = true;
+	opaquePsoDesc.BlendState.RenderTarget[0].LogicOpEnable = false;
+	opaquePsoDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_DEST_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	opaquePsoDesc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_SRC_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_DEST_ALPHA;
+	opaquePsoDesc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_MAX;
+	opaquePsoDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	opaquePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["planes"])));
+
 	RENDERITEMMG->AddRenderSet("base");
 	RENDERITEMMG->AddRenderSet("objectCoordinator");
 	RENDERITEMMG->AddRenderSet("plane");
 	RENDERITEMMG->AddRenderSet("line");
 	RENDERITEMMG->AddRenderSet("dot");
 	RENDERITEMMG->AddRenderSet("ui");
+	RENDERITEMMG->AddRenderSet(cMesh::m_meshRenderName);
 }
 
 void D12D3Maaax::BuildTextures()
@@ -407,7 +434,7 @@ void D12D3Maaax::BuildMaterials()
 {
 	auto wirefence = make_unique<Material>();
 	wirefence->name = "wirefence";
-	wirefence->matCBIndex = m_Materials.size();
+	wirefence->matCBIndex = (int)m_Materials.size();
 	wirefence->diffuseSrvHeapIndex = 0;
 	wirefence->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	wirefence->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
@@ -417,7 +444,7 @@ void D12D3Maaax::BuildMaterials()
 
 	auto icemirror = std::make_unique<Material>();
 	icemirror->name = "icemirror";
-	icemirror->matCBIndex = m_Materials.size();
+	icemirror->matCBIndex = (int)m_Materials.size();
 	icemirror->diffuseSrvHeapIndex = 2;
 	icemirror->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 	icemirror->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
@@ -428,33 +455,9 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	for (int i = 0; i < OBJECTSPLACE::OBJECTS_COUNT; i++)
-	{
-		switch (i)
-		{
-		case DRAW_PLNAES:
-			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawPlane));
-			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
-			break;
-		case DRAW_LINES:
-			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawLines));
-			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("line"));
-			break;
-		case DRAW_DOTS:
-			m_drawElements.push_back(unique_ptr<cDrawElement>(new cDrawDot));
-			m_drawElements.back()->SetRenderItem(RENDERITEMMG->AddRenderItem("dot"));
-			break;
-		case OBJECTS_COUNT:
-			break;
-		default:
-			assert(false);
-			break;
-		}
-	}
-
+	cOperation::OperationsBaseSetup(RENDERITEMMG->AddRenderItem("ui"));
 	m_operator = make_unique<cOperator>();
-	cOperation::SetOperatorUIRender(RENDERITEMMG->AddRenderItem("ui"));
-	m_operator->SetUp(RENDERITEMMG->AddRenderItem("ui"));
+	m_operator->SetUp();
 
 	OBJCOORD->SetUp();
 }

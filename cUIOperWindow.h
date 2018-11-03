@@ -16,12 +16,13 @@ public:
 	virtual ~cUIOperWindow();
 
 	virtual void Build(shared_ptr<cRenderItem> renderItem) override;
-	virtual void IsRenderState(bool value) override;
+	virtual void SetRenderState(bool value) override;
 	 
 	void AddParameter(wstring dataName, DXGI_FORMAT format,void* pData);
-	void ClearParameters() { m_operParameters.clear(); m_currParameterIndex = -1; }
+	void ClearParameters();
 
 	void SetFontSize(int size) { m_fontSize = size; }
+	bool IsMousePosInUIWindow();
 private:
 	virtual void UIUpdate() override;
 

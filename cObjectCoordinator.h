@@ -5,11 +5,10 @@
 class cObjectCoordinator
 {
 public:
-	static void MeshSetUp(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-	static void DisPosUploaders() { m_geo->DisPosUploaders(); }
+	static void MeshSetUp();
 
 private:
-	static unique_ptr<MeshGeometry>	m_geo;
+	static MeshGeometry* m_geo;
 
 public:
 	~cObjectCoordinator() {}
@@ -46,6 +45,7 @@ private:
 	BoundingBox					m_arrowBoundingBox[AXIS_NONE] = {};
 	shared_ptr<cRenderItem>		m_arrowRenderItem;
 	shared_ptr<RenderInstance>	m_arrowRenderInstance[AXIS_NONE] = {};
+	BoundingSphere				m_sphereBounding;
 	shared_ptr<cRenderItem>		m_sphereRenderItem;
 	shared_ptr<RenderInstance>	m_sphereRenderInstance;
 

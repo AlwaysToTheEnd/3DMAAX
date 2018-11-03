@@ -1,28 +1,26 @@
 #include "stdafx.h"
 
-
 cOperator::cOperator()
 	: m_currOperation(nullptr)
 	, m_buttonRenderItem(nullptr)
-	, m_draws(nullptr)
+	, m_currDraws(nullptr)
+	, m_currMesh(nullptr)
 {
 }
-
 
 cOperator::~cOperator()
 {
 }
 
-void cOperator::SetUp(shared_ptr<cRenderItem> buttonRenderItem)
+void cOperator::SetUp()
 {
-	m_buttonRenderItem = buttonRenderItem;
+	m_buttonRenderItem = RENDERITEMMG->AddRenderItem("ui");
+	m_planes.SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
 
-	m_drawButtonCollector.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
-	m_drawButtonCollector.SetPos({ 0,0,0 });
-	m_meshButtonCollector.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
-	m_meshButtonCollector.SetPos({ 0,NOMALBUTTONSIZE,0 });
+	m_operSelectButtons.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
+	m_operSelectButtons.SetPos({ 0,0,0 });
 
-	for (int i = 0; i < OPER_MESHOPER_COUNT; i++)
+	for (int i = 0; i < OPER_COUNT; i++)
 	{
 		switch (i)
 		{
@@ -32,43 +30,77 @@ void cOperator::SetUp(shared_ptr<cRenderItem> buttonRenderItem)
 		case OPER_ADD_LINE:
 			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Line));
 			break;
-		case OPER_PUSH_MESH:
-			continue;
+		case OPER_ADD_DOT:
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Dot));
 			break;
-		case OPER_DRAWOPER_COUNT:
-			continue;
+		case OPER_PUSH_MESH:
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Push_Mesh));
+			break;
+		case OPER_DRAWOPER:
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Draws));
+			break;
+		case OPER_MESHOPER:
+			m_operations.push_back(unique_ptr<cOperation>(new cOper_Add_Mesh));
 			break;
 		default:
 			assert(false);
 			break;
 		}
 
-		m_operations.back()->SetUp();
-		m_drawButtonCollector.AddButton(m_ButtonMtlTexBaseIndex + i,
+		m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
 			bind(&cOperator::OperationStart, this, placeholders::_1), i);
+
+		m_operations.back()->SetUp();
 	}
 }
 
-void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws)
+void cOperator::Update()
 {
-	m_draws = &draws;
+	if (OperationCheck())
+	{
+		m_currOperation->OperationUpdate(m_drawItems, m_planes, m_mesh, m_currDraws, m_currMesh);
+	}
 
+	if (m_currDraws)
+	{
+		for (auto& it : m_currDraws->m_draws)
+		{
+			it->Update();
+		}
+	}
+
+	m_operSelectButtons.Update();
+	m_planes.Update();
+}
+
+void cOperator::SetRenderState(bool value)
+{
+	m_operSelectButtons.SetRenderState(value);
+}
+
+bool cOperator::OperationCheck()
+{
 	if (m_currOperation)
 	{
 		if (!m_currOperation->GetOperState())
 		{
+			if (m_currDraws)
+			{
+				m_currDraws->SetPickRender(2);
+			}
+
 			m_currOperation = nullptr;
 		}
 		else
 		{
-			if (GetAsyncKeyState(VK_SPACE)&0x0001)
+			if (GetAsyncKeyState(VK_SPACE) & 0x0001)
 			{
 				m_currOperation->EndOperation();
 				m_currOperation = nullptr;
 			}
-			else if(GetAsyncKeyState(VK_ESCAPE) & 0x0001)
+			else if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 			{
-				m_currOperation->CancleOperation(draws);
+				m_currOperation->CancleOperation(m_currDraws);
 				m_currOperation = nullptr;
 			}
 		}
@@ -81,45 +113,37 @@ void cOperator::Update(vector<unique_ptr<cDrawElement>>& draws)
 			if (it->GetOperState())
 			{
 				m_currOperation = it.get();
+				break;
 			}
 		}
-	}
 
-	if (m_currOperation)
-	{
-		switch (m_currOperation->GetOperType())
+		if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 		{
-		case OPER_ADD_PLANE:
-		case OPER_ADD_LINE:
-			m_currOperation->DrawElementOperation(draws);
-			break;
-		default:
-			break;
+			m_currDraws = nullptr;
+			CAMERA.SetTargetAndSettingAngle(nullptr);
 		}
 	}
-	else
-	{
-		m_drawButtonCollector.Update();
-		m_meshButtonCollector.Update();
-	}
+
+	return m_currOperation != nullptr;
 }
 
-void cOperator::OperationStart(int type)
+void cOperator::OperationStart(int index)
 {
 	assert(m_operations.size() && "It had not Setup");
 
-	int index = type;
-	
-	if (type >= OPER_DRAWOPER_COUNT)
+	if (index == OPER_DRAWOPER)
 	{
-		index--;
+		if (m_currDraws)
+		{
+			m_currDraws->SetPickRender(0);
+		}
 	}
 
 	m_operations[index]->StartOperation();
 
 	if (m_currOperation)
 	{
-		m_currOperation->CancleOperation(*m_draws);
+		m_currOperation->CancleOperation(m_currDraws);
 	}
 
 	m_currOperation = m_operations[index].get();

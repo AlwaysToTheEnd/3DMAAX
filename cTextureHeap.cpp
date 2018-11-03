@@ -22,7 +22,7 @@ void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, string name, wstring
 	assert(it == m_Textures.end() && "This name is overlapping name");
 
 	TEXTURENUM addTexture;
-	addTexture.num = m_Textures.size();
+	addTexture.num = (UINT)m_Textures.size();
 	addTexture.tex.name = name;
 
 	ResourceUploadBatch resourceUpload(m_device);

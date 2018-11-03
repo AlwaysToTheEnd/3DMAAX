@@ -1,6 +1,5 @@
 #pragma once
 
-
 class cCamera
 {
 public:
@@ -23,7 +22,6 @@ private:
 	float		m_Distance;
 	float		m_RotX;
 	float		m_RotY;
-	float		m_RotZ;
 	bool		m_isButtonDown;
 	POINT		m_PrevMouse;
 	POINT		m_CurrMouse;

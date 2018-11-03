@@ -123,7 +123,7 @@ bool XM_CALLCONV cOcTree::OctreeNode::Picking(PICKRAY ray, float & dist)
 				assert(false);
 				break;
 			}
-
+			
 			float distance = FLT_MAX;
 			if (TriangleTests::Intersects(ray.origin, ray.ray, XMLoadFloat3(vertexPosition0),
 				XMLoadFloat3(vertexPosition1), XMLoadFloat3(vertexPosition2), distance))
@@ -133,6 +133,87 @@ bool XM_CALLCONV cOcTree::OctreeNode::Picking(PICKRAY ray, float & dist)
 				if (dist > distance)
 				{
 					dist = distance;
+				}
+			}
+		}
+	}
+
+	return isPicked;
+}
+
+bool XM_CALLCONV cOcTree::OctreeNode::GetPickTriangle(PICKRAY ray, float & dist, XMFLOAT3 & triPos0, XMFLOAT3 & triPos1, XMFLOAT3 & triPos2)
+{
+	bool isPicked = false;
+
+	if (m_triAngles == nullptr)
+	{
+		for (int i = 0; i < OCTREE_TREENUM; i++)
+		{
+			float distance = FLT_MAX;
+			if (m_nodes[i]->boundBox.Intersects(ray.origin, ray.ray, distance))
+			{
+				if (distance < dist)
+				{
+					if (m_nodes[i]->Picking(ray, dist))
+					{
+						isPicked = true;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		BYTE* vertexs = reinterpret_cast<BYTE*>(m_geo->vertexBufferCPU->GetBufferPointer());
+		BYTE* indices = reinterpret_cast<BYTE*>(m_geo->indexBufferCPU->GetBufferPointer());
+		UINT vertexByteStride = m_geo->vertexByteStride;
+
+		for (auto& it : *m_triAngles)
+		{
+			XMFLOAT3* vertexPosition0 = nullptr;
+			XMFLOAT3* vertexPosition1 = nullptr;
+			XMFLOAT3* vertexPosition2 = nullptr;
+
+			switch (m_geo->indexFormat)
+			{
+			case DXGI_FORMAT_R16_UINT:
+			{
+				UINT16* currIndex = reinterpret_cast<UINT16*>(indices + it * 3 * sizeof(UINT16));
+				vertexPosition0 = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
+				currIndex++;
+				vertexPosition1 = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
+				currIndex++;
+				vertexPosition2 = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
+			}
+			break;
+			case DXGI_FORMAT_R32_UINT:
+			{
+				UINT* currIndex = reinterpret_cast<UINT*>(indices + it * 3 * sizeof(UINT));
+				vertexPosition0 = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
+				currIndex++;
+				vertexPosition1 = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
+				currIndex++;
+				vertexPosition2 = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
+			}
+			break;
+			default:
+				assert(false);
+				break;
+			}
+
+			float distance = FLT_MAX;
+			if (TriangleTests::Intersects(ray.origin, ray.ray, XMLoadFloat3(vertexPosition0),
+				XMLoadFloat3(vertexPosition1), XMLoadFloat3(vertexPosition2), distance))
+			{
+				isPicked = true;
+
+				if (dist > distance)
+				{
+					triPos0 = *vertexPosition0;
+					triPos1 = *vertexPosition1;
+					triPos2 = *vertexPosition2;
+					dist = distance;
+
 				}
 			}
 		}
@@ -186,9 +267,9 @@ void cOcTree::OctreeNode::CreateChildNode()
 	m_triAngles = nullptr;
 }
 
-bool cOcTree::OctreeNode::InterSect(int tryangleNum)
+bool cOcTree::OctreeNode::InterSect(int triangleNum)
 {
-	if (tryangleNum < 0) return false;
+	if (triangleNum < 0) return false;
 
 	BYTE* vertexs = reinterpret_cast<BYTE*>(m_geo->vertexBufferCPU->GetBufferPointer());
 	BYTE* indices = reinterpret_cast<BYTE*>(m_geo->indexBufferCPU->GetBufferPointer());
@@ -205,14 +286,14 @@ bool cOcTree::OctreeNode::InterSect(int tryangleNum)
 		{
 		case DXGI_FORMAT_R16_UINT:
 		{
-			UINT16* currIndex = reinterpret_cast<UINT16*>(indices + tryangleNum * 3 * sizeof(UINT16));
+			UINT16* currIndex = reinterpret_cast<UINT16*>(indices + triangleNum * 3 * sizeof(UINT16));
 			currIndex += i;
 			vertexPosition = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
 		}
 		break;
 		case DXGI_FORMAT_R32_UINT:
 		{
-			UINT* currIndex = reinterpret_cast<UINT*>(indices + tryangleNum * 3 * sizeof(UINT));
+			UINT* currIndex = reinterpret_cast<UINT*>(indices + triangleNum * 3 * sizeof(UINT));
 			currIndex += i;
 			vertexPosition = reinterpret_cast<XMFLOAT3*>(vertexs + vertexByteStride * (*currIndex));
 		}
@@ -263,14 +344,14 @@ cOcTree * cOcTree::CreateOcTree(const MeshGeometry * geo, int numRecursion)
 
 	UINT vertexByteStride = geo->vertexByteStride;
 	UINT indexByteSize = geo->indexFormat == DXGI_FORMAT_R16_UINT ? sizeof(UINT16) : sizeof(UINT);
-	UINT vertexCount = geo->vertexBufferCPU->GetBufferSize() / vertexByteStride;
-	UINT triangleCount = geo->indexBufferCPU->GetBufferSize() / indexByteSize / 3;
+	UINT vertexCount = (UINT)geo->vertexBufferCPU->GetBufferSize() / vertexByteStride;
+	UINT triangleCount = (UINT)geo->indexBufferCPU->GetBufferSize() / indexByteSize / 3;
 
 	XMFLOAT3 maxPos = { -FLT_MAX,-FLT_MAX,-FLT_MAX };
 	XMFLOAT3 minPos = { FLT_MAX,FLT_MAX ,FLT_MAX };
 	XMFLOAT3* vertexPos = nullptr;
 
-	for (int i = 0; i < vertexCount; i++)
+	for (UINT i = 0; i < vertexCount; i++)
 	{
 		vertexPos = reinterpret_cast<XMFLOAT3*>(vertexs + i * vertexByteStride);
 		maxPos.x = MathHelper::Max(vertexPos->x, maxPos.x);
@@ -298,5 +379,11 @@ bool cOcTree::Picking(PICKRAY ray, float & dist)
 {
 	dist = FLT_MAX;
 	return m_Root->Picking(ray, dist);
+}
+
+bool XM_CALLCONV cOcTree::GetPickTriangle(PICKRAY ray, float & dist, XMFLOAT3 & triPos0, XMFLOAT3 & triPos1, XMFLOAT3 & triPos2)
+{
+	dist = FLT_MAX;
+	return m_Root->GetPickTriangle(ray, dist, triPos0, triPos1, triPos2);
 }
 

@@ -21,20 +21,24 @@ cCamera::~cCamera()
 
 void cCamera::Update()
 {
-	XMMATRIX matRot = XMMatrixRotationRollPitchYaw(m_RotX, m_RotY, m_RotZ);
+	XMMATRIX matRot = XMMatrixRotationRollPitchYaw(m_RotX, m_RotY, 0);
 	XMVECTOR eyePos = XMVectorSet(0, 0, -m_Distance, 1);
 
 	eyePos = XMVector3TransformNormal(eyePos, matRot);
 	XMVECTOR lookAt = XMVectorZero();
+	XMVECTOR up = { 0,1,0,0 };
 
 	if (m_target)
 	{
+		XMMATRIX targetRotation = XMMatrixRotationQuaternion(XMLoadFloat4(&m_target->GetQuaternionInstance()));
+		up = XMVector3TransformNormal(up, targetRotation);
+		eyePos = XMVector3TransformNormal(eyePos, targetRotation);
 		lookAt = XMLoadFloat3(&m_target->GetWorldPos());
 		eyePos = XMLoadFloat3(&m_target->GetWorldPos()) + eyePos;
 	}
 
 	XMStoreFloat3(&m_eye, eyePos);
-	XMStoreFloat4x4(&m_View, XMMatrixLookAtLH(eyePos, lookAt, { 0,1,0,0 }));
+	XMStoreFloat4x4(&m_View, XMMatrixLookAtLH(eyePos, lookAt, up));
 }
 
 void cCamera::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -86,19 +90,7 @@ void cCamera::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void cCamera::SetTargetAndSettingAngle(const cObject * target)
 {
 	m_target = target;
-	XMFLOAT4 rotationQuater = m_target->GetQuaternionInstance();
 
-	double q2sqr = rotationQuater.y * rotationQuater.y;
-	double t0 = -2.0 * (q2sqr + rotationQuater.z * rotationQuater.z) + 1.0;
-	double t1 = +2.0 * (rotationQuater.x * rotationQuater.y + rotationQuater.w * rotationQuater.z);
-	double t2 = -2.0 * (rotationQuater.x * rotationQuater.z - rotationQuater.w * rotationQuater.y);
-	double t3 = +2.0 * (rotationQuater.z * rotationQuater.z + rotationQuater.w * rotationQuater.x);
-	double t4 = -2.0 * (rotationQuater.x * rotationQuater.x + q2sqr) + 1.0;
-
-	t2 = t2 > 1.0 ? 1.0 : t2;
-	t2 = t2 < -1.0 ? -1.0 : t2;
-
-	m_RotX = asin(t2);
-	m_RotY = atan2(t3, t4);
-	m_RotZ = atan2(t1, t0);
+	m_RotY = 0;
+	m_RotX = 0;
 }

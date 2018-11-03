@@ -3,51 +3,34 @@
 
 cOper_Add_Line::cOper_Add_Line()
 	:cOperation(OPER_ADD_LINE)
-	, m_operationText(nullptr)
-	, m_currPlane(nullptr)
 	, m_firstDot(nullptr)
 {
 }
-
 
 cOper_Add_Line::~cOper_Add_Line()
 {
 
 }
 
-void cOper_Add_Line::SetUp()
-{
-	m_operControl.Build(m_OperatorUi);
-	m_operationText = FONTMANAGER->GetFont("baseFont");
-	m_operationText->isRender = false;
-	m_operationText->color = Colors::Red;
-	m_operationText->printString = L"Select Plane";
-	m_operationText->pos = { 30,30,0 };
-}
-
-void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw)
+UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	switch (m_worksSate)
 	{
-	case cOper_Add_Line::SELECT_PLANE:
+	case cOper_Add_Line::CURR_DRAW_CHECK:
 	{
-		m_operationText->isRender = true;
-		if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
+		if (CurrDrawCheckAndPick(drawItems, currDrawItems))
 		{
-			cObject* pickPlane = nullptr;
-
-			if (draw[DRAW_PLNAES]->Picking(&pickPlane))
-			{
-				m_currPlane = static_cast<cPlane*>(pickPlane);
-				m_worksSate = FIRST_DOT_PICK;
-				m_operationText->printString = L"Select First dot";
-			}
+			m_operationText->isRender = true;
+			m_operationText->printString = L"Select First Dot";
+			m_worksSate = FIRST_DOT_PICK;
 		}
 	}
-		break;
+	break;
 	case cOper_Add_Line::FIRST_DOT_PICK:
 	{
-		m_firstDot = AddDotAtCurrPlane(draw);
+		m_operationText->isRender = true;
+		m_firstDot = AddDotAtCurrPlane(currDrawItems);
 
 		if (m_firstDot)
 		{
@@ -55,56 +38,47 @@ void cOper_Add_Line::DrawElementOperation(vector<unique_ptr<cDrawElement>>& draw
 			m_operationText->printString = L"Select Secend dot";
 		}
 	}
-		break;
+	break;
 	case cOper_Add_Line::SECEND_DOT_PICK:
 	{
-		cDot* secendDot = AddDotAtCurrPlane(draw);
+		cDot* secendDot = AddDotAtCurrPlane(currDrawItems);
 
-		if (secendDot)
+		if (secendDot&& secendDot != m_firstDot)
 		{
-			cLine* line=static_cast<cLine*>(draw[DRAW_LINES]->AddElement());
+			cLine* line = AddLine(currDrawItems->m_draws);
 			line->SetFirstDot(m_firstDot);
-			line->SetSecendDot(secendDot);
+			line->SetSecondDot(secendDot);
 			m_firstDot = nullptr;
-			m_operationText->isRender=false;
-			m_operationText->printString = L"Select Plane";
+			m_operationText->printString = L"Select First Dot";
 			EndOperation();
 		}
 	}
-		break;
-	default:
-		break;
+	break;
 	}
+
+	return 0;
 }
 
-void cOper_Add_Line::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Line::CancleOperation(DrawItems* draw)
 {
-	draw[DRAW_LINES].get()->DeleteBackObject();
-	m_firstDot = nullptr;
-	m_operationText->isRender = false;
-	m_operationText->printString = L"Select Plane";
+	if (draw)
+	{
+		draw->m_draws[DRAW_LINES]->DeleteBackObject();
+
+		if (m_firstDot)
+		{
+			draw->m_draws[DRAW_DOTS]->DeleteBackObject();
+		}
+
+		m_firstDot = nullptr;
+	}
+
 	EndOperation();
 }
 
-cDot * cOper_Add_Line::AddDotAtCurrPlane(vector<unique_ptr<cDrawElement>>& draw)
+void cOper_Add_Line::EndOperation()
 {
-	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
-	{
-		float distance;
-		PICKRAY ray = INPUTMG->GetMousePickLay();
-		if (m_currPlane->Picking(ray, distance))
-		{
-			XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), m_currPlane->GetXMMatrix());
-			XMVECTOR pos = ray.origin + ray.ray*distance;
-			pos = XMVector3TransformCoord(pos, planeInvMat);
-			pos.m128_f32[2] = 0;
-			cDot* dot = static_cast<cDot*>(draw[DRAW_DOTS]->AddElement());
-			XMStoreFloat3(&dot->GetPos(), pos);
-			dot->SetHostObject(m_currPlane);
-
-			return dot;
-		}
-	}
-
-	return nullptr;
+	cOperation::EndOperation();
+	m_firstDot = nullptr;
+	m_operationText->printString = L"Select First Dot";
 }

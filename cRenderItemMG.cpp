@@ -44,13 +44,11 @@ void cRenderItem::Update()
 		{
 			if ((*it)->numFramesDirty > 0)
 			{
-				InstanceData data;
+				InstanceData data = (*it)->instanceData;
 				XMMATRIX world = XMLoadFloat4x4(&(*it)->instanceData.World);
 				XMMATRIX texTransform = XMLoadFloat4x4(&(*it)->instanceData.TexTransform);
-				data.MaterialIndex = (*it)->instanceData.MaterialIndex;
 				XMStoreFloat4x4(&data.World, XMMatrixTranspose(world));
 				XMStoreFloat4x4(&data.TexTransform, XMMatrixTranspose(texTransform));
-				data.sizeScale = (*it)->instanceData.sizeScale;
 
 				m_currFrameCB->CopyData(m_renderInstanceCount, data);
 				(*it)->numFramesDirty = gNumFrameResources;
@@ -71,7 +69,7 @@ void cRenderItem::Render(ID3D12GraphicsCommandList * cmdList)
 		cmdList->IASetVertexBuffers(0, 1, &m_geo->GetVertexBufferView());
 		cmdList->IASetIndexBuffer(&m_geo->GetIndexBufferView());
 		cmdList->IASetPrimitiveTopology(m_primitiveType);
-
+	
 		cmdList->SetGraphicsRootShaderResourceView(0,
 			m_currFrameCB->Resource()->GetGPUVirtualAddress());
 
@@ -102,7 +100,7 @@ shared_ptr<RenderInstance> cRenderItem::GetRenderIsntance()
 	if (m_instances.size() > m_currBufferSize)
 	{
 		m_numFrameDirty = gNumFrameResources;
-		m_currBufferSize = m_instances.size() * 2;
+		m_currBufferSize = (UINT)m_instances.size() * 2;
 	}
 
 	return m_instances.back();
