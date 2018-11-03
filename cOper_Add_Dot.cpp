@@ -27,13 +27,14 @@ void cOper_Add_Dot::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-void cOper_Add_Dot::DrawElementOperation(DrawItems* drawItems)
+UINT cOper_Add_Dot::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	switch (m_worksSate)
 	{
 	case cOper_Add_Dot::SET_DOTS:
 	{
-		cDot* addDot = AddDotAtCurrPlane(drawItems);
+		cDot* addDot = AddDotAtCurrPlane(currDrawItems);
 		m_operationText->isRender = true;
 
 		if (addDot != nullptr && m_currDot != addDot)
@@ -52,7 +53,7 @@ void cOper_Add_Dot::DrawElementOperation(DrawItems* drawItems)
 			m_currDot->SetPickRender(1);
 		}
 
-		if (m_existingDotNum < drawItems->m_draws[DRAW_DOTS]->GetObjectNum())
+		if (m_existingDotNum < currDrawItems->m_draws[DRAW_DOTS]->GetObjectNum())
 		{
 			m_existingDotNum++;
 			m_addDotCount++;
@@ -64,6 +65,8 @@ void cOper_Add_Dot::DrawElementOperation(DrawItems* drawItems)
 	default:
 		break;
 	}
+
+	return 0;
 }
 
 void cOper_Add_Dot::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)

@@ -1,7 +1,7 @@
 #pragma once
 #include "cUIObject.h"
 #include "cUIOperWindow.h"
-#include "cDrawMesh.h"
+#include "cMesh.h"
 
 enum OPERATIONTYPE
 {
@@ -31,11 +31,8 @@ public:
 
 	virtual ~cOperation() {}
 	virtual void SetUp() = 0;
-	virtual void DrawElementOperation(DrawItems* drawItems) { assert(false); }
-	virtual void PlaneAddOperation(cDrawPlane& planes, cMesh* currMesh) { assert(false); }
-	virtual void MeshOperation(cMesh* currMesh) { assert(false); }
-	virtual DrawItems* DrawsAddOperatioin(unordered_map<wstring, DrawItems>& drawItems, cDrawPlane& planes) { assert(false); return nullptr; }
-	virtual DrawItems* MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh, cMesh** mesh) { assert(false); return nullptr; }
+	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) { assert(false); }
 
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) = 0;
 	virtual void EndOperation();
@@ -50,7 +47,7 @@ protected:
 	cDot* AddDot(vector<unique_ptr<cDrawElement>>& draw);
 	cLine* AddLine(vector<unique_ptr<cDrawElement>>& draw);
 	bool PickPlane(cDrawPlane* planes, cPlane** plane);
-	cDot * AddDotAtCurrPlane(DrawItems* drawItems);
+	cDot* AddDotAtCurrPlane(DrawItems* drawItems);
 
 protected:
 	static shared_ptr<cRenderItem>		m_OperatorUi;

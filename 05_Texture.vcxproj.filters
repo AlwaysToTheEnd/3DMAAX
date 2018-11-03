@@ -73,7 +73,7 @@
     <Filter Include="Objects\ElementObject\Draws">
       <UniqueIdentifier>{74b12965-073b-4868-b2f8-eb3f5436c60c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\ElementObject\Meshs">
+    <Filter Include="Objects\Meshs">
       <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -189,11 +189,11 @@
     <ClInclude Include="cOper_Push_Mesh.h">
       <Filter>cOperation\MeshOper</Filter>
     </ClInclude>
-    <ClInclude Include="cDrawMesh.h">
-      <Filter>Objects\ElementObject\Meshs</Filter>
-    </ClInclude>
     <ClInclude Include="cCSGObject.h">
       <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="cMesh.h">
+      <Filter>Objects\Meshs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -299,11 +299,11 @@
     <ClCompile Include="cOper_Push_Mesh.cpp">
       <Filter>cOperation\MeshOper</Filter>
     </ClCompile>
-    <ClCompile Include="cDrawMesh.cpp">
-      <Filter>Objects\ElementObject\Meshs</Filter>
-    </ClCompile>
     <ClCompile Include="cCSGObject.cpp">
       <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="cMesh.cpp">
+      <Filter>Objects\Meshs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -29,7 +29,8 @@ void cOper_Push_Mesh::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
+UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	m_operControl.Update(XMMatrixIdentity());
 
@@ -73,6 +74,7 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 			m_currDrawCycleDotsList.clear();
 			m_draws = currMesh->GetDraws()[m_selectDrawsIndex];
 			m_currDrawCycleDotsList = currMesh->LineCycleCheck(m_selectDrawsIndex);
+			CAMERA.SetTarget(m_draws->m_plane);
 
 			if (m_currDrawCycleDotsList.empty())
 			{
@@ -90,20 +92,14 @@ void cOper_Push_Mesh::MeshOperation(cMesh* currMesh)
 					i++;
 				}
 
-				i = 0;
 				vector<DrawItems*>& meshDraws = currMesh->GetDraws();
 				for (auto& it : meshDraws)
 				{
-					if (i != m_selectDrawsIndex)
+					if (it!=m_draws)
 					{
 						it->SetRenderState(false);
 					}
-					else
-					{
-						//CAMERA.SetTarget(it->m_plane);
-					}
 
-					i++;
 				}
 
 				m_operControl.SetRenderState(true);

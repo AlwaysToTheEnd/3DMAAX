@@ -37,11 +37,27 @@ void cUIOperWindow::AddParameter(wstring dataName, DXGI_FORMAT format, void * pD
 {
 	m_operParameters.push_back({ dataName,format,pData });
 
-	for (size_t i = m_operFonts.size(); i < m_operParameters.size(); i++)
+	for (size_t i = 0; i < m_operParameters.size(); i++)
 	{
-		m_operFonts.push_back(FONTMANAGER->GetFont("baseFont"));
-		m_operFonts.back()->isRender = false;
+		if (i >= m_operFonts.size())
+		{
+			m_operFonts.push_back(FONTMANAGER->GetFont("baseFont"));
+		}
+
+		m_operFonts[i]->isRender = m_renderInstance->m_isRenderOK;
 	}
+}
+
+void cUIOperWindow::ClearParameters()
+{
+	m_operParameters.clear();
+	
+	for (auto& it : m_operFonts)
+	{
+		it->isRender = false;
+	}
+
+	m_currParameterIndex = -1;
 }
 
 bool cUIOperWindow::IsMousePosInUIWindow()

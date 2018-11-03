@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-const string cDrawMesh::m_meshRenderName = "baseMesh";
+const char* cMesh::m_meshRenderName = "baseMesh";
 
 cMesh::cMesh()
 	: m_geo(nullptr)
@@ -15,8 +15,17 @@ cMesh::~cMesh()
 
 void cMesh::Build(shared_ptr<cRenderItem> renderItem)
 {
-	m_renderItem = renderItem;
+	static UINT meshNum = 0;
+
+	m_renderItem = RENDERITEMMG->AddRenderItem(m_meshRenderName);
+	m_geo = MESHMG->AddTemporaryMesh(m_meshRenderName+to_string(meshNum));
+
+	m_renderItem->SetGeometry(m_geo, m_meshRenderName);
+	m_renderItem->SetRenderOK(false);
+
 	m_renderInstance = m_renderItem->GetRenderIsntance();
+
+	meshNum++;
 }
 
 void XM_CALLCONV cMesh::Update(FXMMATRIX mat)

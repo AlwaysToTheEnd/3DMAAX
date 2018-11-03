@@ -42,7 +42,8 @@ void cOper_Add_Draws::SetUp()
 	}
 }
 
-DrawItems* cOper_Add_Draws::DrawsAddOperatioin(unordered_map<wstring, DrawItems>& drawItems, cDrawPlane & planes)
+UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	switch (m_worksSate)
 	{
@@ -98,7 +99,7 @@ DrawItems* cOper_Add_Draws::DrawsAddOperatioin(unordered_map<wstring, DrawItems>
 		break;
 	}
 
-	return nullptr;
+	return 0;
 }
 
 

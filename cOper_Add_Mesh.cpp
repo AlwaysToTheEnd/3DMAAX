@@ -24,16 +24,16 @@ void cOper_Add_Mesh::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-DrawItems * cOper_Add_Mesh::MeshSelectOperation(
-	unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh, cMesh** mesh)
+UINT cOper_Add_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	switch (m_worksSate)
 	{
 	case cOper_Add_Mesh::SETUI:
 	{
-		if (*mesh == nullptr)
+		if (currMesh == nullptr)
 		{
-			*mesh = static_cast<cMesh*>(drawMesh.AddElement());
+			*mesh = static_cast<cMesh*>(meshs.AddElement());
 		}
 
 		m_operationText->isRender = true;
@@ -82,7 +82,7 @@ DrawItems * cOper_Add_Mesh::MeshSelectOperation(
 	break;
 	}
 
-	return nullptr;
+	return 0;
 }
 
 void cOper_Add_Mesh::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)

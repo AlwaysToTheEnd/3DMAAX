@@ -21,14 +21,15 @@ void cOper_Add_Line::SetUp()
 	m_operationText->pos = { 30,30,0 };
 }
 
-void cOper_Add_Line::DrawElementOperation(DrawItems* drawItems)
+UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	switch (m_worksSate)
 	{
 	case cOper_Add_Line::FIRST_DOT_PICK:
 	{
 		m_operationText->isRender = true;
-		m_firstDot = AddDotAtCurrPlane(drawItems);
+		m_firstDot = AddDotAtCurrPlane(currDrawItems);
 
 		if (m_firstDot)
 		{
@@ -39,11 +40,11 @@ void cOper_Add_Line::DrawElementOperation(DrawItems* drawItems)
 	break;
 	case cOper_Add_Line::SECEND_DOT_PICK:
 	{
-		cDot* secendDot = AddDotAtCurrPlane(drawItems);
+		cDot* secendDot = AddDotAtCurrPlane(currDrawItems);
 
 		if (secendDot)
 		{
-			cLine* line = AddLine(drawItems->m_draws);
+			cLine* line = AddLine(currDrawItems->m_draws);
 			line->SetFirstDot(m_firstDot);
 			line->SetSecondDot(secendDot);
 			m_firstDot = nullptr;
@@ -53,6 +54,8 @@ void cOper_Add_Line::DrawElementOperation(DrawItems* drawItems)
 	}
 	break;
 	}
+
+	return 0;
 }
 
 void cOper_Add_Line::CancleOperation(vector<unique_ptr<cDrawElement>>& draw)

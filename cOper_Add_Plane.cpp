@@ -21,7 +21,8 @@ void cOper_Add_Plane::SetUp()
 	m_operControl.SetPos({ 650,100,0 });
 }
 
-void cOper_Add_Plane::PlaneAddOperation(cDrawPlane & planes, cMesh* currMesh)
+UINT cOper_Add_Plane::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
 	m_planes = &planes;
 

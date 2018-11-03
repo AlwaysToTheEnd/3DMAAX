@@ -16,7 +16,8 @@ public:
 	virtual ~cOper_Push_Mesh();
 
 	virtual void SetUp()override;
-	virtual void MeshOperation(cMesh* currMesh) override;
+	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
 
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw);
 

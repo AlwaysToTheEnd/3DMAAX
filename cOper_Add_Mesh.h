@@ -15,7 +15,8 @@ public:
 	virtual ~cOper_Add_Mesh();
 
 	virtual void SetUp() override;
-	virtual DrawItems* MeshSelectOperation(unordered_map<wstring, DrawItems>& drawItems, cDrawMesh& drawMesh, cMesh** mesh) override;
+	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
+		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
 	virtual void CancleOperation(vector<unique_ptr<cDrawElement>>& draw) override;
 
 private:

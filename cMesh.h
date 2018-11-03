@@ -2,10 +2,11 @@
 
 struct DrawItems;
 
-
-
 class cMesh :public cObject
 {
+public:
+	static const char*		m_meshRenderName;
+
 private:
 	struct CycleLine
 	{
@@ -62,20 +63,3 @@ private:
 	vector<NT_Vertex>		m_vertices;
 	vector<UINT>			m_indices;
 };
-
-
-class cDrawMesh : public cDrawElement
-{
-public:
-	static const string m_meshRenderName;
-
-public:
-	cDrawMesh();
-	virtual ~cDrawMesh();
-
-	virtual void SetRenderItem(shared_ptr<cRenderItem> renderItem) {}
-	virtual cObject* AddElement() override;
-
-private:
-};
-
