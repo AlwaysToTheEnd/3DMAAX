@@ -33,13 +33,13 @@ UINT cOper_Add_Plane::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 		m_currPlane = nullptr;
 		m_currPlane = planes.AddElement();
 		OBJCOORD->ObjectRegistration(m_currPlane);
-		m_operControl.AddParameter(L"quater X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currPlane->GetQuaternion().x);
-		m_operControl.AddParameter(L"quater Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currPlane->GetQuaternion().y);
-		m_operControl.AddParameter(L"quater Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currPlane->GetQuaternion().z);
-		m_operControl.AddParameter(L"quater W : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currPlane->GetQuaternion().w);
-		m_operControl.AddParameter(L"pos    X : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currPlane->GetPos().x);
-		m_operControl.AddParameter(L"pos    Y : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currPlane->GetPos().y);
-		m_operControl.AddParameter(L"pos    Z : ", DXGI_FORMAT_R32_FLOAT, (void*)&m_currPlane->GetPos().z);
+		m_operControl.AddParameter(L"quater X : ", OPERDATATYPE_FLOAT, (void*)&m_currPlane->GetQuaternion().x);
+		m_operControl.AddParameter(L"quater Y : ", OPERDATATYPE_FLOAT, (void*)&m_currPlane->GetQuaternion().y);
+		m_operControl.AddParameter(L"quater Z : ", OPERDATATYPE_FLOAT, (void*)&m_currPlane->GetQuaternion().z);
+		m_operControl.AddParameter(L"quater W : ", OPERDATATYPE_FLOAT, (void*)&m_currPlane->GetQuaternion().w);
+		m_operControl.AddParameter(L"pos    X : ", OPERDATATYPE_FLOAT, (void*)&m_currPlane->GetPos().x);
+		m_operControl.AddParameter(L"pos    Y : ", OPERDATATYPE_FLOAT, (void*)&m_currPlane->GetPos().y);
+		m_operControl.AddParameter(L"pos    Z : ", OPERDATATYPE_FLOAT, (void*)&m_currPlane->GetPos().z);
 		m_operControl.SetRenderState(true);
 		m_worksSate = cOper_Add_Plane::PLANE_ATTRIBUTE_SET;
 	}

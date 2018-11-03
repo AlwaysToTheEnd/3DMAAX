@@ -16,6 +16,11 @@ void cOperator::SetUp()
 {
 	m_buttonRenderItem = RENDERITEMMG->AddRenderItem("ui");
 	m_planes.SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
+	m_operControl.Build(m_buttonRenderItem);
+	m_operControl.SetPos({ 850,50,0 });
+	m_operControl.SetRenderState(true);
+	m_objectControl.SetPos({ 850,50,0 });
+	m_objectControl.SetRenderState(true);
 
 	m_operSelectButtons.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
 	m_operSelectButtons.SetPos({ 0,0,0 });
@@ -84,11 +89,6 @@ bool cOperator::OperationCheck()
 	{
 		if (!m_currOperation->GetOperState())
 		{
-			if (m_currDraws)
-			{
-				m_currDraws->SetPickRender(2);
-			}
-
 			m_currOperation = nullptr;
 		}
 		else
@@ -96,6 +96,7 @@ bool cOperator::OperationCheck()
 			if (GetAsyncKeyState(VK_SPACE) & 0x0001)
 			{
 				m_currOperation->EndOperation();
+				ObjectListUIUpdate();
 				m_currOperation = nullptr;
 			}
 			else if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
@@ -119,6 +120,11 @@ bool cOperator::OperationCheck()
 
 		if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 		{
+			if (m_currDraws)
+			{
+				m_currDraws->SetPickRender(0);
+			}
+
 			m_currDraws = nullptr;
 			CAMERA.SetTargetAndSettingAngle(nullptr);
 		}
@@ -147,4 +153,37 @@ void cOperator::OperationStart(int index)
 	}
 
 	m_currOperation = m_operations[index].get();
+}
+
+void cOperator::ObjectListUIUpdate()
+{
+	m_operControl.ClearParameters();
+
+	auto planes = m_planes.GetObjectsPtr<cPlane>();
+
+	for (auto it:planes)
+	{
+		m_operControl.AddParameter(L"plane 01", OPERDATATYPE_FUNC_INT_PARAM,
+			bind(&cOperator::SelectPlane, this, placeholders::_1), (UINT64)it);
+	}
+
+	for (auto& it : m_drawItems)
+	{
+		m_operControl.AddParameter(it.first, OPERDATATYPE_FUNC_INT_PARAM,
+			bind(&cOperator::SelectDraws, this, placeholders::_1), (UINT64)&it.second);
+	}
+
+	for(auto)
+}
+
+void cOperator::SelectPlane(UINT64 index)
+{
+}
+
+void cOperator::SelectDraws(UINT64 index)
+{
+}
+
+void cOperator::SelectMeshs(UINT64 index)
+{
 }

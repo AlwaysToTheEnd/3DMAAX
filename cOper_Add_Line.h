@@ -21,5 +21,7 @@ public:
 
 private:
 	cDot*					m_firstDot;
+	UINT					m_addLineNum = 0;
+	UINT					m_addDotNum = 0;
 };
 

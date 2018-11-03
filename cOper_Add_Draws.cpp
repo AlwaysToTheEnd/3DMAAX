@@ -49,7 +49,7 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 
 		for (auto& it : drawItems)
 		{
-			m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_selectDrawsIndex);
+			m_operControl.AddParameter(it.first, OPERDATATYPE_INDEX, &m_selectDrawsIndex);
 		}
 
 		m_operControl.SetRenderState(true);

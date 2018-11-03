@@ -2,7 +2,7 @@
 
 
 cCSGObject::cCSGObject()
-	:m_type(CSG_ROOT)
+	: m_type(CSG_ROOT)
 {
 }
 

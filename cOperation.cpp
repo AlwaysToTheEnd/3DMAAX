@@ -128,8 +128,8 @@ void cOperation::SetUp()
 
 void cOperation::EndOperation()
 {
-	m_operState = false; 
-	m_operControl.SetRenderState(false); 
+	m_operState = false;
+	m_operControl.SetRenderState(false);
 	m_operControl.ClearParameters();
 	m_prevViewRender->SetRenderOK(false);
 	OBJCOORD->ObjectRegistration(nullptr);
@@ -145,6 +145,7 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 {
 	if (currDrawItems != nullptr)
 	{
+		currDrawItems->SetPickRender(2);
 		m_currObjectControlParam = -2;
 		return true;
 	}
@@ -157,7 +158,7 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 
 		for (auto& it : drawItems)
 		{
-			m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_currObjectControlParam);
+			m_operControl.AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
 		m_operationText->printString = L"Select Draws";
@@ -165,7 +166,7 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 		m_operControl.SetRenderState(true);
 		m_currObjectControlParam = -1;
 	}
-		break;
+	break;
 	case -1:
 	{
 		m_operControl.Update(XMMatrixIdentity());
@@ -180,6 +181,7 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 		}
 
 		currDrawItems = &it->second;
+		it->second.SetPickRender(2);
 		m_operationText->isRender = false;
 		m_operControl.ClearParameters();
 		m_currObjectControlParam = -2;
@@ -207,7 +209,7 @@ bool cOperation::CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMes
 
 		for (auto& it : meshs)
 		{
-			m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_currObjectControlParam);
+			m_operControl.AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
 		m_operationText->printString = L"Select Mesh";
@@ -404,38 +406,25 @@ bool cOperation::EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs)
 
 bool cOperation::CheckCWCycle(vector<const cDot*>& cycle)
 {
-	bool isRightCycle = false;
+	//http://www.gisdeveloper.co.kr/?p=805
 
-	XMVECTOR currDot = XMLoadFloat3(&cycle[0]->GetPosC());
-	XMVECTOR nextDot = XMLoadFloat3(&cycle[1]->GetPosC());
-	XMVECTOR line0Dir = XMVector3Normalize(nextDot - currDot);
+	bool isRightCycle = false;
 
 	float allAngle = 0;
 	for (size_t i = 0; i < cycle.size() - 1; i++)
 	{
-		XMVECTOR endDot = XMLoadFloat3(&cycle[(i + 2) % (UINT)cycle.size()]->GetPosC());
-		XMVECTOR line1Dir = XMVector3Normalize(endDot - nextDot);
+		XMVECTOR currDot = XMLoadFloat3(&cycle[i]->GetPosC());
+		XMVECTOR nextDot = XMLoadFloat3(&cycle[i + 1]->GetPosC());
 
-		float angle = 0;
-		XMStoreFloat(&angle, XMVector3AngleBetweenNormals(line0Dir, line1Dir));
+		float x0 = currDot.m128_f32[0];
+		float x1 = nextDot.m128_f32[0];
+		float y0 = currDot.m128_f32[1];
+		float y1 = nextDot.m128_f32[1];
 
-		XMVECTOR cross = XMVector3Cross(line0Dir, line1Dir);
-
-		if (cross.m128_f32[2] > 0)
-		{
-			allAngle -= angle;
-		}
-		else
-		{
-			allAngle += angle;
-		}
-
-		currDot = nextDot;
-		nextDot = endDot;
-		line0Dir = line1Dir;
+		allAngle += (x0*y1) - (x1*y0);
 	}
 
-	return allAngle >= 0;
+	return allAngle < 0;
 }
 
 XMVECTOR XM_CALLCONV cOperation::GetNormalFromTriangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)
@@ -476,7 +465,7 @@ bool cOperation::PickPlane(cDrawPlane* planes, cPlane ** plane)
 	return false;
 }
 
-cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
+cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems, bool* isAddDot)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
@@ -489,10 +478,18 @@ cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
 				cObject* pickDot = nullptr;
 				if (drawItems->m_draws[DRAW_DOTS]->Picking(&pickDot))
 				{
+					if (isAddDot)
+					{
+						*isAddDot = false;
+					}
 					cDot* resultDot = static_cast<cDot*>(pickDot);
 					return resultDot;
 				}
 
+				if (isAddDot)
+				{
+					*isAddDot = true;
+				}
 				XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), drawItems->m_plane->GetXMMatrix());
 				XMVECTOR pos = ray.origin + ray.ray*distance;
 				pos = XMVector3TransformCoord(pos, planeInvMat);

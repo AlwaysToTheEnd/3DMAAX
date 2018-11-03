@@ -14,7 +14,13 @@ public:
 
 private:
 	bool OperationCheck();
+	void ObjectListUIUpdate();
+
+private:
 	void OperationStart(int type);
+	void SelectPlane(UINT64 index);
+	void SelectDraws(UINT64 index);
+	void SelectMeshs(UINT64 index);
 
 private:
 	const int						m_ButtonMtlTexBaseIndex = 0;
@@ -29,5 +35,7 @@ private:
 	unordered_map<wstring, DrawItems>	m_drawItems;
 	DrawItems*							m_currDraws;
 	cMesh*								m_currMesh;
+	cUIOperWindow						m_operControl;
+	cUIOperWindow						m_objectControl;
 };
 

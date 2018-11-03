@@ -39,6 +39,14 @@ struct NT_Vertex
 	XMFLOAT3 pos;
 	XMFLOAT3 normal;
 	XMFLOAT2 uv;
+
+	NT_Vertex() {}
+	NT_Vertex(XMFLOAT3 _pos, XMFLOAT3 _normal, XMFLOAT2 _uv)
+	{
+		pos = _pos;
+		normal = _normal;
+		uv = _uv;
+	}
 };
 
 struct C_Vertex

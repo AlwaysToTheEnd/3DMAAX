@@ -37,7 +37,6 @@ private:
 
 private:
 	CSGWORKTYPE				m_type;
-	const DrawItems*		m_draws;
 	vector<NT_Vertex>		m_vertices;
 	vector<TriangleInfo>	m_triangles;
 	list<unique_ptr<cCSGObject>> m_childs;
