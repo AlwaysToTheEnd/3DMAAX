@@ -12,9 +12,9 @@ cOper_Add_Draws::~cOper_Add_Draws()
 {
 }
 
-void cOper_Add_Draws::SetUp()
+void cOper_Add_Draws::Build()
 {
-	cOperation::SetUp();
+	cOperation::Build();
 	m_operationText->printString = L"Select Plane or Draws";
 
 	for (int i = 0; i < DRAWOBJECTSPLACE::OBJECTS_COUNT; i++)
@@ -44,15 +44,15 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 	case cOper_Add_Draws::SETUI:
 	{
 		m_operationText->isRender = true;
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 		m_selectDrawsIndex = -1;
 
 		for (auto& it : drawItems)
 		{
-			m_operControl.AddParameter(it.first, OPERDATATYPE_INDEX, &m_selectDrawsIndex);
+			m_operControl->AddParameter(it.first, OPERDATATYPE_INDEX, &m_selectDrawsIndex);
 		}
 
-		m_operControl.SetRenderState(true);
+		UIMG->UIOn(m_operControl);
 		m_worksSate = cOper_Add_Draws::PICK;
 	}
 		break;
@@ -88,8 +88,6 @@ UINT cOper_Add_Draws::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 				return 0;
 			}
 		}
-
-		m_operControl.Update(XMMatrixIdentity());
 	}
 		break;
 	}

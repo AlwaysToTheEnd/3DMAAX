@@ -20,7 +20,7 @@ cOper_Push_Mesh::~cOper_Push_Mesh()
 UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
-	m_operControl.Update(XMMatrixIdentity());
+	m_operControl->Update(XMMatrixIdentity());
 
 	switch (m_worksSate)
 	{
@@ -52,16 +52,16 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 			{
 				int i = 0;
 				m_cycleIndex = -1;
-				m_operControl.ClearParameters();
+				m_operControl->ClearParameters();
 				for (auto& it : m_currDrawCycleDotsList)
 				{
-					m_operControl.AddParameter(L"Cycle" + to_wstring(i) + L"(" + to_wstring(it.size()) + L")",
+					m_operControl->AddParameter(L"Cycle" + to_wstring(i) + L"(" + to_wstring(it.size()) + L")",
 						OPERDATATYPE_INDEX, &m_cycleIndex);
 					i++;
 				}
 
 				m_operationText->isRender = false;
-				m_operControl.SetRenderState(true);
+				UIMG->UIOn(m_operControl);
 				m_worksSate = CYCLE_SELECT;
 			}
 		}
@@ -72,9 +72,9 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 		if (m_cycleIndex != -1)
 		{
 			PreviewPushMeshCreate(currMesh);
-			m_operControl.ClearParameters();
-			m_operControl.AddParameter(L"Hegith value : ", OPERDATATYPE_FLOAT, &m_meshHeight);
-			m_operControl.AddParameter(L"Create Mesh", OPERDATATYPE_BOOL, &m_isCreateMesh);
+			m_operControl->ClearParameters();
+			m_operControl->AddParameter(L"Hegith value : ", OPERDATATYPE_FLOAT, &m_meshHeight);
+			m_operControl->AddParameter(L"Create Mesh", OPERDATATYPE_BOOL, &m_isCreateMesh);
 			m_worksSate = MESH_HEIGHT_INPUT;
 		}
 	}

@@ -2,13 +2,7 @@
 
 class cUIObject : public cObject
 {
-public:
-	static void MeshSetUp();
-	static void SetGeoAtRenderItem(shared_ptr<cRenderItem> renderItem);
-
-private:
-	static MeshGeometry* m_geo;
-
+	friend class cUIObjectMG;
 public:
 	cUIObject();
 	virtual ~cUIObject();
@@ -20,10 +14,16 @@ public:
 	void SetSize(XMFLOAT2 size);
 	
 	vector<unique_ptr<cUIObject>>& GetChilds() { return m_ChildObject; }
+	const string& GetUIName() { return m_UIName; } 
+	void SetUIName(string name) { m_UIName = name; }
+	virtual bool IsMousePosInUI() = 0;
+	virtual bool InputDataUpdate() = 0;
 
 protected:
 	virtual void UIUpdate() = 0;
+	virtual void SetRenderState(bool value) override;
 
 protected:
-	vector<unique_ptr<cUIObject>> m_ChildObject;
+	string							m_UIName;
+	vector<unique_ptr<cUIObject>>	m_ChildObject;
 };

@@ -93,6 +93,19 @@ void cRenderItem::SetGeometry(const MeshGeometry * geometry, string submeshName)
 	m_startIndexLocation = subMesh.startIndexLocation;
 }
 
+void cRenderItem::ThisInstanceIsEndRender(shared_ptr<RenderInstance> instance)
+{
+	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+	{
+		if (*it == instance)
+		{
+			m_instances.push_back(instance);
+			m_instances.erase(it);
+			return;
+		}
+	}
+}
+
 shared_ptr<RenderInstance> cRenderItem::GetRenderIsntance()
 {
 	m_instances.push_back(make_shared<RenderInstance>());

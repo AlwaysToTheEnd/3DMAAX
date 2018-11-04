@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-shared_ptr<cRenderItem> cOperation::m_OperatorUi = nullptr;
+cUIOperWindow*			cOperation::m_operControl = nullptr;
 shared_ptr<cRenderItem> cOperation::m_prevViewRender = nullptr;
 shared_ptr<RenderInstance> cOperation::m_prevViewRenderInstance = nullptr;
 MeshGeometry* cOperation::m_previewGeo = nullptr;
@@ -102,11 +102,10 @@ vector<const cDot*> CycleLine::GetDotsToParents()
 }
 
 
-void cOperation::OperationsBaseSetup(shared_ptr<cRenderItem> renderItem)
+void cOperation::OperationsBaseSetup()
 {
-	m_OperatorUi = renderItem;
-	cUIObject::SetGeoAtRenderItem(renderItem);
-
+	m_operControl = UIMG->AddUI<cUIOperWindow>("operationWindow");
+	m_operControl->SetPos({ 650,100,0 });
 	m_previewGeo = MESHMG->AddTemporaryMesh("previewGeo");
 	m_prevViewRender = RENDERITEMMG->AddRenderItem(cMesh::m_meshRenderName);
 	m_prevViewRender->SetGeometry(m_previewGeo, m_previewGeo->name);
@@ -115,10 +114,8 @@ void cOperation::OperationsBaseSetup(shared_ptr<cRenderItem> renderItem)
 	m_prevViewRender->SetRenderOK(false);
 }
 
-void cOperation::SetUp()
+void cOperation::Build()
 {
-	m_operControl.Build(m_OperatorUi);
-	m_operControl.SetPos({ 650,100,0 });
 	m_operationText = FONTMANAGER->GetFont("baseFont");
 	m_operationText->isRender = false;
 	m_operationText->color = Colors::Red;
@@ -129,8 +126,8 @@ void cOperation::SetUp()
 void cOperation::EndOperation()
 {
 	m_operState = false;
-	m_operControl.SetRenderState(false);
-	m_operControl.ClearParameters();
+	UIMG->UIOff(m_operControl);
+	m_operControl->ClearParameters();
 	m_prevViewRender->SetRenderOK(false);
 	OBJCOORD->ObjectRegistration(nullptr);
 
@@ -139,6 +136,12 @@ void cOperation::EndOperation()
 		m_operationText->isRender = false;
 	}
 	m_worksSate = 0;
+}
+
+void cOperation::StartOperation()
+{
+	m_operState = true; 
+	m_operControl->ClearParameters();
 }
 
 bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawItems, DrawItems *& currDrawItems)
@@ -154,22 +157,21 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 	{
 	case -2:
 	{
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 
 		for (auto& it : drawItems)
 		{
-			m_operControl.AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
+			m_operControl->AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
 		m_operationText->printString = L"Select Draws";
 		m_operationText->isRender = true;
-		m_operControl.SetRenderState(true);
+		UIMG->UIOn(m_operControl);
 		m_currObjectControlParam = -1;
 	}
 	break;
 	case -1:
 	{
-		m_operControl.Update(XMMatrixIdentity());
 	}
 	break;
 	default:
@@ -183,7 +185,7 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 		currDrawItems = &it->second;
 		it->second.SetPickRender(2);
 		m_operationText->isRender = false;
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 		m_currObjectControlParam = -2;
 		return true;
 	}
@@ -205,22 +207,22 @@ bool cOperation::CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMes
 	{
 	case -2:
 	{
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 
 		for (auto& it : meshs)
 		{
-			m_operControl.AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
+			m_operControl->AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
 		m_operationText->printString = L"Select Mesh";
 		m_operationText->isRender = true;
-		m_operControl.SetRenderState(true);
+		UIMG->UIOn(m_operControl);
 		m_currObjectControlParam = -1;
 	}
 	break;
 	case -1:
 	{
-		m_operControl.Update(XMMatrixIdentity());
+
 	}
 	break;
 	default:
@@ -233,7 +235,7 @@ bool cOperation::CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMes
 
 		currMesh = &it->second;
 		m_operationText->isRender = false;
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 		m_currObjectControlParam = -2;
 		return true;
 	}
@@ -450,7 +452,7 @@ bool cOperation::PickPlane(cDrawPlane* planes, cPlane ** plane)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
-		if (!m_operControl.IsMousePosInUIWindow())
+		if (!m_operControl->IsMousePosInUI())
 		{
 			cObject* pickPlane = nullptr;
 			if (planes->Picking(&pickPlane))
@@ -469,7 +471,7 @@ cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems, bool* isAddDot)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
-		if (!m_operControl.IsMousePosInUIWindow())
+		if (!m_operControl->IsMousePosInUI())
 		{
 			float distance;
 			PICKRAY ray = INPUTMG->GetMousePickLay();

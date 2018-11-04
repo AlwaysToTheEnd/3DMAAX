@@ -9,6 +9,7 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 D12D3Maaax::~D12D3Maaax()
 {
 	m_operator = nullptr;
+	delete UIMG;
 	delete MESHMG;
 	delete RENDERITEMMG;
 	delete OBJCOORD;
@@ -78,7 +79,8 @@ void D12D3Maaax::Update()
 	m_Camera.Update();
 	UpdateMainPassCB();
 	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
-	
+	UIMG->Update();
+
 	m_operator->Update();
 	OBJCOORD->Update();
 
@@ -307,8 +309,8 @@ void D12D3Maaax::BuildGeometry()
 	cDrawPlane::MeshSetUp();
 	cDrawLines::MeshSetUp();
 	cDrawDot::MeshSetUp();
-	cUIObject::MeshSetUp();
 	cObjectCoordinator::MeshSetUp();
+	UIMG->Build();
 }
 
 void D12D3Maaax::BuildPSOs()
@@ -455,11 +457,11 @@ void D12D3Maaax::BuildMaterials()
 
 void D12D3Maaax::BuildObjects()
 {
-	cOperation::OperationsBaseSetup(RENDERITEMMG->AddRenderItem("ui"));
+	cOperation::OperationsBaseSetup();
 	m_operator = make_unique<cOperator>();
-	m_operator->SetUp();
+	m_operator->Build();
 
-	OBJCOORD->SetUp();
+	OBJCOORD->Build();
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()

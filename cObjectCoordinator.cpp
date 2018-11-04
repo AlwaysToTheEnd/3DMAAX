@@ -120,7 +120,7 @@ void cObjectCoordinator::MeshSetUp()
 		DXGI_FORMAT_R16_UINT, (UINT)indices.size() * sizeof(UINT16), false, &subMeshs);
 }
 
-void cObjectCoordinator::SetUp()
+void cObjectCoordinator::Build()
 {
 	m_arrowRenderItem = RENDERITEMMG->AddRenderItem("objectCoordinator");
 	m_arrowRenderItem->SetGeometry(m_geo, "arrow");

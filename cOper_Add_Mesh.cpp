@@ -40,15 +40,15 @@ UINT cOper_Add_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 	//	}
 
 	//	m_operationText->isRender = true;
-	//	m_operControl.ClearParameters();
+	//	m_operControl->ClearParameters();
 	//	m_selectDrawsIndex = -1;
 
 	//	for (auto& it : drawItems)
 	//	{
-	//		m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_selectDrawsIndex);
+	//		m_operControl->AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_selectDrawsIndex);
 	//	}
 
-	//	m_operControl.SetRenderState(true);
+	//	m_operControl->SetRenderState(true);
 	//	m_worksSate = cOper_Add_Mesh::PICK;
 	//}
 	//break;
@@ -80,7 +80,7 @@ UINT cOper_Add_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 	//		}
 	//	}*/
 
-	//	m_operControl.Update(XMMatrixIdentity());
+	//	m_operControl->Update(XMMatrixIdentity());
 	//}
 	//break;
 	//}

@@ -37,7 +37,7 @@ struct CycleLine
 class cOperation
 {
 public:
-	static void OperationsBaseSetup(shared_ptr<cRenderItem> renderItem);
+	static void OperationsBaseSetup();
 
 public:
 	cOperation(OPERATIONTYPE type)
@@ -51,7 +51,7 @@ public:
 	}
 
 	virtual ~cOperation() {}
-	virtual void SetUp();
+	virtual void Build();
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) { assert(false); return 0; }
 
@@ -59,7 +59,7 @@ public:
 	virtual void EndOperation();
 
 public:
-	void StartOperation() { m_operState = true; m_operControl.SetRenderState(true); }
+	void StartOperation(); 
 
 	bool GetOperState() const { return m_operState; }
 	OPERATIONTYPE GetOperType() const { return m_operType; }
@@ -83,14 +83,13 @@ protected:
 	void EarClipping(const vector<vertexType>& dots, vector<indexType>& indices);
 
 protected:
-	static shared_ptr<cRenderItem>		m_OperatorUi;
+	static cUIOperWindow*				m_operControl;
 	static shared_ptr<cRenderItem>		m_prevViewRender;
 	static shared_ptr<RenderInstance>	m_prevViewRenderInstance;
-	static MeshGeometry*	m_previewGeo;
+	static MeshGeometry*				m_previewGeo;
 
 	shared_ptr<RenderFont>	m_operationText;
 	const OPERATIONTYPE		m_operType;
-	cUIOperWindow			m_operControl;
 	bool					m_operState;
 	UINT					m_worksSate;
 	int						m_currObjectControlParam;

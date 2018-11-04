@@ -45,10 +45,10 @@ UINT cOper_Add_Dot::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems
 			}
 
 			m_currDot = addDot;
-			m_operControl.ClearParameters();
-			m_operControl.AddParameter(L"pos    X : ", OPERDATATYPE_FLOAT, (void*)&m_currDot->GetPos().x);
-			m_operControl.AddParameter(L"pos    Y : ", OPERDATATYPE_FLOAT, (void*)&m_currDot->GetPos().y);
-			m_operControl.SetRenderState(1);
+			m_operControl->ClearParameters();
+			m_operControl->AddParameter(L"pos    X : ", OPERDATATYPE_FLOAT, (void*)&m_currDot->GetPos().x);
+			m_operControl->AddParameter(L"pos    Y : ", OPERDATATYPE_FLOAT, (void*)&m_currDot->GetPos().y);
+			UIMG->UIOn(m_operControl);
 
 			m_currDot->SetPickRender(1);
 		}
@@ -59,7 +59,6 @@ UINT cOper_Add_Dot::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems
 			m_addDotCount++;
 		}
 
-		m_operControl.Update(XMMatrixIdentity());
 	}
 		break;
 	default:

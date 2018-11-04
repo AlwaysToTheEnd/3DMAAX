@@ -13,13 +13,6 @@ cUIOperWindow::~cUIOperWindow()
 
 }
 
-void cUIOperWindow::Build(shared_ptr<cRenderItem> renderItem)
-{
-	m_renderInstance = renderItem->GetRenderIsntance();
-	m_renderInstance->instanceData.MaterialIndex = 0;
-	m_renderInstance->m_isRenderOK = false;
-}
-
 void cUIOperWindow::SetRenderState(bool value)
 {
 	if (m_renderInstance)
@@ -49,7 +42,7 @@ void cUIOperWindow::AddParameter(wstring dataName, UIOPERDATATYPE format, functi
 
 void cUIOperWindow::AddParameter(wstring dataName, UIOPERDATATYPE format, function<void(UINT64)> func, UINT64 param)
 {
-	assert(format == OPERDATATYPE_FUNC_INT_PARAM);
+	assert(format == OPERDATATYPE_FUNC_UINT_PARAM);
 
 	m_operParameters.emplace_back(dataName, format, nullptr, func, nullptr, param);
 	ButtonSet();
@@ -58,7 +51,6 @@ void cUIOperWindow::AddParameter(wstring dataName, UIOPERDATATYPE format, functi
 void cUIOperWindow::ClearParameters()
 {
 	m_operParameters.clear();
-	
 	for (auto& it : m_operFonts)
 	{
 		it->isRender = false;
@@ -67,7 +59,7 @@ void cUIOperWindow::ClearParameters()
 	m_currParameterIndex = -1;
 }
 
-bool cUIOperWindow::IsMousePosInUIWindow()
+bool cUIOperWindow::IsMousePosInUI()
 {
 	if (m_renderInstance == nullptr) return false;
 
@@ -148,9 +140,10 @@ void cUIOperWindow::UIUpdate()
 				break;
 			case OPERDATATYPE_FUNC:
 				break;
-			case OPERDATATYPE_FUNC_INT_PARAM:
+			case OPERDATATYPE_FUNC_UINT_PARAM:
 				break;
 			case OPERDATATYPE_NONE:
+				m_operFonts[i]->color = Colors::Black;
 				break;
 			}
 		}
@@ -169,7 +162,7 @@ void cUIOperWindow::UIUpdate()
 				break;
 			case OPERDATATYPE_FUNC:
 				break;
-			case OPERDATATYPE_FUNC_INT_PARAM:
+			case OPERDATATYPE_FUNC_UINT_PARAM:
 				break;
 			case OPERDATATYPE_NONE:
 				break;
@@ -250,9 +243,9 @@ void cUIOperWindow::EnterAction()
 			func();
 		}
 		break;
-		case OPERDATATYPE_FUNC_INT_PARAM:
+		case OPERDATATYPE_FUNC_UINT_PARAM:
 		{
-			function<void(int)> func = reinterpret_cast<void(*)(int)>(m_operParameters[m_currParameterIndex].data);
+			function<void(UINT64)> func = reinterpret_cast<void(*)(UINT64)>(m_operParameters[m_currParameterIndex].data);
 			func(m_operParameters[m_currParameterIndex].funcParam);
 		}
 		break;

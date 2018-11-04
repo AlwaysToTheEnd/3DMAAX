@@ -7,7 +7,7 @@ public:
 	cOperator();
 	~cOperator();
 
-	void SetUp();
+	void Build();
 	void Update();
 
 	void SetRenderState(bool value);
@@ -24,7 +24,6 @@ private:
 
 private:
 	const int						m_ButtonMtlTexBaseIndex = 0;
-	shared_ptr<cRenderItem>			m_buttonRenderItem;
 	cButtonCollector				m_operSelectButtons;
 
 	vector<unique_ptr<cOperation>>	m_operations;
@@ -35,7 +34,7 @@ private:
 	unordered_map<wstring, DrawItems>	m_drawItems;
 	DrawItems*							m_currDraws;
 	cMesh*								m_currMesh;
-	cUIOperWindow						m_operControl;
-	cUIOperWindow						m_objectControl;
+	cUIOperWindow*						m_objectListUI;
+	cUIOperWindow*						m_objectControl;
 };
 
