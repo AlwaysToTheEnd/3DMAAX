@@ -44,7 +44,7 @@ public:
 	void ClearParameters();
 
 	void SetFontSize(int size) { m_fontSize = size; }
-	virtual bool IsMousePosInUI() override;
+	virtual void InputDataUpdate() override;
 
 private:
 	virtual void UIUpdate() override;

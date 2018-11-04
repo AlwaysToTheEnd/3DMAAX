@@ -20,8 +20,6 @@ cOper_Push_Mesh::~cOper_Push_Mesh()
 UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
-	m_operControl->Update(XMMatrixIdentity());
-
 	switch (m_worksSate)
 	{
 	case cOper_Push_Mesh::ADD_MESH_QUERY:
@@ -52,7 +50,6 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 			{
 				int i = 0;
 				m_cycleIndex = -1;
-				m_operControl->ClearParameters();
 				for (auto& it : m_currDrawCycleDotsList)
 				{
 					m_operControl->AddParameter(L"Cycle" + to_wstring(i) + L"(" + to_wstring(it.size()) + L")",

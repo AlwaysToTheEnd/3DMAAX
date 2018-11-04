@@ -41,6 +41,7 @@ private:
 	MeshGeometry*			m_UIGeo;
 	shared_ptr<cRenderItem>	m_UIRender;
 	list<cUIObject*>		m_OnUIs;
+	cUIObject*				m_currPickUI;
 	unordered_map<string, unique_ptr<cUIObject>> m_UIObjects;
 };
 

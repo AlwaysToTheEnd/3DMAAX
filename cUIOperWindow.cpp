@@ -59,38 +59,16 @@ void cUIOperWindow::ClearParameters()
 	m_currParameterIndex = -1;
 }
 
-bool cUIOperWindow::IsMousePosInUI()
+void cUIOperWindow::InputDataUpdate()
 {
-	if (m_renderInstance == nullptr) return false;
-
-	RECT buttonRect;
-	buttonRect.left = (LONG)m_renderInstance->instanceData.World._41;
-	buttonRect.top = (LONG)m_renderInstance->instanceData.World._42;
-	buttonRect.right = buttonRect.left + (LONG)m_renderInstance->instanceData.World._11;
-	buttonRect.bottom = buttonRect.top + (LONG)m_renderInstance->instanceData.World._22;
-	POINT mousePos = INPUTMG->GetMousePosPt();
-
-	return PtInRect(&buttonRect, mousePos);
-}
-
-void cUIOperWindow::UIUpdate()
-{
-	SetSize({ 150.0f,m_operParameters.size() * 15.0f });
-
-	RECT buttonRect;
-	buttonRect.left = (LONG)m_renderInstance->instanceData.World._41;
-	buttonRect.top = (LONG)m_renderInstance->instanceData.World._42;
-	buttonRect.right = buttonRect.left + (LONG)m_renderInstance->instanceData.World._11;
-	buttonRect.bottom = buttonRect.top + (LONG)m_renderInstance->instanceData.World._22;
-
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
 		POINT mousePos = INPUTMG->GetMousePosPt();
-		if (PtInRect(&buttonRect, mousePos))
+		if (PtInRect(&m_uiRECT, mousePos))
 		{
-			int inUIMouseY = mousePos.y - buttonRect.top;
+			int inUIMouseY = mousePos.y - m_uiRECT.top;
 
-			m_currParameterIndex = inUIMouseY / 15;
+			m_currParameterIndex = inUIMouseY / 20.0f;
 		}
 		else
 		{
@@ -103,77 +81,85 @@ void cUIOperWindow::UIUpdate()
 	{
 		KeyboardDataInput();
 		EnterAction();
-	}
 
-	for (int i = 0; i < m_operParameters.size(); i++)
-	{
-		if (i == m_currParameterIndex)
+		if (m_currParameterIndex != -1)
 		{
-			m_operFonts[i]->color = Colors::Red;
-			m_operFonts[i]->printString = m_operParameters[i].dataName;
-			m_operFonts[i]->pos.x = (float)buttonRect.left;
-			m_operFonts[i]->pos.y = (float)buttonRect.top + i * 15;
-			m_operFonts[i]->scale = { 0.3f,0.35f,1 };
+			m_operFonts[m_currParameterIndex]->color = Colors::Red;
+			m_operFonts[m_currParameterIndex]->printString = m_operParameters[m_currParameterIndex].dataName;
+			m_operFonts[m_currParameterIndex]->pos.x = (float)m_uiRECT.left;
+			m_operFonts[m_currParameterIndex]->pos.y = (float)m_uiRECT.top + m_currParameterIndex * 20.0f;
+			m_operFonts[m_currParameterIndex]->scale = { 0.4f,0.45f,1 };
 
-			switch (m_operParameters[i].dataFormat)
+			switch (m_operParameters[m_currParameterIndex].dataFormat)
 			{
 			case OPERDATATYPE_INDEX:
 				break;
 			case OPERDATATYPE_BOOL:
 			{
-				*(bool*)(m_operParameters[i].data) = !(*(bool*)(m_operParameters[i].data));
-				m_currParameterIndex = -1;
-				if (*(bool*)(m_operParameters[i].data) == true)
+				*(bool*)(m_operParameters[m_currParameterIndex].data) = !(*(bool*)(m_operParameters[m_currParameterIndex].data));
+				if (*(bool*)(m_operParameters[m_currParameterIndex].data) == true)
 				{
-					m_operFonts[i]->color = Colors::Red;
+					m_operFonts[m_currParameterIndex]->color = Colors::Red;
 				}
 				else
 				{
-					m_operFonts[i]->color = Colors::Black;
+					m_operFonts[m_currParameterIndex]->color = Colors::Black;
 				}
 
-				m_operFonts[i]->printString = m_operParameters[i].dataName;
+				m_operFonts[m_currParameterIndex]->printString = m_operParameters[m_currParameterIndex].dataName;
+				m_currParameterIndex = -1;
 			}
-				break;
+			break;
 			case OPERDATATYPE_FLOAT:
-				m_operFonts[i]->printString = m_operParameters[i].dataName + m_currInputData;
+				m_operFonts[m_currParameterIndex]->printString = m_operParameters[m_currParameterIndex].dataName + m_currInputData;
 				break;
 			case OPERDATATYPE_FUNC:
 				break;
 			case OPERDATATYPE_FUNC_UINT_PARAM:
 				break;
 			case OPERDATATYPE_NONE:
-				m_operFonts[i]->color = Colors::Black;
+				m_operFonts[m_currParameterIndex]->color = Colors::Black;
 				break;
 			}
 		}
-		else
+	}
+}
+
+void cUIOperWindow::UIUpdate()
+{
+	SetSize({ 200.0f,m_operParameters.size() * 20.0f });
+
+	m_uiRECT.left = (LONG)m_renderInstance->instanceData.World._41;
+	m_uiRECT.top = (LONG)m_renderInstance->instanceData.World._42;
+	m_uiRECT.right = m_uiRECT.left + (LONG)m_renderInstance->instanceData.World._11;
+	m_uiRECT.bottom = m_uiRECT.top + (LONG)m_renderInstance->instanceData.World._22;
+
+	for (int i = 0; i < m_operParameters.size(); i++)
+	{
+		wstring dataStr;
+
+		switch (m_operParameters[i].dataFormat)
 		{
-			wstring dataStr;
-
-			switch (m_operParameters[i].dataFormat)
-			{
-			case OPERDATATYPE_INDEX:
-				break;
-			case OPERDATATYPE_BOOL:
-				break;
-			case OPERDATATYPE_FLOAT:
-				dataStr = to_wstring(*((float*)m_operParameters[i].data));
-				break;
-			case OPERDATATYPE_FUNC:
-				break;
-			case OPERDATATYPE_FUNC_UINT_PARAM:
-				break;
-			case OPERDATATYPE_NONE:
-				break;
-			}
-
-			m_operFonts[i]->color = Colors::Black;
-			m_operFonts[i]->printString = m_operParameters[i].dataName + dataStr;
-			m_operFonts[i]->pos.x = (float)buttonRect.left;
-			m_operFonts[i]->pos.y = (float)buttonRect.top + i * 15;
-			m_operFonts[i]->scale = { 0.3f,0.35f,1 };
+		case OPERDATATYPE_INDEX:
+			break;
+		case OPERDATATYPE_BOOL:
+			break;
+		case OPERDATATYPE_FLOAT:
+			dataStr = to_wstring(*((float*)m_operParameters[i].data));
+			break;
+		case OPERDATATYPE_FUNC:
+			break;
+		case OPERDATATYPE_FUNC_UINT_PARAM:
+			break;
+		case OPERDATATYPE_NONE:
+			break;
 		}
+
+		m_operFonts[i]->color = Colors::Black;
+		m_operFonts[i]->printString = m_operParameters[i].dataName + dataStr;
+		m_operFonts[i]->pos.x = (float)m_uiRECT.left;
+		m_operFonts[i]->pos.y = (float)m_uiRECT.top + i * 20.0f;
+		m_operFonts[i]->scale = { 0.4f,0.45f,1 };
 	}
 }
 
@@ -239,14 +225,12 @@ void cUIOperWindow::EnterAction()
 			break;
 		case OPERDATATYPE_FUNC:
 		{
-			function<void()> func = reinterpret_cast<void(*)()>(m_operParameters[m_currParameterIndex].data);
-			func();
+			m_operParameters[m_currParameterIndex].func();
 		}
 		break;
 		case OPERDATATYPE_FUNC_UINT_PARAM:
 		{
-			function<void(UINT64)> func = reinterpret_cast<void(*)(UINT64)>(m_operParameters[m_currParameterIndex].data);
-			func(m_operParameters[m_currParameterIndex].funcParam);
+			m_operParameters[m_currParameterIndex].param_Func(m_operParameters[m_currParameterIndex].funcParam);
 		}
 		break;
 		default:

@@ -16,8 +16,8 @@ public:
 	vector<unique_ptr<cUIObject>>& GetChilds() { return m_ChildObject; }
 	const string& GetUIName() { return m_UIName; } 
 	void SetUIName(string name) { m_UIName = name; }
-	virtual bool IsMousePosInUI() = 0;
-	virtual bool InputDataUpdate() = 0;
+	virtual bool IsMousePosInUI();
+	virtual void InputDataUpdate() = 0;
 
 protected:
 	virtual void UIUpdate() = 0;
@@ -25,5 +25,6 @@ protected:
 
 protected:
 	string							m_UIName;
+	RECT							m_uiRECT;
 	vector<unique_ptr<cUIObject>>	m_ChildObject;
 };

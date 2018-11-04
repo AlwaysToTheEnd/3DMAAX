@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 cUIObject::cUIObject()
+	:m_uiRECT{0,0,0,0}
 {
 }
 
@@ -33,6 +34,11 @@ void cUIObject::SetSize(XMFLOAT2 size)
 {
 	m_scale.x = size.x;
 	m_scale.y = size.y;
+}
+
+bool cUIObject::IsMousePosInUI()
+{
+	return PtInRect(&m_uiRECT, INPUTMG->GetMousePosPt());
 }
 
 void cUIObject::SetRenderState(bool value)

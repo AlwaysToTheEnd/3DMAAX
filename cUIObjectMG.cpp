@@ -5,6 +5,7 @@ cUIObjectMG* cUIObjectMG::instance = nullptr;
 cUIObjectMG::cUIObjectMG()
 	: m_UIGeo(nullptr)
 	, m_UIRender(nullptr)
+	, m_currPickUI(nullptr)
 {
 
 }
@@ -78,16 +79,58 @@ void cUIObjectMG::Build()
 void cUIObjectMG::Update()
 {
 	XMMATRIX mat = XMMatrixIdentity();
-	bool isUIClick = false;
+	bool isUIClickCheck = false;
 
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON) || INPUTMG->GetMouseOneDown(VK_RBUTTON))
 	{
-		isUIClick = true;
+		isUIClickCheck = true;
 	}
 
-	for (auto& it : m_OnUIs)
+	if (isUIClickCheck)
 	{
-		it->Update(mat);
+		bool mouseInUI = false;
+		for (auto& it : m_OnUIs)
+		{
+			if (it->IsMousePosInUI())
+			{
+				if (!mouseInUI)
+				{
+					mouseInUI = true;
+					m_currPickUI = it;
+				}
+			}
+
+			it->Update(mat);
+		}
+
+		if (!mouseInUI)
+		{
+			m_currPickUI = nullptr;
+		}
+		else
+		{
+			OnListCheck(m_currPickUI, false);
+			m_OnUIs.push_front(m_currPickUI);
+			m_UIRender->ThisInstanceIsEndRender(m_currPickUI->m_renderInstance);
+		}
+	}
+	else
+	{
+		for (auto& it : m_OnUIs)
+		{
+			it->Update(mat);
+		}
+	}
+
+	if (m_currPickUI)
+	{
+		m_currPickUI->InputDataUpdate();
+		INPUTMG->InputReset();
+
+		if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
+		{
+			m_currPickUI = nullptr;
+		}
 	}
 }
 
@@ -116,11 +159,22 @@ void cUIObjectMG::UIOff(string key)
 	if (iter == m_UIObjects.end()) assert(false);
 
 	OnListCheck(iter->second.get(), false);
+
+	if (m_currPickUI == iter->second.get())
+	{
+		m_currPickUI = nullptr;
+	}
+
 	iter->second->SetRenderState(false);
 }
 
 void cUIObjectMG::UIOff(cUIObject * object)
 {
+	if (m_currPickUI == object)
+	{
+		m_currPickUI = nullptr;
+	}
+
 	OnListCheck(object, false);
 	object->SetRenderState(false);
 }

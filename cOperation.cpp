@@ -105,7 +105,7 @@ vector<const cDot*> CycleLine::GetDotsToParents()
 void cOperation::OperationsBaseSetup()
 {
 	m_operControl = UIMG->AddUI<cUIOperWindow>("operationWindow");
-	m_operControl->SetPos({ 650,100,0 });
+	m_operControl->SetPos({ 550,50,0 });
 	m_previewGeo = MESHMG->AddTemporaryMesh("previewGeo");
 	m_prevViewRender = RENDERITEMMG->AddRenderItem(cMesh::m_meshRenderName);
 	m_prevViewRender->SetGeometry(m_previewGeo, m_previewGeo->name);

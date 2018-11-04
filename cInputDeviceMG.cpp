@@ -159,6 +159,16 @@ bool cInputDeviceMG::GetMouseUp(int vKey)
 	return false;
 }
 
+void cInputDeviceMG::InputReset()
+{
+	m_isLButtonDownStay = 0;
+	m_isLButtonUp = 0;
+	m_isLButtonOneDown = 0;
+	m_isRButtonDownStay = 0;
+	m_isRButtonUp = 0;
+	m_isRButtonOneDown = 0;
+}
+
 PICKRAY XM_CALLCONV cInputDeviceMG::GetMousePickLay()
 {
 	return { XMLoadFloat3(&m_origin), XMLoadFloat3(&m_ray) };

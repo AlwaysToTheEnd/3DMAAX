@@ -21,10 +21,12 @@ public:
 	bool GetMouseOneDown(int vKey);
 	bool GetMouseDownStay(int vKey);
 	bool GetMouseUp(int vKey);
+	void InputReset();
 
 	PICKRAY XM_CALLCONV GetMousePickLay();
 	POINT GetMousePosPt() { return { (int)m_mousePos.x, (int)m_mousePos.y }; }
 	XMFLOAT2 GetMousePosFlot() { return { m_mousePos.x, m_mousePos.y }; }
+	XMFLOAT3 GetMousePosFloat3() { return { m_mousePos.x, m_mousePos.y, 0 }; }
 
 private:
 	cInputDeviceMG();

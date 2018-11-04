@@ -18,9 +18,9 @@ void cOperator::Build()
 	m_planes.SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
 	m_objectListUI = UIMG->AddUI<cUIOperWindow>("objectListUI");
 	m_objectControl= UIMG->AddUI<cUIOperWindow>("objectControlUI");
-	m_objectListUI->SetPos({ 850,50,0 });
+	m_objectListUI->SetPos({ 790,50,0 });
 	UIMG->UIOn(m_objectListUI);
-	m_objectControl->SetPos({ 850,50,0 });
+	m_objectControl->SetPos({ 790,250,0 });
 	UIMG->UIOn(m_objectControl);
 
 	m_operSelectButtons.Build({ NOMALBUTTONSIZE, NOMALBUTTONSIZE });
@@ -60,6 +60,7 @@ void cOperator::Build()
 	}
 
 	m_operSelectButtons.SetRenderState(true);
+	ObjectListUIUpdate();
 }
 
 void cOperator::Update()
@@ -124,6 +125,9 @@ bool cOperator::OperationCheck()
 
 		if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 		{
+			OBJCOORD->ObjectRegistration(nullptr);
+			UIMG->UIOff(m_objectControl);
+
 			if (m_currDraws)
 			{
 				m_currDraws->SetPickRender(0);
@@ -169,7 +173,7 @@ void cOperator::ObjectListUIUpdate()
 	m_objectListUI->AddParameter(L"PLANE LIST", OPERDATATYPE_NONE, (void*)nullptr);
 	for (auto it:planes)
 	{
-		m_objectListUI->AddParameter(L" plane "+to_wstring(i), OPERDATATYPE_FUNC_UINT_PARAM,
+		m_objectListUI->AddParameter(L"  plane "+to_wstring(i), OPERDATATYPE_FUNC_UINT_PARAM,
 			bind(&cOperator::SelectPlane, this, placeholders::_1), (UINT64)it);
 		i++;
 	}
@@ -177,29 +181,52 @@ void cOperator::ObjectListUIUpdate()
 	m_objectListUI->AddParameter(L"DRAW LIST", OPERDATATYPE_NONE, (void*)nullptr);
 	for (auto& it : m_drawItems)
 	{
-		m_objectListUI->AddParameter(L" "+it.first, OPERDATATYPE_FUNC_UINT_PARAM,
+		m_objectListUI->AddParameter(L"  "+it.first, OPERDATATYPE_FUNC_UINT_PARAM,
 			bind(&cOperator::SelectDraws, this, placeholders::_1), (UINT64)&it.second);
 	}
 
 	m_objectListUI->AddParameter(L"MESH INFO", OPERDATATYPE_NONE, (void*)nullptr);
 	for (auto& it : m_mesh)
 	{
-		m_objectListUI->AddParameter(L" "+it.first, OPERDATATYPE_FUNC_UINT_PARAM,
+		m_objectListUI->AddParameter(L"  "+it.first, OPERDATATYPE_FUNC_UINT_PARAM,
 			bind(&cOperator::SelectMeshs, this, placeholders::_1), (UINT64)&it.second);
 	}
 }
 
-void cOperator::SelectPlane(UINT64 index)
+void cOperator::SelectPlane(UINT64 address)
 {
 	m_objectControl->ClearParameters();
+	UIMG->UIOn(m_objectControl);
+
+	cPlane* plane = reinterpret_cast<cPlane*>(address);
+
+	if (!m_currOperation)
+	{
+		OBJCOORD->ObjectRegistration(plane);
+	}
+	
+	m_objectControl->AddParameter(L"quater X : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().x);
+	m_objectControl->AddParameter(L"quater Y : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().y);
+	m_objectControl->AddParameter(L"quater Z : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().z);
+	m_objectControl->AddParameter(L"quater W : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().w);
+	m_objectControl->AddParameter(L"pos    X : ", OPERDATATYPE_FLOAT, (void*)&plane->GetPos().x);
+	m_objectControl->AddParameter(L"pos    Y : ", OPERDATATYPE_FLOAT, (void*)&plane->GetPos().y);
+	m_objectControl->AddParameter(L"pos    Z : ", OPERDATATYPE_FLOAT, (void*)&plane->GetPos().z);
 }
 
-void cOperator::SelectDraws(UINT64 index)
+void cOperator::SelectDraws(UINT64 address)
 {
 	m_objectControl->ClearParameters();
+
+	DrawItems* draws = reinterpret_cast<DrawItems*>(address);
+
+	if (m_currDraws == nullptr)
+	{
+		m_currDraws = draws;
+	}
 }
 
-void cOperator::SelectMeshs(UINT64 index)
+void cOperator::SelectMeshs(UINT64 address)
 {
 	m_objectControl->ClearParameters();
 }

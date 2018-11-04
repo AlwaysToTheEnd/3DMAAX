@@ -29,7 +29,7 @@ void cButtonCollector::Update()
 void cButtonCollector::AddButton(string buttonName, UINT materTexIndex, function<void(int)> func, UINT parameterValue)
 {
 	XMFLOAT2 pos = {0,0};
-	pos.x += m_buttons.size()*m_buttonSize.x;
+	pos.x += m_buttons.size()*(m_buttonSize.x+3.0f);
 
 	m_buttons.push_back(UIMG->AddUI<cUIButton>(buttonName));
 	m_buttons.back()->SetActiveFunc(func);

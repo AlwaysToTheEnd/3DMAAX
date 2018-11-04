@@ -18,9 +18,9 @@ private:
 
 private:
 	void OperationStart(int type);
-	void SelectPlane(UINT64 index);
-	void SelectDraws(UINT64 index);
-	void SelectMeshs(UINT64 index);
+	void SelectPlane(UINT64 address);
+	void SelectDraws(UINT64 address);
+	void SelectMeshs(UINT64 address);
 
 private:
 	const int						m_ButtonMtlTexBaseIndex = 0;
