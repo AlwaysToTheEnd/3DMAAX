@@ -7,6 +7,7 @@ cOper_Push_Mesh::cOper_Push_Mesh()
 	, m_cycleIndex(-1)
 	, m_meshHeight(0)
 	, m_isCreateMesh(false)
+	, m_workType(CSG_UNION)
 {
 }
 
@@ -36,7 +37,7 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 	break;
 	case cOper_Push_Mesh::DRAW_SELECT:
 	{
-		if (currDrawItems)
+		if (CurrDrawCheckAndPick(drawItems, currDrawItems))
 		{
 			m_currDrawCycleDotsList.clear();
 			
@@ -57,7 +58,7 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 					i++;
 				}
 
-				m_operationText->isRender = false;
+				m_operationText->printString = L"Select Cycle";
 				UIMG->UIOn(m_operControl);
 				m_worksSate = CYCLE_SELECT;
 			}
@@ -71,16 +72,32 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 			PreviewPushMeshCreate(currMesh);
 			m_operControl->ClearParameters();
 			m_operControl->AddParameter(L"Hegith value : ", OPERDATATYPE_FLOAT, &m_meshHeight);
+			m_operControl->AddParameter(L"UINION", OPERDATATYPE_INDEX, &m_workType);
+			m_operControl->AddParameter(L"DIFFERENCE", OPERDATATYPE_INDEX, &m_workType);
+			m_operControl->AddParameter(L"INTERSECTION", OPERDATATYPE_INDEX, &m_workType);
 			m_operControl->AddParameter(L"Create Mesh", OPERDATATYPE_BOOL, &m_isCreateMesh);
-			m_worksSate = MESH_HEIGHT_INPUT;
+			m_worksSate = MESH_ATTRIBUTE_INPUT;
 		}
 	}
 	break;
-	case cOper_Push_Mesh::MESH_HEIGHT_INPUT:
+	case cOper_Push_Mesh::MESH_ATTRIBUTE_INPUT:
 	{
 		XMMATRIX planeMat = XMLoadFloat4x4(&m_draws->m_plane->GetMatrix());
 		XMMATRIX scaleMat;
 		XMMATRIX translationMat = XMMatrixIdentity();
+
+		switch (m_workType)
+		{
+		case CSG_UNION:
+			m_operationText->printString = L"UNION";
+			break;
+		case CSG_DIFFERENCE:
+			m_operationText->printString = L"DIFFERENCE";
+			break;
+		case CSG_INTERSECTION:
+			m_operationText->printString = L"INTERSECTION";
+			break;
+		}
 
 		if (m_meshHeight == 0)
 		{
@@ -100,10 +117,9 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 		{
 			if (m_meshHeight == 0) return 0;
 
-
 			unique_ptr<cCSGObject> scgObject(new cCSGObject);
 			scgObject->SetData(m_vertices, m_indices, scaleMat*translationMat*planeMat);
-			currMesh->AddCSGObject(CSG_UNION, move(scgObject));
+			currMesh->AddCSGObject((CSGWORKTYPE)(m_workType), move(scgObject));
 			currMesh->SubObjectSubAbsorption();
 			currMesh->SetDrawItems(m_draws);
 			m_draws->SetRenderState(false);
@@ -198,7 +214,7 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 		XMFLOAT3 normalVector(0, 0, 0);
 		XMStoreFloat3(&normalVector,
 			GetNormalFromTriangle(m_vertices[m_indices[i]].pos, m_vertices[m_indices[i + 1]].pos, m_vertices[m_indices[i + 2]].pos));
-
+		
 		m_vertices[m_indices[i]].normal = normalVector;
 		m_vertices[m_indices[i + 1]].normal = normalVector;
 		m_vertices[m_indices[i + 2]].normal = normalVector;

@@ -10,11 +10,20 @@ enum CSGWORKTYPE
 
 class cCSGObject
 {
+private:
 	struct TriangleInfo
 	{
 		XMFLOAT3	normal = {};
 		UINT		index[3] = {};
 		bool		ccw = false;
+	};
+
+	enum TRIANGLECOLLISIONTYPE
+	{
+		COLLISION_NONE,
+		EACH_OTHER,
+		DEST_2POINT,
+		SRC_2POINT,
 	};
 
 public:
@@ -35,9 +44,10 @@ private:
 	void ObjectUnion(const cCSGObject* src);
 	void ObjectDifference(const cCSGObject* src);
 	void ObjectInterSection(const cCSGObject* src);
-	bool XM_CALLCONV TriangleCollision(	FXMVECTOR destPos0, FXMVECTOR destPos1, FXMVECTOR destPos2,
+	UINT XM_CALLCONV TriangleCollision(	FXMVECTOR destPos0, FXMVECTOR destPos1, FXMVECTOR destPos2,
 										GXMVECTOR srcPos0, HXMVECTOR srcPos1, HXMVECTOR srcPos2,
-										bool collisionLine[]);
+										XMVECTOR& collisionPos1, XMVECTOR& collisionPos2,
+										UINT& index0, UINT& index1);
 private:
 	bool					m_isOn;
 	CSGWORKTYPE				m_type;

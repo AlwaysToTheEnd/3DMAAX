@@ -8,7 +8,7 @@ private:
 		ADD_MESH_QUERY,
 		DRAW_SELECT,
 		CYCLE_SELECT,
-		MESH_HEIGHT_INPUT
+		MESH_ATTRIBUTE_INPUT
 	};
 
 public:
@@ -29,6 +29,7 @@ private:
 	float		m_meshHeight;
 	bool		m_isCreateMesh;
 
+	CSGWORKTYPE					m_workType;
 	vector<NT_Vertex>			m_vertices;
 	vector<UINT>				m_indices;
 	list<vector<const cDot*>>	m_currDrawCycleDotsList;
