@@ -15,11 +15,12 @@ public:
 	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
 	virtual void IsRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
-	
+
 public:
 	void SubObjectSubAbsorption();
 	void AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object);
 	bool XM_CALLCONV GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4* quaternion);
+	cCSGObject* GetCSGRootObject() { return m_rootCSG.get(); }
 
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }

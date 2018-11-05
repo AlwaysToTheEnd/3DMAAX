@@ -190,6 +190,35 @@ void cOperator::ObjectListUIUpdate()
 	{
 		m_objectListUI->AddParameter(L"  "+it.first, OPERDATATYPE_FUNC_UINT_PARAM,
 			bind(&cOperator::SelectMeshs, this, placeholders::_1), (UINT64)&it.second);
+
+		if (&it.second == m_currMesh)
+		{
+			cCSGObject* rootCSG = it.second.GetCSGRootObject();
+			auto& childSCGObjects = rootCSG->GetChilds();
+
+			for (size_t i = 0; i < childSCGObjects.size(); i++)
+			{
+				wstring csgName = L"push "+to_wstring(i);
+
+				switch (childSCGObjects[i]->GetType())
+				{
+				case CSG_UNION:
+					csgName += L"(Union)";
+					break;
+				case CSG_DIFFERENCE:
+					csgName += L"(Dif)";
+					break;
+				case CSG_INTERSECTION:
+					csgName += L"(Inter)";
+					break;
+				default:
+					break;
+				}
+
+				m_objectListUI->AddParameter(L"    " + csgName, OPERDATATYPE_FUNC_UINT_PARAM,
+					bind(&cOperator::SelectCSGObjectOn, this, placeholders::_1), (UINT64)childSCGObjects[i].get());
+			}
+		}
 	}
 }
 
@@ -229,4 +258,19 @@ void cOperator::SelectDraws(UINT64 address)
 void cOperator::SelectMeshs(UINT64 address)
 {
 	m_objectControl->ClearParameters();
+
+
+}
+
+void cOperator::SelectCSGObjectOn(UINT64 address)
+{
+	m_objectControl->ClearParameters();
+
+	cCSGObject* scgObject= reinterpret_cast<cCSGObject*>(address);
+	scgObject->SetOnState(!scgObject->GetOnState());
+
+	if (m_currMesh)
+	{
+		m_currMesh->SubObjectSubAbsorption();
+	}
 }

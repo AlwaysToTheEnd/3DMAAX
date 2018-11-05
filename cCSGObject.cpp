@@ -3,6 +3,7 @@
 
 cCSGObject::cCSGObject()
 	: m_type(CSG_ROOT)
+	, m_isOn(true)
 {
 }
 
@@ -13,27 +14,51 @@ cCSGObject::~cCSGObject()
 
 void cCSGObject::SubObjectSubAbsorption()
 {
+	if (m_type == CSG_ROOT)
+	{
+		m_vertices.clear();
+		m_triangles.clear();
+	}
+
 	for (auto& it : m_childs)
 	{
-		it->SubObjectSubAbsorption();
-
-		switch (it->m_type)
+		if (it->m_isOn)
 		{
-		case CSG_UNION:
-			ObjectUnion(it.get());
-			break;
-		case CSG_DIFFERENCE:
-			ObjectUnion(it.get());
-			break;
-		case CSG_INTERSECTION:
-			ObjectUnion(it.get());
-			break;
-		default:
-			assert(false);
-			break;
+			it->SubObjectSubAbsorption();
+
+			switch (it->m_type)
+			{
+			case CSG_UNION:
+				ObjectUnion(it.get());
+				break;
+			case CSG_DIFFERENCE:
+				ObjectUnion(it.get());
+				break;
+			case CSG_INTERSECTION:
+				ObjectUnion(it.get());
+				break;
+			default:
+				assert(false);
+				break;
+			}
 		}
 	}
 }
+
+//void cCSGObject::ChildOnstateControl(cCSGObject * childObjectAddress, bool value)
+//{
+//	for (auto& it : m_childs)
+//	{
+//		if (childObjectAddress == it.get())
+//		{
+//			if (childObjectAddress->m_isOn != value)
+//			{
+//				childObjectAddress->m_isOn = value;
+//				break;
+//			}
+//		}
+//	}
+//}
 
 void cCSGObject::AddChild(CSGWORKTYPE type, unique_ptr<cCSGObject> object)
 {
@@ -197,20 +222,38 @@ void XM_CALLCONV cCSGObject::SetData(const vector<NT_Vertex>& vertices, const ve
 	}
 }
 
-bool XM_CALLCONV cCSGObject::TriangleCollision( FXMVECTOR destPos1, FXMVECTOR destPos2, FXMVECTOR destPos3, 
-												GXMVECTOR srcPos1, HXMVECTOR srcPos2, HXMVECTOR srcPos3, 
+bool XM_CALLCONV cCSGObject::TriangleCollision( FXMVECTOR destPos0, FXMVECTOR destPos1, FXMVECTOR destPos2, 
+												GXMVECTOR srcPos0, HXMVECTOR srcPos1, HXMVECTOR srcPos2, 
 												bool collisionLine[])
 {
+	XMVECTOR destOrigin[3] = {};
+	XMVECTOR srcOrigin[3] = {};
+	XMVECTOR destRay[3] = {};
+	XMVECTOR srcRay[3] = {};
 
-	XMVECTOR destRay1 = destPos2 - destPos1;
-	XMVECTOR destRay2 = destPos3 - destPos1;
-	XMVECTOR destRay3 = destPos3 - destPos2;
+	destOrigin[0] = destPos0;
+	destOrigin[1] = destPos1;
+	destOrigin[2] = destPos2;
 
-	XMVECTOR srcRay1 = srcPos2 - srcPos1;
-	XMVECTOR srcRay2 = srcPos3 - srcPos1;
-	XMVECTOR srcRay3 = srcPos3 - srcPos2;
+	srcOrigin[0] = srcPos0;
+	srcOrigin[1] = srcPos1;
+	srcOrigin[2] = srcPos2;
 
+	destRay[0]= destOrigin[1] - destOrigin[0];
+	destRay[1]= destOrigin[2] - destOrigin[0];
+	destRay[2]= destOrigin[2] - destOrigin[1];
 
+	srcRay[0] = srcOrigin[1] - srcOrigin[0];
+	srcRay[1] = srcOrigin[2] - srcOrigin[0];
+	srcRay[2] = srcOrigin[2] - srcOrigin[1];
+
+	for (UINT i = 0; i < 3; i++)
+	{
+		PICKRAY ray;
+		ray.origin = destOrigin[0];
+		ray.ray = destRay[0];
+		destRay[i]
+	}
 
 
 	return false;

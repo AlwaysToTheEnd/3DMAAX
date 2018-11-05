@@ -21,6 +21,7 @@ private:
 	void SelectPlane(UINT64 address);
 	void SelectDraws(UINT64 address);
 	void SelectMeshs(UINT64 address);
+	void SelectCSGObjectOn(UINT64 address);
 
 private:
 	const int						m_ButtonMtlTexBaseIndex = 0;
