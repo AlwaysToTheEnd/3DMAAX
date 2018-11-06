@@ -43,8 +43,9 @@ public:
 	cOperation(OPERATIONTYPE type);
 	virtual ~cOperation() {}
 	virtual void Build();
-	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
-		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) { assert(false); return 0; }
+	virtual UINT OperationUpdate(	unordered_map<wstring, DrawItems>& drawItems,
+									cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, 
+									DrawItems*& currDrawItems, cMesh*& currMesh) { assert(false); return 0; }
 
 	virtual void CancleOperation(DrawItems* draw) = 0;
 	virtual void EndOperation();

@@ -55,17 +55,3 @@ private:
 	UINT64*								m_currFence;
 	unordered_map<string, unique_ptr<MeshGeometry>> m_Meshgometrys;
 };
-
-//m_CurrentFence++;
-//
-//ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(), m_CurrentFence));
-//
-//if (m_Fence->GetCompletedValue() < m_CurrentFence)
-//{
-//	HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-//
-//	ThrowIfFailed(m_Fence->SetEventOnCompletion(m_CurrentFence, eventHandle));
-//
-//	WaitForSingleObject(eventHandle, INFINITE);
-//	CloseHandle(eventHandle);
-//}

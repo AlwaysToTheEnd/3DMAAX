@@ -14,8 +14,10 @@ public:
 	cOper_Add_Line();
 	virtual ~cOper_Add_Line();
 
-	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
-		cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh) override;
+	virtual UINT OperationUpdate(	unordered_map<wstring, DrawItems>& drawItems,
+									cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, 
+									DrawItems*& currDrawItems, cMesh*& currMesh) override;
+
 	virtual void CancleOperation(DrawItems* draw) override;
 	virtual void EndOperation() override;
 
