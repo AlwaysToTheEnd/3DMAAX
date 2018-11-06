@@ -14,9 +14,9 @@ public:
 	void SetSize(XMFLOAT2 size);
 	
 	vector<unique_ptr<cUIObject>>& GetChilds() { return m_ChildObject; }
-	const string& GetUIName() { return m_UIName; } 
+	const string& GetUIName() const { return m_UIName; } 
 	void SetUIName(string name) { m_UIName = name; }
-	virtual bool IsMousePosInUI();
+	virtual bool IsMousePosInUI() const;
 	virtual void InputDataUpdate() = 0;
 
 protected:

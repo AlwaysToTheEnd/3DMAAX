@@ -40,16 +40,7 @@ public:
 	static void OperationsBaseSetup();
 
 public:
-	cOperation(OPERATIONTYPE type)
-		: m_operType(type)
-		, m_operationText(nullptr)
-		, m_operState(false)
-		, m_worksSate(0)
-		, m_currObjectControlParam(-2)
-	{
-
-	}
-
+	cOperation(OPERATIONTYPE type);
 	virtual ~cOperation() {}
 	virtual void Build();
 	virtual UINT OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
@@ -66,22 +57,25 @@ public:
 
 protected:
 	bool CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawItems, DrawItems*& currDrawItems);
+	bool CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMesh*& currMesh);
+
 	cDot* AddDot(vector<unique_ptr<cDrawElement>>& draw);
 	cLine* AddLine(vector<unique_ptr<cDrawElement>>& draw);
 	bool PickPlane(cDrawPlane* planes, cPlane** plane);
 	cDot* AddDotAtCurrPlane(DrawItems* drawItems, bool* isAddDot=nullptr);
 
 protected:
-	bool CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMesh*& currMesh);
-	list<vector<const cDot*>> LineCycleCheck(DrawItems* drawItem);
-	void OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
-	bool EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs);
-	bool CheckCWCycle(vector<const cDot*>& cycle);
-	XMVECTOR XM_CALLCONV GetNormalFromTriangle(const XMFLOAT3& pos1, const XMFLOAT3& pos2, const XMFLOAT3& pos3);
-	
+	list<vector<const cDot*>>	LineCycleCheck(DrawItems* drawItem);
+	void						OverLapCycleDotsCheck(list<vector<const cDot*>>& dotslist);
+	bool						EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs);
+
 	template<typename vertexType, typename indexType>
 	void EarClipping(const vector<vertexType>& dots, vector<indexType>& indices);
+	bool CheckCWCycle(const vector<const cDot*>& cycle) const;
 
+protected:
+	XMVECTOR XM_CALLCONV GetNormalFromTriangle(const XMFLOAT3& pos1, const XMFLOAT3& pos2, const XMFLOAT3& pos3);
+	
 protected:
 	static cUIOperWindow*				m_operControl;
 	static shared_ptr<cRenderItem>		m_prevViewRender;

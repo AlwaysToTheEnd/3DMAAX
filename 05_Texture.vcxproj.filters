@@ -73,14 +73,14 @@
     <Filter Include="Objects\ElementObject\Draws">
       <UniqueIdentifier>{74b12965-073b-4868-b2f8-eb3f5436c60c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Objects\Meshs">
+      <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
+    </Filter>
     <Filter Include="UI\cUITypes">
       <UniqueIdentifier>{fb4b6f31-b4d8-450b-babe-4cc37b252508}</UniqueIdentifier>
     </Filter>
     <Filter Include="ManagedClass\cUIObjectMG">
       <UniqueIdentifier>{30680e04-0d82-4770-966a-73142a8b1d1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Objects\Mesh">
-      <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -141,8 +141,8 @@
     <ClInclude Include="D12D3Maaax.h">
       <Filter>D12App\D12D3Maaax</Filter>
     </ClInclude>
-    <ClInclude Include="cInputDeviceMG.h">
-      <Filter>ManagedClass\cInputDeviceMG</Filter>
+    <ClInclude Include="cDrawElement.h">
+      <Filter>Objects\ElementObject</Filter>
     </ClInclude>
     <ClInclude Include="cOperation.h">
       <Filter>cOperation</Filter>
@@ -190,7 +190,7 @@
       <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="cMesh.h">
-      <Filter>Objects\Mesh</Filter>
+      <Filter>Objects\Meshs</Filter>
     </ClInclude>
     <ClInclude Include="cUIButton.h">
       <Filter>UI\cUITypes</Filter>
@@ -201,8 +201,8 @@
     <ClInclude Include="cUIObjectMG.h">
       <Filter>ManagedClass\cUIObjectMG</Filter>
     </ClInclude>
-    <ClInclude Include="cDrawElement.h">
-      <Filter>Objects\ElementObject\Draws</Filter>
+    <ClInclude Include="cInputDeviceMG.h">
+      <Filter>ManagedClass\cInputDeviceMG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -257,6 +257,9 @@
     <ClCompile Include="cInputDeviceMG.cpp">
       <Filter>ManagedClass\cInputDeviceMG</Filter>
     </ClCompile>
+    <ClCompile Include="cDrawElement.cpp">
+      <Filter>Objects\ElementObject</Filter>
+    </ClCompile>
     <ClCompile Include="cOperation.cpp">
       <Filter>cOperation</Filter>
     </ClCompile>
@@ -303,7 +306,7 @@
       <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="cMesh.cpp">
-      <Filter>Objects\Mesh</Filter>
+      <Filter>Objects\Meshs</Filter>
     </ClCompile>
     <ClCompile Include="cUIButton.cpp">
       <Filter>UI\cUITypes</Filter>
@@ -313,9 +316,6 @@
     </ClCompile>
     <ClCompile Include="cUIObjectMG.cpp">
       <Filter>ManagedClass\cUIObjectMG</Filter>
-    </ClCompile>
-    <ClCompile Include="cDrawElement.cpp">
-      <Filter>Objects\ElementObject\Draws</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

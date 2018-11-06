@@ -114,6 +114,15 @@ void cOperation::OperationsBaseSetup()
 	m_prevViewRender->SetRenderOK(false);
 }
 
+cOperation::cOperation(OPERATIONTYPE type)
+	: m_operType(type)
+	, m_operationText(nullptr)
+	, m_operState(false)
+	, m_worksSate(0)
+	, m_currObjectControlParam(-2)
+{
+}
+
 void cOperation::Build()
 {
 	m_operationText = FONTMANAGER->GetFont("baseFont");
@@ -406,7 +415,7 @@ bool cOperation::EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs)
 	return true;
 }
 
-bool cOperation::CheckCWCycle(vector<const cDot*>& cycle)
+bool cOperation::CheckCWCycle(const vector<const cDot*>& cycle) const
 {
 	//http://www.gisdeveloper.co.kr/?p=805
 

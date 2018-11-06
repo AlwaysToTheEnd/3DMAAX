@@ -36,7 +36,7 @@ void cUIObject::SetSize(XMFLOAT2 size)
 	m_scale.y = size.y;
 }
 
-bool cUIObject::IsMousePosInUI()
+bool cUIObject::IsMousePosInUI() const
 {
 	return PtInRect(&m_uiRECT, INPUTMG->GetMousePosPt());
 }

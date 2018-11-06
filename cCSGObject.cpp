@@ -32,10 +32,10 @@ void cCSGObject::SubObjectSubAbsorption()
 				ObjectUnion(it.get());
 				break;
 			case CSG_DIFFERENCE:
-				ObjectUnion(it.get());
+				ObjectDifference(it.get());
 				break;
 			case CSG_INTERSECTION:
-				ObjectUnion(it.get());
+				ObjectInterSection(it.get());
 				break;
 			default:
 				assert(false);
@@ -127,30 +127,76 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 
 	for (UINT i = 0; i < srcTriangleSize; i++)
 	{
-		XMVECTOR destPos0 = XMLoadFloat3(&m_vertices[m_triangles[i].index[0]].pos);
-		XMVECTOR destPos1 = XMLoadFloat3(&m_vertices[m_triangles[i].index[1]].pos);
-		XMVECTOR destPos2 = XMLoadFloat3(&m_vertices[m_triangles[i].index[2]].pos);
-		XMVECTOR collsionPos1 = XMVectorZero();
-		XMVECTOR collsionPos2 = XMVectorZero();
+		XMVECTOR destPos[3] = {};
+		destPos[0] = XMLoadFloat3(&m_vertices[m_triangles[i].index[0]].pos);
+		destPos[1] = XMLoadFloat3(&m_vertices[m_triangles[i].index[1]].pos);
+		destPos[2] = XMLoadFloat3(&m_vertices[m_triangles[i].index[2]].pos);
+		XMFLOAT3 collsionPos0 = {};
+		XMFLOAT3 collsionPos1 = {};
 		UINT index0 = UINT_MAX;
 		UINT index1 = UINT_MAX;
 
 		for (UINT j = 0; j < srcTriangleSize; j++)
 		{
-			XMVECTOR srcPos0 = XMLoadFloat3(&srcVertices[srcTriangles[i].index[0]].pos);
-			XMVECTOR srcPos1 = XMLoadFloat3(&srcVertices[srcTriangles[i].index[1]].pos);
-			XMVECTOR srcPos2 = XMLoadFloat3(&srcVertices[srcTriangles[i].index[2]].pos);
+			XMVECTOR srcPos[3];
+			srcPos[0] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[0]].pos);
+			srcPos[1] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[1]].pos);
+			srcPos[2] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[2]].pos);
 
-			switch (TriangleCollision(	destPos0, destPos1, destPos2, 
-										srcPos0, srcPos1, srcPos2, 
-										collsionPos1, collsionPos2,
-										index0, index1))
+			switch (TriangleCollision(destPos[0], destPos[1], destPos[2],
+				srcPos[0], srcPos[1], srcPos[2],
+				collsionPos0, collsionPos1,
+				index0, index1))
 			{
 			case cCSGObject::EACH_OTHER:
+			{
+
+			}
 				break;
 			case cCSGObject::DEST_2POINT:
-				break;
+			{
+				UINT leaveIndex = GetLeaveIndex(index0, index1);
+				TriangleInfo addTriangle;
+				m_vertices.emplace_back(collsionPos0, m_triangles[i].normal, XMFLOAT2(0, 0));
+				m_vertices.emplace_back(collsionPos1, m_triangles[i].normal, XMFLOAT2(0, 0));
+
+				switch (leaveIndex)
+				{
+				case 0:
+					m_triangles[i].index[2] = m_vertices.size() - 2;
+
+					addTriangle = m_triangles[i];
+					addTriangle.index[1] = m_vertices.size() - 2;
+					addTriangle.index[2] = m_vertices.size() - 1;
+					m_triangles.push_back(addTriangle);
+					break;
+				case 1:
+					m_triangles[i].index[0] = m_triangles[i].index[1];
+					m_triangles[i].index[1] = m_triangles[i].index[2];
+					m_triangles[i].index[2] = m_vertices.size() - 1;
+
+					addTriangle = m_triangles[i];
+					addTriangle.index[1] = m_vertices.size() - 1;
+					addTriangle.index[2] = m_vertices.size() - 2;
+					m_triangles.push_back(addTriangle);
+					break;
+				case 2:
+					m_triangles[i].index[0] = m_triangles[i].index[2];
+					m_triangles[i].index[1] = m_triangles[i].index[0];
+					m_triangles[i].index[2] = m_vertices.size() - 2;
+
+					addTriangle = m_triangles[i];
+					addTriangle.index[1] = m_vertices.size() - 2;
+					addTriangle.index[2] = m_vertices.size() - 1;
+					m_triangles.push_back(addTriangle);
+					break;
+				}
+			}
+			break;
 			case cCSGObject::SRC_2POINT:
+			{
+
+			}
 				break;
 			default:
 				break;
@@ -170,7 +216,7 @@ void cCSGObject::ObjectInterSection(const cCSGObject * src)
 	UINT srcTriangleSize = (UINT)srcTriangles.size();
 }
 
-void cCSGObject::GetData(vector<NT_Vertex>& vertices, vector<UINT>& indices)
+void cCSGObject::GetData(vector<NT_Vertex>& vertices, vector<UINT>& indices) const
 {
 	vertices.clear();
 	indices.clear();
@@ -247,10 +293,10 @@ void XM_CALLCONV cCSGObject::SetData(const vector<NT_Vertex>& vertices, const ve
 	}
 }
 
-UINT XM_CALLCONV cCSGObject::TriangleCollision(	FXMVECTOR destPos0, FXMVECTOR destPos1, FXMVECTOR destPos2,
-												GXMVECTOR srcPos0, HXMVECTOR srcPos1, HXMVECTOR srcPos2,
-												XMVECTOR& collisionPos1, XMVECTOR& collisionPos2,
-												UINT& index0, UINT& index1)
+UINT XM_CALLCONV cCSGObject::TriangleCollision(FXMVECTOR destPos0, FXMVECTOR destPos1, FXMVECTOR destPos2,
+	GXMVECTOR srcPos0, HXMVECTOR srcPos1, HXMVECTOR srcPos2,
+	XMFLOAT3& collisionPos0, XMFLOAT3& collisionPos1,
+	UINT& index0, UINT& index1)
 {
 	XMVECTOR		destOrigin[3] = {};
 	XMVECTOR		srcOrigin[3] = {};
@@ -270,19 +316,19 @@ UINT XM_CALLCONV cCSGObject::TriangleCollision(	FXMVECTOR destPos0, FXMVECTOR de
 	srcOrigin[2] = srcPos2;
 
 	destRay[0] = destOrigin[1] - destOrigin[0];
-	destRay[1] = destOrigin[2] - destOrigin[0];
-	destRay[2] = destOrigin[2] - destOrigin[1];
+	destRay[1] = destOrigin[2] - destOrigin[1];
+	destRay[2] = destOrigin[0] - destOrigin[2];
 
 	srcRay[0] = srcOrigin[1] - srcOrigin[0];
-	srcRay[1] = srcOrigin[2] - srcOrigin[0];
-	srcRay[2] = srcOrigin[2] - srcOrigin[1];
+	srcRay[1] = srcOrigin[2] - srcOrigin[1];
+	srcRay[2] = srcOrigin[0] - srcOrigin[2];
 
 	float dist = FLT_MAX;
 	for (UINT i = 0; i < 3; i++)
 	{
 		if (TriangleTests::Intersects(destOrigin[i], destRay[i], srcOrigin[0], srcOrigin[1], srcOrigin[2], dist))
 		{
-			if (dist > 0.0f && dist < 1.0f)
+			if (dist > -1.0f && dist < 1.0f)
 			{
 				destCollisionPos[i] = destOrigin[i] + destRay[i] * dist;
 				destRayCollsionIndices.push_back(i);
@@ -294,7 +340,7 @@ UINT XM_CALLCONV cCSGObject::TriangleCollision(	FXMVECTOR destPos0, FXMVECTOR de
 	{
 		if (TriangleTests::Intersects(srcOrigin[i], srcRay[i], destOrigin[0], destOrigin[1], destOrigin[2], dist))
 		{
-			if (dist > 0.0f && dist < 1.0f)
+			if (dist >= 0.0f && dist <= 1.0f)
 			{
 				srcCollisionPos[i] = srcOrigin[i] + srcRay[i] * dist;
 				srcRayCollsionIndices.push_back(i);
@@ -304,29 +350,43 @@ UINT XM_CALLCONV cCSGObject::TriangleCollision(	FXMVECTOR destPos0, FXMVECTOR de
 
 	if (destRayCollsionIndices.size() == 1 && srcRayCollsionIndices.size() == 1)
 	{
-		collisionPos1 = destCollisionPos[destRayCollsionIndices[0]];
-		collisionPos2 = srcCollisionPos[srcRayCollsionIndices[0]];
+		XMStoreFloat3(&collisionPos0, destCollisionPos[destRayCollsionIndices[0]]);
+		XMStoreFloat3(&collisionPos1, srcCollisionPos[srcRayCollsionIndices[0]]);
+
 		index0 = destRayCollsionIndices[0];
 		index1 = srcRayCollsionIndices[0];
 		return EACH_OTHER;
 	}
 	else if (destRayCollsionIndices.size() == 2)
 	{
-		collisionPos1 = destCollisionPos[destRayCollsionIndices[0]];
-		collisionPos2 = destCollisionPos[destRayCollsionIndices[1]];
+		XMStoreFloat3(&collisionPos0, destCollisionPos[destRayCollsionIndices[0]]);
+		XMStoreFloat3(&collisionPos1, destCollisionPos[destRayCollsionIndices[1]]);
 		index0 = destRayCollsionIndices[0];
 		index1 = destRayCollsionIndices[1];
 		return DEST_2POINT;
 	}
 	else if (srcRayCollsionIndices.size() == 2)
 	{
-		collisionPos1 = srcCollisionPos[srcRayCollsionIndices[0]];
-		collisionPos2 = srcCollisionPos[srcRayCollsionIndices[1]];
+		XMStoreFloat3(&collisionPos0, srcCollisionPos[srcRayCollsionIndices[0]]);
+		XMStoreFloat3(&collisionPos1, srcCollisionPos[srcRayCollsionIndices[1]]);
 		index0 = srcRayCollsionIndices[0];
 		index1 = srcRayCollsionIndices[1];
 		return SRC_2POINT;
 	}
 
 	return COLLISION_NONE;
+}
+
+UINT cCSGObject::GetLeaveIndex(UINT index0, UINT index1) const
+{
+	for (UINT i = 0; i < 3; i++)
+	{
+		if (index0 != i && index1 != i)
+		{
+			return i;
+		}
+	}
+
+	assert(false);
 }
 

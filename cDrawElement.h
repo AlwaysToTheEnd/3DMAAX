@@ -20,10 +20,11 @@ public:
 
 	void DeleteBackObject();
 	void SetPickRender(UINT key);
-	UINT GetObjectNum() { return (UINT)m_objects.size(); }
+	UINT GetObjectNum() const { return (UINT)m_objects.size(); }
 
 	template<typename T>
 	vector<T*> GetObjectsPtr();
+
 	void DeleteObject(cObject* object);
 	void SetRenderState(bool value);
 

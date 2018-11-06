@@ -24,9 +24,9 @@ public:
 	void InputReset();
 
 	PICKRAY XM_CALLCONV GetMousePickLay();
-	POINT GetMousePosPt() { return { (int)m_mousePos.x, (int)m_mousePos.y }; }
-	XMFLOAT2 GetMousePosFlot() { return { m_mousePos.x, m_mousePos.y }; }
-	XMFLOAT3 GetMousePosFloat3() { return { m_mousePos.x, m_mousePos.y, 0 }; }
+	POINT GetMousePosPt() const { return { (int)m_mousePos.x, (int)m_mousePos.y }; }
+	XMFLOAT2 GetMousePosFlot() const { return { m_mousePos.x, m_mousePos.y }; }
+	XMFLOAT3 GetMousePosFloat3() const { return { m_mousePos.x, m_mousePos.y, 0 }; }
 
 private:
 	cInputDeviceMG();

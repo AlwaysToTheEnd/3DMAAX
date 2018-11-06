@@ -67,7 +67,7 @@ void cMesh::AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object)
 	m_rootCSG->AddChild(work, move(object));
 }
 
-bool XM_CALLCONV cMesh::GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4 * quaternion)
+bool XM_CALLCONV cMesh::GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4 * quaternion) const
 {
 	if (m_geo->octree == nullptr) return false;
 
