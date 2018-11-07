@@ -45,21 +45,6 @@ void cCSGObject::SubObjectSubAbsorption()
 	}
 }
 
-//void cCSGObject::ChildOnstateControl(cCSGObject * childObjectAddress, bool value)
-//{
-//	for (auto& it : m_childs)
-//	{
-//		if (childObjectAddress == it.get())
-//		{
-//			if (childObjectAddress->m_isOn != value)
-//			{
-//				childObjectAddress->m_isOn = value;
-//				break;
-//			}
-//		}
-//	}
-//}
-
 void cCSGObject::AddChild(CSGWORKTYPE type, unique_ptr<cCSGObject> object)
 {
 	object->m_type = type;
@@ -100,10 +85,6 @@ void cCSGObject::ObjectUnion(const cCSGObject * src)
 		}
 	}
 
-	//for (UINT i = 0; i < srcVerticesSize; i++)
-	//{
-	//	//for()
-	//}
 }
 
 void cCSGObject::ObjectDifference(const cCSGObject * src)
@@ -121,16 +102,8 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 	UINT srcVerticesSize = (UINT)srcVertices.size();
 	UINT srcTriangleSize = (UINT)srcTriangles.size();
 
-	m_vertices.insert(m_vertices.end(), srcVertices.cbegin(), srcVertices.cend());
-
-	list<UINT> modifiedIndex;
-
 	for (UINT i = 0; i < srcTriangleSize; i++)
 	{
-		XMVECTOR destPos[3] = {};
-		destPos[0] = XMLoadFloat3(&m_vertices[m_triangles[i].index[0]].pos);
-		destPos[1] = XMLoadFloat3(&m_vertices[m_triangles[i].index[1]].pos);
-		destPos[2] = XMLoadFloat3(&m_vertices[m_triangles[i].index[2]].pos);
 		XMFLOAT3 collsionPos0 = {};
 		XMFLOAT3 collsionPos1 = {};
 		UINT index0 = UINT_MAX;
@@ -138,18 +111,25 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 
 		for (UINT j = 0; j < srcTriangleSize; j++)
 		{
+			XMVECTOR destPos[3] = {};
+			destPos[0] = XMLoadFloat3(&m_vertices[m_triangles[i].index[0]].pos);
+			destPos[1] = XMLoadFloat3(&m_vertices[m_triangles[i].index[1]].pos);
+			destPos[2] = XMLoadFloat3(&m_vertices[m_triangles[i].index[2]].pos);
+
 			XMVECTOR srcPos[3];
 			srcPos[0] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[0]].pos);
 			srcPos[1] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[1]].pos);
 			srcPos[2] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[2]].pos);
 
-			switch (TriangleCollision(destPos[0], destPos[1], destPos[2],
-				srcPos[0], srcPos[1], srcPos[2],
-				collsionPos0, collsionPos1,
-				index0, index1))
+			switch (TriangleCollision(	destPos[0], destPos[1], destPos[2],
+										srcPos[0], srcPos[1], srcPos[2],
+										collsionPos0, collsionPos1,
+										index0, index1))
 			{
 			case cCSGObject::EACH_OTHER:
 			{
+				XMVECTOR srcTrianglePlane = XMPlaneFromPointNormal(srcPos[0], XMLoadFloat3(&srcTriangles[j].normal));
+				float dotValue = XMVectorGetX(XMPlaneDotCoord(srcTrianglePlane, destPos[index0]));
 
 			}
 				break;
@@ -159,37 +139,64 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 				TriangleInfo addTriangle;
 				m_vertices.emplace_back(collsionPos0, m_triangles[i].normal, XMFLOAT2(0, 0));
 				m_vertices.emplace_back(collsionPos1, m_triangles[i].normal, XMFLOAT2(0, 0));
-
-				switch (leaveIndex)
+		
+				XMVECTOR srcTrianglePlane = XMPlaneFromPointNormal(srcPos[0], XMLoadFloat3(&srcTriangles[j].normal));
+				float dotValue = XMVectorGetX(XMPlaneDotCoord(srcTrianglePlane, destPos[leaveIndex]));
+				
+				if (dotValue >= 0)
 				{
-				case 0:
-					m_triangles[i].index[2] = m_vertices.size() - 2;
+					switch (leaveIndex)
+					{
+					case 0:
+						m_triangles[i].index[2] = m_vertices.size() - 2;
 
-					addTriangle = m_triangles[i];
-					addTriangle.index[1] = m_vertices.size() - 2;
-					addTriangle.index[2] = m_vertices.size() - 1;
-					m_triangles.push_back(addTriangle);
-					break;
-				case 1:
-					m_triangles[i].index[0] = m_triangles[i].index[1];
-					m_triangles[i].index[1] = m_triangles[i].index[2];
-					m_triangles[i].index[2] = m_vertices.size() - 1;
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = m_vertices.size() - 2;
+						addTriangle.index[2] = m_vertices.size() - 1;
+						m_triangles.push_back(addTriangle);
+						break;
+					case 1:
+						m_triangles[i].index[0] = m_triangles[i].index[1];
+						m_triangles[i].index[1] = m_triangles[i].index[2];
+						m_triangles[i].index[2] = m_vertices.size() - 1;
 
-					addTriangle = m_triangles[i];
-					addTriangle.index[1] = m_vertices.size() - 1;
-					addTriangle.index[2] = m_vertices.size() - 2;
-					m_triangles.push_back(addTriangle);
-					break;
-				case 2:
-					m_triangles[i].index[0] = m_triangles[i].index[2];
-					m_triangles[i].index[1] = m_triangles[i].index[0];
-					m_triangles[i].index[2] = m_vertices.size() - 2;
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = m_vertices.size() - 1;
+						addTriangle.index[2] = m_vertices.size() - 2;
+						m_triangles.push_back(addTriangle);
+						break;
+					case 2:
+						m_triangles[i].index[0] = m_triangles[i].index[2];
+						m_triangles[i].index[1] = m_triangles[i].index[0];
+						m_triangles[i].index[2] = m_vertices.size() - 2;
 
-					addTriangle = m_triangles[i];
-					addTriangle.index[1] = m_vertices.size() - 2;
-					addTriangle.index[2] = m_vertices.size() - 1;
-					m_triangles.push_back(addTriangle);
-					break;
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = m_vertices.size() - 2;
+						addTriangle.index[2] = m_vertices.size() - 1;
+						m_triangles.push_back(addTriangle);
+						break;
+					}
+				}
+				else
+				{
+					switch (leaveIndex)
+					{
+					case 0:
+						m_triangles[i].index[0] = m_triangles[i].index[2];
+						m_triangles[i].index[1] = m_vertices.size() - 2;
+						m_triangles[i].index[2] = m_vertices.size() - 1;
+						break;
+					case 1:
+						m_triangles[i].index[0] = m_triangles[i].index[0];
+						m_triangles[i].index[1] = m_vertices.size() - 2;
+						m_triangles[i].index[2] = m_vertices.size() - 1;
+						break;
+					case 2:
+						m_triangles[i].index[0] = m_triangles[i].index[1];
+						m_triangles[i].index[1] = m_vertices.size() - 1;
+						m_triangles[i].index[2] = m_vertices.size() - 2;
+						break;
+					}
 				}
 			}
 			break;
@@ -198,11 +205,11 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 
 			}
 				break;
-			default:
-				break;
 			}
 		}
 	}
+
+	m_vertices.insert(m_vertices.end(), srcVertices.cbegin(), srcVertices.cend());
 }
 
 void cCSGObject::ObjectInterSection(const cCSGObject * src)
