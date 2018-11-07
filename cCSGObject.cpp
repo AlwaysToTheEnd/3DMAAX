@@ -121,58 +121,113 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 			srcPos[1] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[1]].pos);
 			srcPos[2] = XMLoadFloat3(&srcVertices[srcTriangles[j].index[2]].pos);
 
-			switch (TriangleCollision(	destPos[0], destPos[1], destPos[2],
-										srcPos[0], srcPos[1], srcPos[2],
-										collsionPos0, collsionPos1,
-										index0, index1))
+			switch (TriangleCollision(destPos[0], destPos[1], destPos[2],
+				srcPos[0], srcPos[1], srcPos[2],
+				collsionPos0, collsionPos1,
+				index0, index1))
 			{
 			case cCSGObject::EACH_OTHER:
 			{
 				XMVECTOR srcTrianglePlane = XMPlaneFromPointNormal(srcPos[0], XMLoadFloat3(&srcTriangles[j].normal));
 				float dotValue = XMVectorGetX(XMPlaneDotCoord(srcTrianglePlane, destPos[index0]));
+				TriangleInfo addTriangle;
+				m_vertices.emplace_back(collsionPos0, m_triangles[i].normal, XMFLOAT2(0, 0));
 
+				if (dotValue >= 0)
+				{
+					/*XMVECTOR nonInterLine = destPos[(index0 + 2) % 3] - destPos[index0];
+					XMVECTOR crossVector = XMVector3Cross(destPos[(index0 + 1) % 3] - destPos[index0], nonInterLine);
+					XMVECTOR leftLineNormal = XMVector3Normalize(XMVector3Cross(nonInterLine, crossVector));
+
+					XMVECTOR lineEndPlane = XMPlaneFromPointNormal(destPos[index0], leftLineNormal);*/
+					m_vertices.emplace_back(collsionPos0, m_triangles[i].normal, XMFLOAT2(0, 0));
+
+					m_triangles[i].index[0] = m_triangles[i].index[index0];
+					m_triangles[i].index[1] = (UINT)m_vertices.size() - 2;
+					m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+				}
+				else
+				{
+					m_vertices.emplace_back(collsionPos1, m_triangles[i].normal, XMFLOAT2(0, 0));
+
+					switch (index0)
+					{
+					case 0:
+						m_triangles[i].index[0] = m_triangles[i].index[1];
+						m_triangles[i].index[1] = m_triangles[i].index[2];
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = (UINT)m_vertices.size() - 1;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 2;
+						m_triangles.push_back(addTriangle);
+						break;
+					case 1:
+						m_triangles[i].index[0] = (UINT)m_triangles[i].index[2];
+						m_triangles[i].index[1] = m_triangles[i].index[0];
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = (UINT)m_vertices.size() - 1;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 2;
+						m_triangles.push_back(addTriangle);
+						break;
+					case 2:
+						m_triangles[i].index[0] = m_triangles[i].index[0];
+						m_triangles[i].index[1] = m_triangles[i].index[1];
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = (UINT)m_vertices.size() - 1;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 2;
+						m_triangles.push_back(addTriangle);
+						break;
+					default:
+						break;
+					}
+				}
 			}
-				break;
+			break;
 			case cCSGObject::DEST_2POINT:
 			{
 				UINT leaveIndex = GetLeaveIndex(index0, index1);
 				TriangleInfo addTriangle;
 				m_vertices.emplace_back(collsionPos0, m_triangles[i].normal, XMFLOAT2(0, 0));
 				m_vertices.emplace_back(collsionPos1, m_triangles[i].normal, XMFLOAT2(0, 0));
-		
+
 				XMVECTOR srcTrianglePlane = XMPlaneFromPointNormal(srcPos[0], XMLoadFloat3(&srcTriangles[j].normal));
 				float dotValue = XMVectorGetX(XMPlaneDotCoord(srcTrianglePlane, destPos[leaveIndex]));
-				
+
 				if (dotValue >= 0)
 				{
 					switch (leaveIndex)
 					{
 					case 0:
-						m_triangles[i].index[2] = m_vertices.size() - 2;
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 2;
 
 						addTriangle = m_triangles[i];
-						addTriangle.index[1] = m_vertices.size() - 2;
-						addTriangle.index[2] = m_vertices.size() - 1;
+						addTriangle.index[1] = (UINT)m_vertices.size() - 2;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 1;
 						m_triangles.push_back(addTriangle);
 						break;
 					case 1:
 						m_triangles[i].index[0] = m_triangles[i].index[1];
 						m_triangles[i].index[1] = m_triangles[i].index[2];
-						m_triangles[i].index[2] = m_vertices.size() - 1;
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
 
 						addTriangle = m_triangles[i];
-						addTriangle.index[1] = m_vertices.size() - 1;
-						addTriangle.index[2] = m_vertices.size() - 2;
+						addTriangle.index[1] = (UINT)m_vertices.size() - 1;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 2;
 						m_triangles.push_back(addTriangle);
 						break;
 					case 2:
 						m_triangles[i].index[0] = m_triangles[i].index[2];
 						m_triangles[i].index[1] = m_triangles[i].index[0];
-						m_triangles[i].index[2] = m_vertices.size() - 2;
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 2;
 
 						addTriangle = m_triangles[i];
-						addTriangle.index[1] = m_vertices.size() - 2;
-						addTriangle.index[2] = m_vertices.size() - 1;
+						addTriangle.index[1] = (UINT)m_vertices.size() - 2;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 1;
 						m_triangles.push_back(addTriangle);
 						break;
 					}
@@ -183,18 +238,18 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 					{
 					case 0:
 						m_triangles[i].index[0] = m_triangles[i].index[2];
-						m_triangles[i].index[1] = m_vertices.size() - 2;
-						m_triangles[i].index[2] = m_vertices.size() - 1;
+						m_triangles[i].index[1] = (UINT)m_vertices.size() - 2;
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
 						break;
 					case 1:
 						m_triangles[i].index[0] = m_triangles[i].index[0];
-						m_triangles[i].index[1] = m_vertices.size() - 2;
-						m_triangles[i].index[2] = m_vertices.size() - 1;
+						m_triangles[i].index[1] = (UINT)m_vertices.size() - 2;
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
 						break;
 					case 2:
 						m_triangles[i].index[0] = m_triangles[i].index[1];
-						m_triangles[i].index[1] = m_vertices.size() - 1;
-						m_triangles[i].index[2] = m_vertices.size() - 2;
+						m_triangles[i].index[1] = (UINT)m_vertices.size() - 1;
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 2;
 						break;
 					}
 				}
@@ -204,12 +259,29 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 			{
 
 			}
-				break;
+			break;
 			}
+
+			assert(XMVector3Equal(XMLoadFloat3(&collsionPos0), XMLoadFloat3(&collsionPos1)) == false);
 		}
 	}
 
-	m_vertices.insert(m_vertices.end(), srcVertices.cbegin(), srcVertices.cend());
+	UINT addVertexStartIndex = (UINT)m_vertices.size();
+	UINT addTriangleStartIndex = (UINT)m_triangles.size();
+	m_triangles.reserve(m_triangles.size() + srcTriangles.size());
+	m_vertices.insert(m_vertices.end(), srcVertices.begin(), srcVertices.end());
+	m_triangles.insert(m_triangles.end(), srcTriangles.begin(), srcTriangles.end());
+
+	UINT i = 0;
+	for (auto& it : srcTriangles)
+	{
+		UINT currIndex = i + addTriangleStartIndex;
+		m_triangles[currIndex].index[0] = addVertexStartIndex + it.index[0];
+		m_triangles[currIndex].index[1] = addVertexStartIndex + it.index[1];
+		m_triangles[currIndex].index[2] = addVertexStartIndex + it.index[2];
+
+		i++;
+	}
 }
 
 void cCSGObject::ObjectInterSection(const cCSGObject * src)
@@ -309,6 +381,8 @@ UINT XM_CALLCONV cCSGObject::TriangleCollision(FXMVECTOR destPos0, FXMVECTOR des
 	XMVECTOR		srcOrigin[3] = {};
 	XMVECTOR		destRay[3] = {};
 	XMVECTOR		srcRay[3] = {};
+	float			destRayDist[3] = {};
+	float			srcRayDist[3] = {};
 	vector<UINT>	destRayCollsionIndices;
 	vector<UINT>	srcRayCollsionIndices;
 	XMVECTOR		destCollisionPos[3] = {};
@@ -317,18 +391,34 @@ UINT XM_CALLCONV cCSGObject::TriangleCollision(FXMVECTOR destPos0, FXMVECTOR des
 	destOrigin[0] = destPos0;
 	destOrigin[1] = destPos1;
 	destOrigin[2] = destPos2;
-
+	
 	srcOrigin[0] = srcPos0;
 	srcOrigin[1] = srcPos1;
 	srcOrigin[2] = srcPos2;
-
+	
 	destRay[0] = destOrigin[1] - destOrigin[0];
 	destRay[1] = destOrigin[2] - destOrigin[1];
 	destRay[2] = destOrigin[0] - destOrigin[2];
+	
+	destRayDist[0] = XMVectorGetX(XMVector3Length(destRay[0]));
+	destRayDist[1] = XMVectorGetX(XMVector3Length(destRay[1]));
+	destRayDist[2] = XMVectorGetX(XMVector3Length(destRay[2]));
 
 	srcRay[0] = srcOrigin[1] - srcOrigin[0];
 	srcRay[1] = srcOrigin[2] - srcOrigin[1];
 	srcRay[2] = srcOrigin[0] - srcOrigin[2];
+
+	srcRayDist[0] = XMVectorGetX(XMVector3Length(srcRay[0]));
+	srcRayDist[1] = XMVectorGetX(XMVector3Length(srcRay[1]));
+	srcRayDist[2] = XMVectorGetX(XMVector3Length(srcRay[2]));
+
+	destRay[0] = XMVector3Normalize(destRay[0]);
+	destRay[1] = XMVector3Normalize(destRay[1]);
+	destRay[2] = XMVector3Normalize(destRay[2]);
+
+	srcRay[0] = XMVector3Normalize(srcRay[0]);
+	srcRay[1] = XMVector3Normalize(srcRay[1]);
+	srcRay[2] = XMVector3Normalize(srcRay[2]);
 
 	float dist = FLT_MAX;
 	for (UINT i = 0; i < 3; i++)
@@ -394,6 +484,7 @@ UINT cCSGObject::GetLeaveIndex(UINT index0, UINT index1) const
 		}
 	}
 
+	return 0;
 	assert(false);
 }
 

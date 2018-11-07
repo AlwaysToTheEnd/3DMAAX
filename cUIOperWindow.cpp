@@ -68,7 +68,7 @@ void cUIOperWindow::InputDataUpdate()
 		{
 			int inUIMouseY = mousePos.y - m_uiRECT.top;
 
-			m_currParameterIndex = inUIMouseY / 20.0f;
+			m_currParameterIndex = (int)(inUIMouseY / 20.0f);
 		}
 		else
 		{
