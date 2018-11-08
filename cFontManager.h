@@ -28,7 +28,7 @@ public:
 	}
 
 	void Build(ID3D12Device* device, ID3D12CommandQueue* queue);
-	void AddFont(const string& fontName ,const wstring& fileName);
+	void AddFont(ID3D12Device * device, ID3D12CommandQueue * queue, const string& fontName ,const wstring& fileName);
 	shared_ptr<RenderFont> GetFont(string fontName);
 
 	void Resize(UINT clientWidth, UINT clientHeight);
@@ -40,7 +40,8 @@ private:
 
 	enum Descriptors
 	{
-		MyFont,
+		BaseFont,
+		BaseFont_K,
 		Count,
 	};
 

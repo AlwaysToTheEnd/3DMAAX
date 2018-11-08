@@ -16,7 +16,7 @@ cTextureHeap::cTextureHeap(ID3D12Device * device, UINT maxTexture)
 	ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(m_SrvHeap.GetAddressOf())));
 }
 
-void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, string name, wstring filename)
+void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, const string& name, const wstring& filename)
 {
 	auto it = m_Textures.find(name);
 	assert(it == m_Textures.end() && "This name is overlapping name");
@@ -62,7 +62,7 @@ void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, string name, wstring
 	m_device->CreateShaderResourceView(addTexture.tex.resource.Get(), &srvDesc, srvHeapHandle);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE cTextureHeap::GetTexture(string name)
+D3D12_GPU_DESCRIPTOR_HANDLE cTextureHeap::GetTexture(const string& name)
 {
 	auto it = m_Textures.find(name);
 	assert(it != m_Textures.end() && "can not find this name");
@@ -71,4 +71,12 @@ D3D12_GPU_DESCRIPTOR_HANDLE cTextureHeap::GetTexture(string name)
 	srvHeapHandle.Offset(it->second.num, m_SrvDescriptorSize);
 
 	return srvHeapHandle;
+}
+
+UINT cTextureHeap::GetTextureIndex(const string& name) const
+{
+	auto it = m_Textures.find(name);
+	assert(it != m_Textures.end() && "can not find this name");
+
+	return it->second.num;
 }

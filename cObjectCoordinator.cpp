@@ -29,7 +29,7 @@ void cObjectCoordinator::MeshSetUp()
 	for (int i = 0; i < sphere.Vertices.size(); i++)
 	{
 		vertices[i].pos = sphere.Vertices[i].Position;
-		XMStoreFloat4(&vertices[i].color, Colors::Gray.v);
+		XMStoreFloat4(&vertices[i].color, Colors::Black.v);
 	}
 
 	indices = sphere.GetIndices16();

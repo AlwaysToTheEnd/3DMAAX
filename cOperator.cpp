@@ -24,7 +24,7 @@ void cOperator::Build()
 	UIMG->UIOn(m_objectControl);
 
 	m_operSelectButtons.Build({ NOMALBUTTONSIZE, NOMALBUTTONSIZE });
-	m_operSelectButtons.SetPos({ 0,0,0 });
+	m_operSelectButtons.SetPos({ 0,3,0 });
 
 	for (int i = 0; i < OPER_COUNT; i++)
 	{
@@ -78,6 +78,7 @@ void cOperator::Update()
 		}
 	}
 
+	m_operSelectButtons.Update();
 	m_planes.Update();
 }
 

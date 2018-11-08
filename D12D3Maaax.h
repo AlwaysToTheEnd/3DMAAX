@@ -1,5 +1,4 @@
 #pragma once
-#define MAXTEXTURENUM 20
 
 class D12D3Maaax :public D12App
 {
@@ -38,6 +37,7 @@ private:
 	unordered_map<string, ComPtr<ID3D12PipelineState>> m_PSOs;
 	unordered_map<string, unique_ptr<Material>>	m_Materials;
 	unique_ptr<cTextureHeap>					m_TextureHeap = nullptr;
+	vector<string>								m_TextureNames;
 
 	ComPtr<ID3D12RootSignature>				m_RootSignature = nullptr;
 	unordered_map<string, ComPtr<ID3DBlob>>	m_Shaders;

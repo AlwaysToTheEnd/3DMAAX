@@ -8,10 +8,13 @@ public:
 	cTextureHeap& operator=(const cTextureHeap& rhs) = delete;
 	cTextureHeap(ID3D12Device* device ,UINT maxTexture);
 
-	void AddTexture(ID3D12CommandQueue* cmdqueue, string name, wstring filename);
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTexture(string name);
-	ID3D12DescriptorHeap* GetHeap() { return m_SrvHeap.Get(); }
+	void AddTexture(ID3D12CommandQueue* cmdqueue, const string& name, const wstring& filename);
 
+	ID3D12DescriptorHeap* GetHeap() { return m_SrvHeap.Get(); }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetTexture(const string& name);
+	
+	UINT GetTextureIndex(const string& name) const;
+	UINT GetTexturesNum() const { return (UINT)m_Textures.size(); }
 private:
 	struct TEXTURENUM
 	{

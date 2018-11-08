@@ -109,7 +109,7 @@ void D12D3Maaax::Draw()
 	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LimeGreen, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::Gray, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -249,7 +249,7 @@ void D12D3Maaax::UpdateMainPassCB()
 void D12D3Maaax::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE texTable;
-	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, MAXTEXTURENUM, 0);
+	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_TextureHeap->GetTexturesNum(), 0);
 
 	CD3DX12_ROOT_PARAMETER slotRootParam[4];
 	slotRootParam[0].InitAsShaderResourceView(0, 1);
@@ -419,9 +419,22 @@ void D12D3Maaax::BuildPSOs()
 
 void D12D3Maaax::BuildTextures()
 {
-	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), MAXTEXTURENUM);
-	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "plane", L"Texture/plane.png");
-	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "ice", L"Texture/ice.dds");
+	wstring fileName;
+	const wstring folderName = L"Texture/";
+	m_TextureNames.push_back("ui.png");
+	m_TextureNames.push_back("plane.png");
+	m_TextureNames.push_back("line.png");
+	m_TextureNames.push_back("dots.png");
+	m_TextureNames.push_back("writing.png");
+	m_TextureNames.push_back("push.png");
+	m_TextureNames.push_back("CreateMesh.png");
+	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), (UINT)m_TextureNames.size());
+	
+	for (auto& it : m_TextureNames)
+	{
+		fileName.assign(it.begin(), it.end());
+		m_TextureHeap->AddTexture(m_CommandQueue.Get(), it, folderName + fileName);
+	}
 }
 
 void D12D3Maaax::BuildFrameResources()
@@ -435,25 +448,18 @@ void D12D3Maaax::BuildFrameResources()
 
 void D12D3Maaax::BuildMaterials()
 {
-	auto wirefence = make_unique<Material>();
-	wirefence->name = "wirefence";
-	wirefence->matCBIndex = (int)m_Materials.size();
-	wirefence->diffuseMapIndex = 1;
-	wirefence->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	wirefence->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	wirefence->roughness = 0.25f;
+	for (auto& it : m_TextureNames)
+	{
+		auto material = make_unique<Material>();
+		material->name = it;
+		material->matCBIndex = (int)m_Materials.size();
+		material->diffuseMapIndex = m_TextureHeap->GetTextureIndex(it);
+		material->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		material->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+		material->roughness = 0.25f;
 
-	m_Materials["wirefence"] = move(wirefence);
-
-	auto icemirror = std::make_unique<Material>();
-	icemirror->name = "icemirror";
-	icemirror->matCBIndex = (int)m_Materials.size();
-	icemirror->diffuseMapIndex = 0;
-	icemirror->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
-	icemirror->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	icemirror->roughness = 0.5f;
-
-	m_Materials["icemirror"] = std::move(icemirror);
+		m_Materials[it] = move(material);
+	}
 }
 
 void D12D3Maaax::BuildObjects()

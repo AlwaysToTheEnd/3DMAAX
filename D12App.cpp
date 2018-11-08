@@ -366,7 +366,7 @@ bool D12App::InitDirect3D()
 
 	HRESULT hr = S_OK;
 
- 	ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(m_DxgiFactory.GetAddressOf())));
+ 	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(m_DxgiFactory.GetAddressOf())));
 	
 	hr= D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_D3dDevice.GetAddressOf()));
 

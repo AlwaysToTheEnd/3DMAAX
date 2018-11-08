@@ -1,5 +1,5 @@
 #pragma once
-#define NOMALBUTTONSIZE 30
+#define NOMALBUTTONSIZE 40
 
 class cOperator
 {
@@ -24,7 +24,7 @@ private:
 	void SelectCSGObjectOn(UINT64 address);
 
 private:
-	const int						m_ButtonMtlTexBaseIndex = 0;
+	const int						m_ButtonMtlTexBaseIndex = 1;
 	cButtonCollector				m_operSelectButtons;
 
 	vector<unique_ptr<cOperation>>	m_operations;

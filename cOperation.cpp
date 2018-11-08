@@ -127,9 +127,15 @@ void cOperation::Build()
 {
 	m_operationText = FONTMANAGER->GetFont("baseFont");
 	m_operationText->isRender = false;
-	m_operationText->color = Colors::Red;
+	m_operationText->color = Colors::OrangeRed;
 	m_operationText->printString = L"";
-	m_operationText->pos = { 30,30,0 };
+	m_operationText->pos = { 20,50,0 };
+
+	m_operationText_K= FONTMANAGER->GetFont("baseFont_K");
+	m_operationText_K->isRender = false;
+	m_operationText_K->color = Colors::Black;
+	m_operationText_K->printString = L"";
+	m_operationText_K->pos = { 20,50,0 };
 }
 
 void cOperation::EndOperation()

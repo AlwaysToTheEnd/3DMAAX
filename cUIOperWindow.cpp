@@ -86,9 +86,9 @@ void cUIOperWindow::InputDataUpdate()
 		{
 			m_operFonts[m_currParameterIndex]->color = Colors::Red;
 			m_operFonts[m_currParameterIndex]->printString = m_operParameters[m_currParameterIndex].dataName;
-			m_operFonts[m_currParameterIndex]->pos.x = (float)m_uiRECT.left;
-			m_operFonts[m_currParameterIndex]->pos.y = (float)m_uiRECT.top + m_currParameterIndex * 20.0f;
-			m_operFonts[m_currParameterIndex]->scale = { 0.4f,0.45f,1 };
+			//m_operFonts[m_currParameterIndex]->pos.x = (float)m_uiRECT.left + 1.0f;
+			//m_operFonts[m_currParameterIndex]->pos.y = (float)m_uiRECT.top + m_currParameterIndex * 20.0f + 2.0f;
+			//m_operFonts[m_currParameterIndex]->scale = { 0.45f,0.45f,1 };
 
 			switch (m_operParameters[m_currParameterIndex].dataFormat)
 			{
@@ -157,9 +157,9 @@ void cUIOperWindow::UIUpdate()
 
 		m_operFonts[i]->color = Colors::Black;
 		m_operFonts[i]->printString = m_operParameters[i].dataName + dataStr;
-		m_operFonts[i]->pos.x = (float)m_uiRECT.left;
-		m_operFonts[i]->pos.y = (float)m_uiRECT.top + i * 20.0f;
-		m_operFonts[i]->scale = { 0.4f,0.45f,1 };
+		m_operFonts[i]->pos.x = (float)m_uiRECT.left + 1.0f;
+		m_operFonts[i]->pos.y = (float)m_uiRECT.top + i * 20.0f + 2.0f;
+		m_operFonts[i]->scale = { 0.45f,0.45f,1 };
 	}
 }
 
