@@ -420,6 +420,7 @@ void D12D3Maaax::BuildPSOs()
 void D12D3Maaax::BuildTextures()
 {
 	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), MAXTEXTURENUM);
+	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "plane", L"Texture/plane.png");
 	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "ice", L"Texture/ice.dds");
 }
 
@@ -437,7 +438,7 @@ void D12D3Maaax::BuildMaterials()
 	auto wirefence = make_unique<Material>();
 	wirefence->name = "wirefence";
 	wirefence->matCBIndex = (int)m_Materials.size();
-	wirefence->diffuseSrvHeapIndex = 0;
+	wirefence->diffuseMapIndex = 1;
 	wirefence->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	wirefence->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	wirefence->roughness = 0.25f;
@@ -447,7 +448,7 @@ void D12D3Maaax::BuildMaterials()
 	auto icemirror = std::make_unique<Material>();
 	icemirror->name = "icemirror";
 	icemirror->matCBIndex = (int)m_Materials.size();
-	icemirror->diffuseSrvHeapIndex = 2;
+	icemirror->diffuseMapIndex = 0;
 	icemirror->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 	icemirror->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	icemirror->roughness = 0.5f;

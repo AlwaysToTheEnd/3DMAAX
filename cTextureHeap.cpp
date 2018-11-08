@@ -28,9 +28,22 @@ void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, string name, wstring
 	ResourceUploadBatch resourceUpload(m_device);
 	resourceUpload.Begin();
 
-	ThrowIfFailed(CreateDDSTextureFromFile(m_device,
-		resourceUpload, filename.c_str(), addTexture.tex.resource.GetAddressOf()));
-	m_Textures[name] = addTexture;
+	size_t index = filename.find('.') + 1;
+	wstring extension;
+	extension.assign(&filename[index], filename.size() - index);
+
+	if (extension == L"dds")
+	{
+		ThrowIfFailed(CreateDDSTextureFromFile(m_device,
+			resourceUpload, filename.c_str(), addTexture.tex.resource.GetAddressOf()));
+		m_Textures[name] = addTexture;
+	}
+	else
+	{
+		ThrowIfFailed(CreateWICTextureFromFile(m_device,
+			resourceUpload, filename.c_str(), addTexture.tex.resource.GetAddressOf()));
+		m_Textures[name] = addTexture;
+	}
 
 	auto uploadResourceFinished = resourceUpload.End(cmdqueue);
 	uploadResourceFinished.wait();
@@ -45,14 +58,14 @@ void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, string name, wstring
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	srvDesc.Texture2D.MipLevels = addTexture.tex.resource->GetDesc().MipLevels;
-	
+
 	m_device->CreateShaderResourceView(addTexture.tex.resource.Get(), &srvDesc, srvHeapHandle);
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE cTextureHeap::GetTexture(string name)
 {
 	auto it = m_Textures.find(name);
-	assert(it != m_Textures.end()&&"can not find this name");
+	assert(it != m_Textures.end() && "can not find this name");
 
 	auto srvHeapHandle = (CD3DX12_GPU_DESCRIPTOR_HANDLE)m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
 	srvHeapHandle.Offset(it->second.num, m_SrvDescriptorSize);

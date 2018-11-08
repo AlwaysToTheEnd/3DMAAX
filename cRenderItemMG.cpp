@@ -49,7 +49,7 @@ void cRenderItem::Update()
 				XMMATRIX texTransform = XMLoadFloat4x4(&(*it)->instanceData.TexTransform);
 				XMStoreFloat4x4(&data.World, XMMatrixTranspose(world));
 				XMStoreFloat4x4(&data.TexTransform, XMMatrixTranspose(texTransform));
-
+			
 				m_currFrameCB->CopyData(m_renderInstanceCount, data);
 				(*it)->numFramesDirty = gNumFrameResources;
 			}

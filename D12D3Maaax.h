@@ -1,5 +1,5 @@
 #pragma once
-#define MAXTEXTURENUM 7
+#define MAXTEXTURENUM 20
 
 class D12D3Maaax :public D12App
 {

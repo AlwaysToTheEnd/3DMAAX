@@ -138,7 +138,6 @@ struct Material
 {
 	string		name;
 	int			matCBIndex = -1;
-	int			diffuseSrvHeapIndex = -1;
 
 	int			numFramesDirty = gNumFrameResources;
 
