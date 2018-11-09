@@ -97,5 +97,4 @@ void cOper_Add_Line::EndOperation()
 {
 	cOperation::EndOperation();
 	m_firstDot = nullptr;
-	m_operationText->printString = L"첫번째 점을 선택해주십시오";
 }

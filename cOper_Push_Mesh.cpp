@@ -17,7 +17,6 @@ cOper_Push_Mesh::~cOper_Push_Mesh()
 
 }
 
-
 UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems,
 	cDrawPlane& planes, unordered_map<wstring, cMesh>& meshs, DrawItems*& currDrawItems, cMesh*& currMesh)
 {
