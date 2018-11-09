@@ -29,7 +29,7 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 		{
 			m_isCreateMesh = false;
 			m_draws = nullptr;
-			m_operationText->printString = L"Select Draw";
+			m_operationText->printString = L"그림 오브젝트 선택";
 			m_operationText->isRender = true;
 			m_worksSate = DRAW_SELECT;
 		}

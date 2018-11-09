@@ -19,14 +19,14 @@ void cFontManager::Build(ID3D12Device * device, ID3D12CommandQueue * queue)
 	m_spriteBatch = std::make_unique<SpriteBatch>(device, resourceUpload, pd);
 
 	m_fonts["baseFont"] = std::make_unique<SpriteFont>(device, resourceUpload,
-		L"font/aBlackB.spritefont",
+		L"font/baseFont.spritefont",
 		m_resourceDescriptors->GetCpuHandle(Descriptors::BaseFont),
 		m_resourceDescriptors->GetGpuHandle(Descriptors::BaseFont));
 
-	m_fonts["baseFont_K"] = std::make_unique<SpriteFont>(device, resourceUpload,
-		L"font/aBlackB_K.spritefont",
-		m_resourceDescriptors->GetCpuHandle(Descriptors::BaseFont_K),
-		m_resourceDescriptors->GetGpuHandle(Descriptors::BaseFont_K));
+	//m_fonts["baseFont_K"] = std::make_unique<SpriteFont>(device, resourceUpload,
+	//	L"font/aBlackB_K.spritefont",
+	//	m_resourceDescriptors->GetCpuHandle(Descriptors::BaseFont_K),
+	//	m_resourceDescriptors->GetGpuHandle(Descriptors::BaseFont_K));
 
 	auto uploadResourcesFinished = resourceUpload.End(queue);
 

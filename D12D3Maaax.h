@@ -37,6 +37,7 @@ private:
 	unordered_map<string, ComPtr<ID3D12PipelineState>> m_PSOs;
 	unordered_map<string, unique_ptr<Material>>	m_Materials;
 	unique_ptr<cTextureHeap>					m_TextureHeap = nullptr;
+	unique_ptr<cTextureHeap>					m_CubeTextureHeap = nullptr;
 	vector<string>								m_TextureNames;
 
 	ComPtr<ID3D12RootSignature>				m_RootSignature = nullptr;

@@ -251,16 +251,20 @@ void D12D3Maaax::BuildRootSignature()
 	CD3DX12_DESCRIPTOR_RANGE texTable;
 	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_TextureHeap->GetTexturesNum(), 0);
 
-	CD3DX12_ROOT_PARAMETER slotRootParam[4];
+	CD3DX12_DESCRIPTOR_RANGE cubeMapTexTable;
+	cubeMapTexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 5, 1);
+
+	CD3DX12_ROOT_PARAMETER slotRootParam[5];
 	slotRootParam[0].InitAsShaderResourceView(0, 1);
 	slotRootParam[1].InitAsShaderResourceView(1, 1);
 	slotRootParam[2].InitAsConstantBufferView(0);
 	slotRootParam[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParam[4].InitAsDescriptorTable(1, &cubeMapTexTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	auto staticSamplers = GetStaticSamplers();
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootDesc;
-	rootDesc.Init(4, slotRootParam, (UINT)staticSamplers.size(),
+	rootDesc.Init(5, slotRootParam, (UINT)staticSamplers.size(),
 		staticSamplers.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> serializedRootSig = nullptr;

@@ -41,7 +41,6 @@ private:
 	enum Descriptors
 	{
 		BaseFont,
-		BaseFont_K,
 		Count,
 	};
 

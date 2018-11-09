@@ -159,7 +159,7 @@ void cUIOperWindow::UIUpdate()
 		m_operFonts[i]->printString = m_operParameters[i].dataName + dataStr;
 		m_operFonts[i]->pos.x = (float)m_uiRECT.left + 1.0f;
 		m_operFonts[i]->pos.y = (float)m_uiRECT.top + i * 20.0f + 2.0f;
-		m_operFonts[i]->scale = { 0.45f,0.45f,1 };
+		m_operFonts[i]->scale = { 0.55f,0.55f,1 };
 	}
 }
 

@@ -130,12 +130,6 @@ void cOperation::Build()
 	m_operationText->color = Colors::OrangeRed;
 	m_operationText->printString = L"";
 	m_operationText->pos = { 20,50,0 };
-
-	m_operationText_K= FONTMANAGER->GetFont("baseFont_K");
-	m_operationText_K->isRender = false;
-	m_operationText_K->color = Colors::Black;
-	m_operationText_K->printString = L"";
-	m_operationText_K->pos = { 20,50,0 };
 }
 
 void cOperation::EndOperation()
@@ -179,7 +173,7 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 			m_operControl->AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
-		m_operationText->printString = L"Select Draws";
+		m_operationText->printString = L"그림 오브젝트 선택";
 		m_operationText->isRender = true;
 		UIMG->UIOn(m_operControl);
 		m_currObjectControlParam = -1;
@@ -229,7 +223,7 @@ bool cOperation::CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMes
 			m_operControl->AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
-		m_operationText->printString = L"Select Mesh";
+		m_operationText->printString = L"작업할 메쉬 선택";
 		m_operationText->isRender = true;
 		UIMG->UIOn(m_operControl);
 		m_currObjectControlParam = -1;

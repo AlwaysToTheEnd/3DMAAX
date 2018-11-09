@@ -28,7 +28,7 @@ UINT cOper_Add_Dot::OperationUpdate(unordered_map<wstring, DrawItems>& drawItems
 		{
 			m_worksSate = SET_DOTS;
 			m_operationText->isRender = true;
-			m_operationText->printString = L"set dot time";
+			m_operationText->printString = L"점 찍기 시간";
 		}
 
 		break;

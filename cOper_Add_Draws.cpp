@@ -15,7 +15,7 @@ cOper_Add_Draws::~cOper_Add_Draws()
 void cOper_Add_Draws::Build()
 {
 	cOperation::Build();
-	m_operationText->printString = L"Select Plane or Draws";
+	m_operationText->printString = L"평면을 선택하거나 기존 그림 오브젝트를 선택";
 
 	for (int i = 0; i < DRAWOBJECTSPLACE::OBJECTS_COUNT; i++)
 	{

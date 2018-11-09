@@ -25,7 +25,7 @@ UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 			m_firstDot = nullptr;
 			m_addLineNum = 0;
 			m_addDotNum = 0;
-			m_operationText->printString = L"Select First Dot";
+			m_operationText->printString = L"첫번째 점을 선택해주십시오";
 			m_worksSate = FIRST_DOT_PICK;
 		}
 	}
@@ -44,7 +44,7 @@ UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 			}
 
 			m_worksSate = SECEND_DOT_PICK;
-			m_operationText->printString = L"Select Secend dot";
+			m_operationText->printString = L"두번째 점을 선택해주십시오";
 		}
 	}
 	break;
@@ -65,7 +65,7 @@ UINT cOper_Add_Line::OperationUpdate(unordered_map<wstring, DrawItems>& drawItem
 			line->SetFirstDot(m_firstDot);
 			line->SetSecondDot(secendDot);
 			m_firstDot = nullptr;
-			m_operationText->printString = L"Select First Dot";
+			m_operationText->printString = L"첫번째 점을 선택해주십시오";
 			m_worksSate = FIRST_DOT_PICK;
 		}
 	}
@@ -97,5 +97,5 @@ void cOper_Add_Line::EndOperation()
 {
 	cOperation::EndOperation();
 	m_firstDot = nullptr;
-	m_operationText->printString = L"Select First Dot";
+	m_operationText->printString = L"첫번째 점을 선택해주십시오";
 }

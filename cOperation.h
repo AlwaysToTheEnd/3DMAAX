@@ -84,7 +84,6 @@ protected:
 	static MeshGeometry*				m_previewGeo;
 
 	shared_ptr<RenderFont>	m_operationText;
-	shared_ptr<RenderFont>	m_operationText_K;
 	const OPERATIONTYPE		m_operType;
 	bool					m_operState;
 	UINT					m_worksSate;
