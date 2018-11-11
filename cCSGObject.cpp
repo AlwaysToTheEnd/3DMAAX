@@ -140,7 +140,7 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 					XMVECTOR leftLineNormal = XMVector3Normalize(XMVector3Cross(nonInterLine, crossVector));
 
 					XMVECTOR lineEndPlane = XMPlaneFromPointNormal(destPos[index0], leftLineNormal);*/
-					m_vertices.emplace_back(collsionPos0, m_triangles[i].normal, XMFLOAT2(0, 0));
+					m_vertices.emplace_back(collsionPos1, m_triangles[i].normal, XMFLOAT2(0, 0));
 
 					m_triangles[i].index[0] = m_triangles[i].index[index0];
 					m_triangles[i].index[1] = (UINT)m_vertices.size() - 2;
@@ -257,7 +257,59 @@ void cCSGObject::ObjectDifference(const cCSGObject * src)
 			break;
 			case cCSGObject::SRC_2POINT:
 			{
+				XMVECTOR srcTrianglePlane = XMPlaneFromPointNormal(srcPos[0], XMLoadFloat3(&srcTriangles[j].normal));
+				float dotValue = XMVectorGetX(XMPlaneDotCoord(srcTrianglePlane, destPos[index0]));
+				TriangleInfo addTriangle;
+				m_vertices.emplace_back(collsionPos0, m_triangles[i].normal, XMFLOAT2(0, 0));
 
+				if (dotValue >= 0)
+				{
+					m_vertices.emplace_back(collsionPos1, m_triangles[i].normal, XMFLOAT2(0, 0));
+
+					m_triangles[i].index[0] = m_triangles[i].index[index0];
+					m_triangles[i].index[1] = (UINT)m_vertices.size() - 2;
+					m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+				}
+				else
+				{
+					m_vertices.emplace_back(collsionPos1, m_triangles[i].normal, XMFLOAT2(0, 0));
+
+					switch (index0)
+					{
+					case 0:
+						m_triangles[i].index[0] = m_triangles[i].index[1];
+						m_triangles[i].index[1] = m_triangles[i].index[2];
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = (UINT)m_vertices.size() - 1;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 2;
+						m_triangles.push_back(addTriangle);
+						break;
+					case 1:
+						m_triangles[i].index[0] = (UINT)m_triangles[i].index[2];
+						m_triangles[i].index[1] = m_triangles[i].index[0];
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = (UINT)m_vertices.size() - 1;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 2;
+						m_triangles.push_back(addTriangle);
+						break;
+					case 2:
+						m_triangles[i].index[0] = m_triangles[i].index[0];
+						m_triangles[i].index[1] = m_triangles[i].index[1];
+						m_triangles[i].index[2] = (UINT)m_vertices.size() - 1;
+
+						addTriangle = m_triangles[i];
+						addTriangle.index[1] = (UINT)m_vertices.size() - 1;
+						addTriangle.index[2] = (UINT)m_vertices.size() - 2;
+						m_triangles.push_back(addTriangle);
+						break;
+					default:
+						break;
+					}
+				}
 			}
 			break;
 			}

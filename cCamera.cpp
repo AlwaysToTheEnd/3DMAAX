@@ -11,9 +11,7 @@ cCamera::cCamera()
 	, m_RotY(0)
 	, m_View(MathHelper::Identity4x4())
 {
-
 }
-
 
 cCamera::~cCamera()
 {

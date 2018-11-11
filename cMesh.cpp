@@ -26,6 +26,7 @@ void cMesh::Build(shared_ptr<cRenderItem> renderItem)
 	m_renderItem->SetRenderOK(false);
 
 	m_renderInstance = m_renderItem->GetRenderIsntance();
+	m_renderInstance->instanceData.MaterialIndex = 7;
 
 	meshNum++;
 }

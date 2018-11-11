@@ -39,7 +39,7 @@ UINT cOper_Push_Mesh::OperationUpdate(unordered_map<wstring, DrawItems>& drawIte
 		if (CurrDrawCheckAndPick(drawItems, currDrawItems))
 		{
 			m_currDrawCycleDotsList.clear();
-			
+
 			m_draws = currDrawItems;
 			m_draws->SetPickRender(2);
 			m_draws->SetRenderState(true);
@@ -166,23 +166,50 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 	m_vertices.clear();
 	m_indices.clear();
 
+	XMFLOAT4 edgeRect(FLT_MAX, -FLT_MAX, -FLT_MAX, FLT_MAX);
+
 	for (UINT i = 0; i < cycleDotsNum; i++)
 	{
 		m_vertices.push_back({});
 		m_vertices.back().pos = cycleDots[i]->GetPosC();
 		m_vertices.back().uv = { 0,0 };
+
+		if (m_vertices.back().pos.x < edgeRect.x)
+		{
+			edgeRect.x = m_vertices.back().pos.x;
+		}
+
+		if (m_vertices.back().pos.x > edgeRect.z)
+		{
+			edgeRect.z = m_vertices.back().pos.x;
+		}
+
+		if (m_vertices.back().pos.y > edgeRect.y)
+		{
+			edgeRect.y = m_vertices.back().pos.y;
+		}
+
+		if (m_vertices.back().pos.y < edgeRect.w)
+		{
+			edgeRect.w = m_vertices.back().pos.y;
+		}
 	}
 
-	EarClipping<NT_Vertex, UINT>(m_vertices, m_indices);
+	float edgeRectSizeX = edgeRect.z - edgeRect.x;
+	float edgeRectSizeY = edgeRect.y - edgeRect.w;
 
 	for (UINT i = 0; i < cycleDotsNum; i++)
 	{
-		NT_Vertex vertex;
-		vertex.pos = cycleDots[i]->GetPosC();
-		vertex.pos.z -= 1.0f;
-		vertex.uv = { 0,0 };
+		m_vertices[i].uv.x = (m_vertices[i].pos.x - edgeRect.x) / edgeRectSizeX;
+		m_vertices[i].uv.y = (m_vertices[i].pos.y - edgeRect.w) / edgeRectSizeY;
+	}
 
-		m_vertices.push_back(vertex);
+	EarClipping<NT_Vertex, UINT>(m_vertices, m_indices);
+	m_vertices.insert(m_vertices.end(), m_vertices.begin(), m_vertices.end());
+
+	for (UINT i = cycleDotsNum; i < cycleDotsNum * 2; i++)
+	{
+		m_vertices[i].pos.z -= 1.0f;
 	}
 
 	UINT indicesNum = (UINT)m_indices.size();
@@ -194,26 +221,52 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 		m_indices.push_back(m_indices[i + 1] + cycleDotsNum);
 	}
 
-	UINT sideTriangleStartIndex = (UINT)m_vertices.size();
-	m_vertices.insert(m_vertices.end(), m_vertices.begin(), m_vertices.end());
+	vector<float> weightLength(cycleDotsNum+1);
+	float cycleLength = 0;
 
-	for (UINT i = sideTriangleStartIndex; i < sideTriangleStartIndex + cycleDotsNum; i++)
+	weightLength.front() = 0.0f;
+	for (UINT i = 0; i < cycleDotsNum-1; i++)
 	{
-		m_indices.push_back(i);
-		m_indices.push_back(i + cycleDotsNum);
-		m_indices.push_back((i + 1) % cycleDotsNum + cycleDotsNum);
+		float lineDist= XMVectorGetX(XMVector3Length(
+			XMLoadFloat3(&m_vertices[i + 1].pos) - XMLoadFloat3(&m_vertices[i].pos)));
+		cycleLength += lineDist;
+		weightLength[i+1] = cycleLength;
+	}
+	weightLength.back() = 1.0f;
 
-		m_indices.push_back(i);
-		m_indices.push_back((i + 1) % cycleDotsNum + cycleDotsNum);
-		m_indices.push_back((i + 1) % cycleDotsNum);
+	for (UINT i = 0; i < cycleDotsNum; i++)
+	{
+		size_t currIndex = m_vertices.size();
+		float startUV_X = weightLength[i] / cycleLength;
+		float endUV_X = weightLength[i+1] / cycleLength;
+		m_vertices.push_back(m_vertices[i]);
+		m_vertices.push_back(m_vertices[i + cycleDotsNum]);
+		m_vertices.push_back(m_vertices[(i + 1) % cycleDotsNum + cycleDotsNum]);
+		m_vertices.push_back(m_vertices[(i + 1) % cycleDotsNum]);
+		m_vertices[currIndex].uv.y = 0.0f;
+		m_vertices[currIndex].uv.x = startUV_X;
+		m_vertices[currIndex + 1].uv.y = 1.0f;
+		m_vertices[currIndex + 1].uv.x = startUV_X;
+		m_vertices[currIndex + 2].uv.y = 1.0f;
+		m_vertices[currIndex + 2].uv.x = endUV_X;
+		m_vertices[currIndex + 3].uv.y = 0.0f;
+		m_vertices[currIndex + 3].uv.x = endUV_X;
+
+		m_indices.push_back(currIndex);
+		m_indices.push_back(currIndex + 1);
+		m_indices.push_back(currIndex + 2);
+
+		m_indices.push_back(currIndex);
+		m_indices.push_back(currIndex + 2);
+		m_indices.push_back(currIndex + 3);
 	}
 
 	for (size_t i = 0; i < m_indices.size(); i += 3)
 	{
 		XMFLOAT3 normalVector(0, 0, 0);
-		XMStoreFloat3(&normalVector,
-			GetNormalFromTriangle(m_vertices[m_indices[i]].pos, m_vertices[m_indices[i + 1]].pos, m_vertices[m_indices[i + 2]].pos));
-		
+		XMStoreFloat3(&normalVector, XMVector3Normalize(
+			GetNormalFromTriangle(m_vertices[m_indices[i]].pos, m_vertices[m_indices[i + 1]].pos, m_vertices[m_indices[i + 2]].pos)));
+
 		m_vertices[m_indices[i]].normal = normalVector;
 		m_vertices[m_indices[i + 1]].normal = normalVector;
 		m_vertices[m_indices[i + 2]].normal = normalVector;
@@ -229,5 +282,6 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 	m_prevViewRender->SetRenderOK(true);
 	m_prevViewRenderInstance->m_isRenderOK = true;
 	m_prevViewRenderInstance->numFramesDirty = gNumFrameResources;
+	m_prevViewRenderInstance->instanceData.MaterialIndex = 7;
 	XMStoreFloat4x4(&m_prevViewRenderInstance->instanceData.World, planeMat);
 }

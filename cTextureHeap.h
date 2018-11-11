@@ -16,6 +16,7 @@ public:
 	
 	UINT GetTextureIndex(const string& name) const;
 	UINT GetTexturesNum() const { return (UINT)m_Textures.size(); }
+
 private:
 	struct TEXTURENUM
 	{

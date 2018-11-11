@@ -9,6 +9,9 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 D12D3Maaax::~D12D3Maaax()
 {
 	m_operator = nullptr;
+	m_TextureHeap = nullptr;
+	m_cubeMapRenderInstance = nullptr;
+	m_cubeMapRender = nullptr;
 	delete UIMG;
 	delete MESHMG;
 	delete RENDERITEMMG;
@@ -150,8 +153,8 @@ void D12D3Maaax::Draw()
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
 
 	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
-	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
+	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 
 	m_CommandList->SetPipelineState(m_PSOs["planes"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
@@ -350,6 +353,17 @@ void D12D3Maaax::BuildGeometry()
 void D12D3Maaax::BuildPSOs()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
+	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
+	transparencyBlendDesc.BlendEnable = true;
+	transparencyBlendDesc.LogicOpEnable = false;
+	transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	ZeroMemory(&opaquePsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	opaquePsoDesc.InputLayout = { m_NTVertexInputLayout.data(), (UINT)m_NTVertexInputLayout.size() };
@@ -367,6 +381,7 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	//opaquePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	opaquePsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.SampleMask = UINT_MAX;
 	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -378,6 +393,7 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["base"])));
 
 	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["baseWF"])));
 	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 
@@ -397,17 +413,6 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&cubeMapPsoDesc, IID_PPV_ARGS(&m_PSOs["cubeMap"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
-	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
-	transparencyBlendDesc.BlendEnable = true;
-	transparencyBlendDesc.LogicOpEnable = false;
-	transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-	transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
-	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	transparentPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 	transparentPsoDesc.VS =
@@ -478,6 +483,7 @@ void D12D3Maaax::BuildTextures()
 	m_TextureNames.push_back("writing.png");
 	m_TextureNames.push_back("push.png");
 	m_TextureNames.push_back("CreateMesh.png");
+	m_TextureNames.push_back("ice.dds");
 	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), (UINT)m_TextureNames.size() + 1);
 
 	for (auto& it : m_TextureNames)

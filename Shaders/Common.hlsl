@@ -47,7 +47,7 @@ cbuffer cbPass : register(b0)
 };
 
 TextureCube gCubeTexture : register(t0);
-Texture2D gDiffuseMap[7] : register(t1);
+Texture2D gDiffuseMap[8] : register(t1);
 
 SamplerState gsamPointWrap : register(s0);
 SamplerState gsamPointClamp : register(s1);
