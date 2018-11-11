@@ -46,7 +46,8 @@ cbuffer cbPass : register(b0)
     Light gLights[MaxLights];
 };
 
-Texture2D gDiffuseMap[7] : register(t0);
+TextureCube gCubeTexture : register(t0);
+Texture2D gDiffuseMap[7] : register(t1);
 
 SamplerState gsamPointWrap : register(s0);
 SamplerState gsamPointClamp : register(s1);

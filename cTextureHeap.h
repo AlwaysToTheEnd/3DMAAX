@@ -9,6 +9,7 @@ public:
 	cTextureHeap(ID3D12Device* device ,UINT maxTexture);
 
 	void AddTexture(ID3D12CommandQueue* cmdqueue, const string& name, const wstring& filename);
+	void AddCubeMapTexture(ID3D12CommandQueue* cmdqueue, const string& name, const wstring& filename);
 
 	ID3D12DescriptorHeap* GetHeap() { return m_SrvHeap.Get(); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTexture(const string& name);

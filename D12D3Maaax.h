@@ -37,7 +37,6 @@ private:
 	unordered_map<string, ComPtr<ID3D12PipelineState>> m_PSOs;
 	unordered_map<string, unique_ptr<Material>>	m_Materials;
 	unique_ptr<cTextureHeap>					m_TextureHeap = nullptr;
-	unique_ptr<cTextureHeap>					m_CubeTextureHeap = nullptr;
 	vector<string>								m_TextureNames;
 
 	ComPtr<ID3D12RootSignature>				m_RootSignature = nullptr;
@@ -50,6 +49,9 @@ private:
 	XMFLOAT4X4		m_2DProj = MathHelper::Identity4x4();
 
 private:
-	unique_ptr<cOperator>	m_operator =nullptr;
-	bool					m_isBaseWireFrameMode = false;
+	unique_ptr<cOperator>		m_operator =nullptr;
+	MeshGeometry*				m_cubeMapSphere = nullptr;
+	shared_ptr<cRenderItem>		m_cubeMapRender = nullptr;
+	shared_ptr<RenderInstance>	m_cubeMapRenderInstance = nullptr;
+	bool						m_isBaseWireFrameMode = false;
 };

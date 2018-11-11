@@ -62,6 +62,50 @@ void cTextureHeap::AddTexture(ID3D12CommandQueue* cmdqueue, const string& name, 
 	m_device->CreateShaderResourceView(addTexture.tex.resource.Get(), &srvDesc, srvHeapHandle);
 }
 
+void cTextureHeap::AddCubeMapTexture(ID3D12CommandQueue * cmdqueue, const string & name, const wstring & filename)
+{
+	auto it = m_Textures.find(name);
+	assert(it == m_Textures.end() && "This name is overlapping name");
+
+	TEXTURENUM addTexture;
+	addTexture.num = (UINT)m_Textures.size();
+	addTexture.tex.name = name;
+
+	ResourceUploadBatch resourceUpload(m_device);
+	resourceUpload.Begin();
+
+	size_t index = filename.find('.') + 1;
+	wstring extension;
+	extension.assign(&filename[index], filename.size() - index);
+
+	if (extension == L"dds")
+	{
+		ThrowIfFailed(CreateDDSTextureFromFile(m_device,
+			resourceUpload, filename.c_str(), addTexture.tex.resource.GetAddressOf()));
+		m_Textures[name] = addTexture;
+	}
+	else
+	{
+		assert(false && "Cube Texture support only dds extension");
+	}
+
+	auto uploadResourceFinished = resourceUpload.End(cmdqueue);
+	uploadResourceFinished.wait();
+
+	auto srvHeapHandle = (CD3DX12_CPU_DESCRIPTOR_HANDLE)m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+	srvHeapHandle.Offset(addTexture.num, m_SrvDescriptorSize);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.Format = addTexture.tex.resource->GetDesc().Format;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.Texture2D.MipLevels = addTexture.tex.resource->GetDesc().MipLevels;
+
+	m_device->CreateShaderResourceView(addTexture.tex.resource.Get(), &srvDesc, srvHeapHandle);
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE cTextureHeap::GetTexture(const string& name)
 {
 	auto it = m_Textures.find(name);

@@ -45,7 +45,7 @@ bool D12D3Maaax::Initialize()
 	FlushCommandQueue();
 
 	MESHMG->MeshBuildUpGPU();
-	
+
 	OnResize();
 
 	return true;
@@ -78,7 +78,7 @@ void D12D3Maaax::Update()
 
 	m_Camera.Update();
 	UpdateMainPassCB();
-	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
+	INPUTMG->Update(m_Camera.GetEyePos(), *m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
 	UIMG->Update();
 
 	m_operator->Update();
@@ -88,7 +88,7 @@ void D12D3Maaax::Update()
 	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
 
-	if (GetAsyncKeyState(VK_F2)&0x0001)
+	if (GetAsyncKeyState(VK_F2) & 0x0001)
 	{
 		m_isBaseWireFrameMode = !m_isBaseWireFrameMode;
 	}
@@ -101,7 +101,7 @@ void D12D3Maaax::Draw()
 	ThrowIfFailed(cmdListAlloc->Reset());
 
 	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc,
-		m_PSOs["base"].Get()));
+		m_PSOs["cubeMap"].Get()));
 
 	m_CommandList->RSSetViewports(1, &m_ScreenViewport);
 	m_CommandList->RSSetScissorRects(1, &m_ScissorRect);
@@ -123,16 +123,24 @@ void D12D3Maaax::Draw()
 	auto matBuffer = m_CurrFrameResource->materialBuffer->Resource();
 	m_CommandList->SetGraphicsRootShaderResourceView(1, matBuffer->GetGPUVirtualAddress());
 
-	m_CommandList->SetGraphicsRootDescriptorTable(3,
-		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
+	D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart();
+	m_CommandList->SetGraphicsRootDescriptorTable(3, srvHandle);
+	srvHandle.ptr += m_CBV_SRV_UAV_DescriptorSize * m_TextureHeap->GetTextureIndex("cubeMap");
+	m_CommandList->SetGraphicsRootDescriptorTable(4, srvHandle);
 	/////////////////////////////
 
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 
+	RENDERITEMMG->Render(m_CommandList.Get(), "cubeMap");
+
 	if (m_isBaseWireFrameMode)
 	{
 		m_CommandList->SetPipelineState(m_PSOs["baseWF"].Get());
+	}
+	else
+	{
+		m_CommandList->SetPipelineState(m_PSOs["base"].Get());
 	}
 
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
@@ -248,11 +256,11 @@ void D12D3Maaax::UpdateMainPassCB()
 
 void D12D3Maaax::BuildRootSignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE texTable;
-	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_TextureHeap->GetTexturesNum(), 0);
-
 	CD3DX12_DESCRIPTOR_RANGE cubeMapTexTable;
-	cubeMapTexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 5, 1);
+	cubeMapTexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+
+	CD3DX12_DESCRIPTOR_RANGE texTable;
+	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_TextureHeap->GetTexturesNum(), 1);
 
 	CD3DX12_ROOT_PARAMETER slotRootParam[5];
 	slotRootParam[0].InitAsShaderResourceView(0, 1);
@@ -294,6 +302,9 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 	m_Shaders["drawElementVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_1");
 	m_Shaders["drawElementPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_1");
 
+	m_Shaders["cubeMapVS"] = d3dUtil::CompileShader(L"Shaders\\CubeMapShader.hlsl", nullptr, "VS", "vs_5_1");
+	m_Shaders["cubeMapPS"] = d3dUtil::CompileShader(L"Shaders\\CubeMapShader.hlsl", nullptr, "PS", "ps_5_1");
+
 	m_NTVertexInputLayout =
 	{
 		{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
@@ -314,6 +325,25 @@ void D12D3Maaax::BuildGeometry()
 	cDrawLines::MeshSetUp();
 	cDrawDot::MeshSetUp();
 	cObjectCoordinator::MeshSetUp();
+
+	GeometryGenerator gen;
+	vector<NT_Vertex> vertices;
+
+	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.5f, 30, 30);
+	vertices.resize(sphere.Vertices.size());
+
+	for (int i = 0; i < sphere.Vertices.size(); i++)
+	{
+		vertices[i].pos = sphere.Vertices[i].Position;
+		vertices[i].normal = sphere.Vertices[i].Normal;
+		vertices[i].uv = sphere.Vertices[i].TexC;
+	}
+
+	vector<UINT16> indices = sphere.GetIndices16();
+	m_cubeMapSphere = MESHMG->AddMeshGeometry("cubeMap", vertices.data(), indices.data(),
+		sizeof(NT_Vertex), sizeof(NT_Vertex)* (UINT)vertices.size(),
+		DXGI_FORMAT_R16_UINT, sizeof(UINT16)*(UINT)indices.size(), false);
+
 	UIMG->Build();
 }
 
@@ -350,6 +380,21 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["baseWF"])));
 	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC cubeMapPsoDesc = opaquePsoDesc;
+	cubeMapPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	cubeMapPsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	cubeMapPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["cubeMapVS"]->GetBufferPointer()),
+		m_Shaders["cubeMapVS"]->GetBufferSize()
+	};
+	cubeMapPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["cubeMapPS"]->GetBufferPointer()),
+		m_Shaders["cubeMapPS"]->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&cubeMapPsoDesc, IID_PPV_ARGS(&m_PSOs["cubeMap"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
@@ -413,6 +458,7 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["planes"])));
 
 	RENDERITEMMG->AddRenderSet("base");
+	RENDERITEMMG->AddRenderSet("cubeMap");
 	RENDERITEMMG->AddRenderSet("objectCoordinator");
 	RENDERITEMMG->AddRenderSet("plane");
 	RENDERITEMMG->AddRenderSet("line");
@@ -432,13 +478,15 @@ void D12D3Maaax::BuildTextures()
 	m_TextureNames.push_back("writing.png");
 	m_TextureNames.push_back("push.png");
 	m_TextureNames.push_back("CreateMesh.png");
-	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), (UINT)m_TextureNames.size());
-	
+	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), (UINT)m_TextureNames.size() + 1);
+
 	for (auto& it : m_TextureNames)
 	{
 		fileName.assign(it.begin(), it.end());
 		m_TextureHeap->AddTexture(m_CommandQueue.Get(), it, folderName + fileName);
 	}
+
+	m_TextureHeap->AddCubeMapTexture(m_CommandQueue.Get(), "cubeMap", folderName + L"cubeMap.dds");
 }
 
 void D12D3Maaax::BuildFrameResources()
@@ -471,6 +519,12 @@ void D12D3Maaax::BuildObjects()
 	cOperation::OperationsBaseSetup();
 	m_operator = make_unique<cOperator>();
 	m_operator->Build();
+
+	m_cubeMapRender = RENDERITEMMG->AddRenderItem("cubeMap");
+	m_cubeMapRender->SetGeometry(m_cubeMapSphere, m_cubeMapSphere->name);
+	m_cubeMapRenderInstance = m_cubeMapRender->GetRenderIsntance();
+	m_cubeMapRenderInstance->m_isRenderOK = true;
+	XMStoreFloat4x4(&m_cubeMapRenderInstance->instanceData.World, XMMatrixScaling(5000.0f, 5000.0f, 5000.0f));
 
 	OBJCOORD->Build();
 }

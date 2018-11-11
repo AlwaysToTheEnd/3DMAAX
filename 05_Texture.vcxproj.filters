@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="D12App">
       <UniqueIdentifier>{f1d175c1-594c-4e78-87b6-9cb83d0f6093}</UniqueIdentifier>
     </Filter>
@@ -81,6 +77,10 @@
     </Filter>
     <Filter Include="ManagedClass\cUIObjectMG">
       <UniqueIdentifier>{30680e04-0d82-4770-966a-73142a8b1d1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -351,6 +351,9 @@
       <Filter>리소스 파일</Filter>
     </FxCompile>
     <FxCompile Include="BezierGeometry.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMapShader.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
   </ItemGroup>
