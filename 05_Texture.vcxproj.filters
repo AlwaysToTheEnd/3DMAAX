@@ -341,9 +341,6 @@
     <FxCompile Include="Shaders\UIShader.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
-    <FxCompile Include="ShadowShader.hlsl">
-      <Filter>리소스 파일</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\DrawElementSahder.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
@@ -354,6 +351,9 @@
       <Filter>리소스 파일</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\CubeMapShader.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowShader.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
   </ItemGroup>

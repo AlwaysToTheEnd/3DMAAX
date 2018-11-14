@@ -10,46 +10,7 @@
     #define NUM_SPOT_LIGHTS 0
 #endif
 
-#include "Shaders/LightingUtil.hlsl"
-
-struct VertexIn
-{
-    float4 m_Position:POSITION;
-};
-
-struct VertexOut
-{
-    float4 m_Position:POSITION;
-    float4 m_ClipPosition:TEXCOORD1;
-};
-
-cbuffer cbPerObject : register(b0)
-{
-    float4x4 gWorld;
-	float4x4 gTexTransform;
-};
-
-cbuffer cbPass : register(b1)
-{
-    float4x4 gView;
-    float4x4 gInvView;
-    float4x4 gProj;
-    float4x4 gInvProj;
-    float4x4 gViewProj;
-    float4x4 gInvViewProj;
-    float4x4 gLightView;
-    float3 gEyePosW;
-    float cbPerObjectPad1;
-    float2 gRenderTargetSize;
-    float2 gInvRenderTargetSize;
-    float gNearZ;
-    float gFarZ;
-    float gTotalTime;
-    float gDeltaTime;
-    float4 gAmbientLight;
-
-    Light gLights[MaxLights];
-};
+#include "Common.hlsl"
 
 VertexOut VS(VertexIn vin)
 {
