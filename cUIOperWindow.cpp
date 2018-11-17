@@ -32,19 +32,15 @@ void cUIOperWindow::AddParameter(wstring dataName, UIOPERDATATYPE format, void *
 	ButtonSet();
 }
 
-void cUIOperWindow::AddParameter(wstring dataName, UIOPERDATATYPE format, function<void()> func)
+void cUIOperWindow::AddParameter(wstring dataName, function<void()> func)
 {
-	assert(format == OPERDATATYPE_FUNC);
-
-	m_operParameters.emplace_back(dataName, format, func, nullptr, nullptr, 0);
+	m_operParameters.emplace_back(dataName, OPERDATATYPE_FUNC, func, nullptr, nullptr, 0);
 	ButtonSet();
 }
 
-void cUIOperWindow::AddParameter(wstring dataName, UIOPERDATATYPE format, function<void(UINT64)> func, UINT64 param)
+void cUIOperWindow::AddParameter(wstring dataName, function<void(UINT64)> func, UINT64 param)
 {
-	assert(format == OPERDATATYPE_FUNC_UINT_PARAM);
-
-	m_operParameters.emplace_back(dataName, format, nullptr, func, nullptr, param);
+	m_operParameters.emplace_back(dataName, OPERDATATYPE_FUNC_UINT_PARAM, nullptr, func, nullptr, param);
 	ButtonSet();
 }
 
@@ -86,9 +82,6 @@ void cUIOperWindow::InputDataUpdate()
 		{
 			m_operFonts[m_currParameterIndex]->color = Colors::Red;
 			m_operFonts[m_currParameterIndex]->printString = m_operParameters[m_currParameterIndex].dataName;
-			//m_operFonts[m_currParameterIndex]->pos.x = (float)m_uiRECT.left + 1.0f;
-			//m_operFonts[m_currParameterIndex]->pos.y = (float)m_uiRECT.top + m_currParameterIndex * 20.0f + 2.0f;
-			//m_operFonts[m_currParameterIndex]->scale = { 0.45f,0.45f,1 };
 
 			switch (m_operParameters[m_currParameterIndex].dataFormat)
 			{

@@ -174,7 +174,7 @@ void cOperator::ObjectListUIUpdate()
 	m_objectListUI->AddParameter(L"PLANE LIST", OPERDATATYPE_NONE, (void*)nullptr);
 	for (auto it:planes)
 	{
-		m_objectListUI->AddParameter(L"  plane "+to_wstring(i), OPERDATATYPE_FUNC_UINT_PARAM,
+		m_objectListUI->AddParameter(L"  plane "+to_wstring(i),
 			bind(&cOperator::SelectPlane, this, placeholders::_1), (UINT64)it);
 		i++;
 	}
@@ -182,14 +182,14 @@ void cOperator::ObjectListUIUpdate()
 	m_objectListUI->AddParameter(L"DRAW LIST", OPERDATATYPE_NONE, (void*)nullptr);
 	for (auto& it : m_drawItems)
 	{
-		m_objectListUI->AddParameter(L"  "+it.first, OPERDATATYPE_FUNC_UINT_PARAM,
+		m_objectListUI->AddParameter(L"  "+it.first, 
 			bind(&cOperator::SelectDraws, this, placeholders::_1), (UINT64)&it.second);
 	}
 
 	m_objectListUI->AddParameter(L"MESH INFO", OPERDATATYPE_NONE, (void*)nullptr);
 	for (auto& it : m_mesh)
 	{
-		m_objectListUI->AddParameter(L"  "+it.first, OPERDATATYPE_FUNC_UINT_PARAM,
+		m_objectListUI->AddParameter(L"  "+it.first, 
 			bind(&cOperator::SelectMeshs, this, placeholders::_1), (UINT64)&it.second);
 
 		if (&it.second == m_currMesh)
@@ -216,7 +216,7 @@ void cOperator::ObjectListUIUpdate()
 					break;
 				}
 
-				m_objectListUI->AddParameter(L"    " + csgName, OPERDATATYPE_FUNC_UINT_PARAM,
+				m_objectListUI->AddParameter(L"    " + csgName,
 					bind(&cOperator::SelectCSGObjectOn, this, placeholders::_1), (UINT64)childSCGObjects[i].get());
 			}
 		}

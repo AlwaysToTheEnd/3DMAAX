@@ -39,8 +39,8 @@ public:
 	virtual ~cUIOperWindow();
 	 
 	void AddParameter(wstring dataName, UIOPERDATATYPE format, void* pData);
-	void AddParameter(wstring dataName, UIOPERDATATYPE format, function<void()> func);
-	void AddParameter(wstring dataName, UIOPERDATATYPE format, function<void(UINT64)> func, UINT64 param);
+	void AddParameter(wstring dataName, function<void()> func);
+	void AddParameter(wstring dataName, function<void(UINT64)> func, UINT64 param);
 	void ClearParameters();
 
 	void SetFontSize(int size) { m_fontSize = size; }

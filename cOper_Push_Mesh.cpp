@@ -236,7 +236,7 @@ void cOper_Push_Mesh::PreviewPushMeshCreate(cMesh* currMesh)
 
 	for (UINT i = 0; i < cycleDotsNum; i++)
 	{
-		size_t currIndex = m_vertices.size();
+		UINT currIndex = (UINT)m_vertices.size();
 		float startUV_X = weightLength[i] / cycleLength;
 		float endUV_X = weightLength[i+1] / cycleLength;
 		m_vertices.push_back(m_vertices[i]);
