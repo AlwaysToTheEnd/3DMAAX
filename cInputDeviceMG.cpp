@@ -105,7 +105,7 @@ void cInputDeviceMG::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	}
 }
 
-bool cInputDeviceMG::GetMouseOneDown(int vKey)
+bool cInputDeviceMG::GetMouseOneDown(int vKey) const
 {
 	switch (vKey)
 	{
@@ -123,7 +123,7 @@ bool cInputDeviceMG::GetMouseOneDown(int vKey)
 	return false;
 }
 
-bool cInputDeviceMG::GetMouseDownStay(int vKey)
+bool cInputDeviceMG::GetMouseDownStay(int vKey) const
 {
 	switch (vKey)
 	{
@@ -141,7 +141,7 @@ bool cInputDeviceMG::GetMouseDownStay(int vKey)
 	return false;
 }
 
-bool cInputDeviceMG::GetMouseUp(int vKey)
+bool cInputDeviceMG::GetMouseUp(int vKey) const
 {
 	switch (vKey)
 	{
@@ -159,7 +159,17 @@ bool cInputDeviceMG::GetMouseUp(int vKey)
 	return false;
 }
 
-PICKRAY XM_CALLCONV cInputDeviceMG::GetMousePickLay()
+void cInputDeviceMG::InputReset()
+{
+	m_isLButtonDownStay = 0;
+	m_isLButtonUp = 0;
+	m_isLButtonOneDown = 0;
+	m_isRButtonDownStay = 0;
+	m_isRButtonUp = 0;
+	m_isRButtonOneDown = 0;
+}
+
+PICKRAY XM_CALLCONV cInputDeviceMG::GetMousePickLay() const
 {
 	return { XMLoadFloat3(&m_origin), XMLoadFloat3(&m_ray) };
 }

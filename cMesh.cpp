@@ -20,12 +20,13 @@ void cMesh::Build(shared_ptr<cRenderItem> renderItem)
 
 	m_rootCSG = make_unique<cCSGObject>();
 	m_renderItem = RENDERITEMMG->AddRenderItem(m_meshRenderName);
-	m_geo = MESHMG->AddTemporaryMesh(m_meshRenderName+to_string(meshNum));
+	m_geo = MESHMG->AddTemporaryMesh(m_meshRenderName + to_string(meshNum));
 
 	m_renderItem->SetGeometry(m_geo, m_meshRenderName + to_string(meshNum));
 	m_renderItem->SetRenderOK(false);
 
 	m_renderInstance = m_renderItem->GetRenderIsntance();
+	m_renderInstance->instanceData.MaterialIndex = 7;
 
 	meshNum++;
 }
@@ -45,14 +46,21 @@ void cMesh::SubObjectSubAbsorption()
 	m_rootCSG->SubObjectSubAbsorption();
 	m_rootCSG->GetData(m_vertices, m_indices);
 
-	MESHMG->ChangeMeshGeometryData(m_geo->name, m_vertices.data(), m_indices.data(), sizeof(NT_Vertex),
-		sizeof(NT_Vertex)*(UINT)m_vertices.size(), DXGI_FORMAT_R32_UINT, sizeof(UINT)*(UINT)m_indices.size(),
-		true);
+	if (m_vertices.size())
+	{
+		MESHMG->ChangeMeshGeometryData(m_geo->name, m_vertices.data(), m_indices.data(), sizeof(NT_Vertex),
+			sizeof(NT_Vertex)*(UINT)m_vertices.size(), DXGI_FORMAT_R32_UINT, sizeof(UINT)*(UINT)m_indices.size(),
+			true);
 
-	m_geo->octree = nullptr;
-	m_geo->SetOctree(0);
-	m_renderItem->SetGeometry(m_geo, m_geo->name);
-	m_renderItem->SetRenderOK(true);
+		m_geo->octree = nullptr;
+		m_geo->SetOctree(0);
+		m_renderItem->SetGeometry(m_geo, m_geo->name);
+		m_renderItem->SetRenderOK(true);
+	}
+	else
+	{
+		m_renderItem->SetRenderOK(false);
+	}
 }
 
 void cMesh::AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object)
@@ -60,8 +68,10 @@ void cMesh::AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object)
 	m_rootCSG->AddChild(work, move(object));
 }
 
-bool XM_CALLCONV cMesh::GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4 * quaternion)
+bool XM_CALLCONV cMesh::GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4 * quaternion) const
 {
+	if (m_geo->octree == nullptr) return false;
+
 	XMFLOAT3 pos0, pos1, pos2;
 
 	if (m_geo->octree->GetPickTriangle(ray, dist, pos0, pos1, pos2))
@@ -77,7 +87,7 @@ bool XM_CALLCONV cMesh::GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, floa
 			XMVECTOR triangleNormal = XMVector3Cross(v1, v2);
 			XMVECTOR frontDir = baseDir;
 			XMVECTOR quaternionAxis = XMVector3Cross(frontDir, triangleNormal);
-			
+
 			float angle = 0;
 			XMStoreFloat(&angle, XMVector3AngleBetweenVectors(frontDir, triangleNormal));
 

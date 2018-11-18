@@ -15,11 +15,12 @@ public:
 	virtual void XM_CALLCONV Update(FXMMATRIX mat) override;
 	virtual bool XM_CALLCONV Picking(PICKRAY ray, float& distance) override;
 	virtual void IsRenderState(bool value) { m_renderInstance->m_isRenderOK = value; }
-	
+
 public:
 	void SubObjectSubAbsorption();
 	void AddCSGObject(CSGWORKTYPE work, unique_ptr<cCSGObject> object);
-	bool XM_CALLCONV GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4* quaternion);
+	bool XM_CALLCONV GetPickTriangleInfo(PICKRAY ray, FXMVECTOR baseDir, float& dist, XMFLOAT4* quaternion) const;
+	cCSGObject* GetCSGRootObject() { return m_rootCSG.get(); }
 
 public:
 	void SetGeometry(MeshGeometry* geo) { m_geo = geo; }
@@ -28,11 +29,11 @@ public:
 
 private:
 	MeshGeometry*			m_geo;
-	shared_ptr<cRenderItem> m_renderItem;
+	vector<SubMeshGeometry> m_drawArgs;
 	BoundingSphere			m_boundSphere;
 	vector<DrawItems*>		m_draws;
+	shared_ptr<cRenderItem> m_renderItem;
 
-	vector<SubMeshGeometry> m_drawArgs;
 	unique_ptr<cCSGObject>	m_rootCSG;
 	vector<NT_Vertex>		m_vertices;
 	vector<UINT>			m_indices;

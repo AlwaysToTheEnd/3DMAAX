@@ -2,7 +2,7 @@
 
 class cPlane;
 
-class cLine :public cObject
+class cLine : public cObject
 {
 public:
 	cLine();
@@ -16,8 +16,8 @@ public:
 	void SetSecondDot(const cDot* object) { m_hostObject[1] = object; }
 
 	int CheckLinked(const cLine* line);
-	const cDot* GetFirstDot() { return m_hostObject[0]; }
-	const cDot* GetSecondDot() { return m_hostObject[1]; }
+	const cDot* GetFirstDot() const { return m_hostObject[0]; }
+	const cDot* GetSecondDot() const { return m_hostObject[1]; }
 private:
 	const cDot*	m_hostObject[2];
 	float		m_lineDistacne;

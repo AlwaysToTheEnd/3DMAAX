@@ -1,5 +1,4 @@
 #pragma once
-#define MAXTEXTURENUM 7
 
 class D12D3Maaax :public D12App
 {
@@ -17,9 +16,13 @@ private:
 	virtual void Draw() override;
 
 	void UpdateMaterialCBs();
+	void UpdateShadowMatrix();
 	void UpdateMainPassCB();
 
+	void DrawShadowMap();
+
 	void BuildTextures();
+	void BuildShadowMap();
 	void BuildMaterials();
 	void BuildRootSignature();
 	void BuildShadersAndInputLayout();
@@ -28,7 +31,7 @@ private:
 	void BuildObjects();
 	void BuildFrameResources();
 
-	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+	array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
 
 private:
 	vector<unique_ptr<FrameResource>>	m_FrameResources;
@@ -38,6 +41,7 @@ private:
 	unordered_map<string, ComPtr<ID3D12PipelineState>> m_PSOs;
 	unordered_map<string, unique_ptr<Material>>	m_Materials;
 	unique_ptr<cTextureHeap>					m_TextureHeap = nullptr;
+	vector<string>								m_TextureNames;
 
 	ComPtr<ID3D12RootSignature>				m_RootSignature = nullptr;
 	unordered_map<string, ComPtr<ID3DBlob>>	m_Shaders;
@@ -49,6 +53,14 @@ private:
 	XMFLOAT4X4		m_2DProj = MathHelper::Identity4x4();
 
 private:
-	unique_ptr<cOperator>	m_operator =nullptr;
-	bool					m_isBaseWireFrameMode = false;
+	unique_ptr<cOperator>		m_operator =nullptr;
+	MeshGeometry*				m_cubeMapSphere = nullptr;
+	shared_ptr<cRenderItem>		m_cubeMapRender = nullptr;
+	shared_ptr<RenderInstance>	m_cubeMapRenderInstance = nullptr;
+	bool						m_isBaseWireFrameMode = false;
+
+private:
+	ComPtr<ID3D12DescriptorHeap>	m_ShadowDsvHeap = nullptr;
+	XMFLOAT4X4						m_ShadowMapMatrix = MathHelper::Identity4x4();
+	XMFLOAT4X4						m_RightVeiwProjMatrix = MathHelper::Identity4x4();
 };

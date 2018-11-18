@@ -2,9 +2,10 @@
 
 cOperator::cOperator()
 	: m_currOperation(nullptr)
-	, m_buttonRenderItem(nullptr)
 	, m_currDraws(nullptr)
 	, m_currMesh(nullptr)
+	, m_objectListUI(nullptr)
+	, m_objectControl(nullptr)
 {
 }
 
@@ -12,13 +13,18 @@ cOperator::~cOperator()
 {
 }
 
-void cOperator::SetUp()
+void cOperator::Build()
 {
-	m_buttonRenderItem = RENDERITEMMG->AddRenderItem("ui");
 	m_planes.SetRenderItem(RENDERITEMMG->AddRenderItem("plane"));
+	m_objectListUI = UIMG->AddUI<cUIOperWindow>("objectListUI");
+	m_objectControl= UIMG->AddUI<cUIOperWindow>("objectControlUI");
+	m_objectListUI->SetPos({ 790,50,0 });
+	UIMG->UIOn(m_objectListUI);
+	m_objectControl->SetPos({ 790,250,0 });
+	UIMG->UIOn(m_objectControl);
 
-	m_operSelectButtons.SetUp({ NOMALBUTTONSIZE, NOMALBUTTONSIZE }, m_buttonRenderItem);
-	m_operSelectButtons.SetPos({ 0,0,0 });
+	m_operSelectButtons.Build({ NOMALBUTTONSIZE, NOMALBUTTONSIZE });
+	m_operSelectButtons.SetPos({ 0,3,0 });
 
 	for (int i = 0; i < OPER_COUNT; i++)
 	{
@@ -47,11 +53,14 @@ void cOperator::SetUp()
 			break;
 		}
 
-		m_operSelectButtons.AddButton(m_ButtonMtlTexBaseIndex + i,
+		m_operSelectButtons.AddButton("operatorButton"+to_string(i) ,m_ButtonMtlTexBaseIndex + i,
 			bind(&cOperator::OperationStart, this, placeholders::_1), i);
 
-		m_operations.back()->SetUp();
+		m_operations.back()->Build();
 	}
+
+	m_operSelectButtons.SetRenderState(true);
+	ObjectListUIUpdate();
 }
 
 void cOperator::Update()
@@ -84,23 +93,21 @@ bool cOperator::OperationCheck()
 	{
 		if (!m_currOperation->GetOperState())
 		{
-			if (m_currDraws)
-			{
-				m_currDraws->SetPickRender(2);
-			}
-
 			m_currOperation = nullptr;
+			ObjectListUIUpdate();
 		}
 		else
 		{
 			if (GetAsyncKeyState(VK_SPACE) & 0x0001)
 			{
 				m_currOperation->EndOperation();
+				ObjectListUIUpdate();
 				m_currOperation = nullptr;
 			}
 			else if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 			{
 				m_currOperation->CancleOperation(m_currDraws);
+				ObjectListUIUpdate();
 				m_currOperation = nullptr;
 			}
 		}
@@ -119,6 +126,14 @@ bool cOperator::OperationCheck()
 
 		if (GetAsyncKeyState(VK_ESCAPE) & 0x0001)
 		{
+			OBJCOORD->ObjectRegistration(nullptr);
+			UIMG->UIOff(m_objectControl);
+
+			if (m_currDraws)
+			{
+				m_currDraws->SetPickRender(0);
+			}
+
 			m_currDraws = nullptr;
 			CAMERA.SetTargetAndSettingAngle(nullptr);
 		}
@@ -147,4 +162,116 @@ void cOperator::OperationStart(int index)
 	}
 
 	m_currOperation = m_operations[index].get();
+}
+
+void cOperator::ObjectListUIUpdate()
+{
+	m_objectListUI->ClearParameters();
+
+	auto planes = m_planes.GetObjectsPtr<cPlane>();
+
+	UINT i = 0;
+	m_objectListUI->AddParameter(L"PLANE LIST", OPERDATATYPE_NONE, (void*)nullptr);
+	for (auto it:planes)
+	{
+		m_objectListUI->AddParameter(L"  plane "+to_wstring(i),
+			bind(&cOperator::SelectPlane, this, placeholders::_1), (UINT64)it);
+		i++;
+	}
+
+	m_objectListUI->AddParameter(L"DRAW LIST", OPERDATATYPE_NONE, (void*)nullptr);
+	for (auto& it : m_drawItems)
+	{
+		m_objectListUI->AddParameter(L"  "+it.first, 
+			bind(&cOperator::SelectDraws, this, placeholders::_1), (UINT64)&it.second);
+	}
+
+	m_objectListUI->AddParameter(L"MESH INFO", OPERDATATYPE_NONE, (void*)nullptr);
+	for (auto& it : m_mesh)
+	{
+		m_objectListUI->AddParameter(L"  "+it.first, 
+			bind(&cOperator::SelectMeshs, this, placeholders::_1), (UINT64)&it.second);
+
+		if (&it.second == m_currMesh)
+		{
+			cCSGObject* rootCSG = it.second.GetCSGRootObject();
+			auto& childSCGObjects = rootCSG->GetChilds();
+
+			for (size_t i = 0; i < childSCGObjects.size(); i++)
+			{
+				wstring csgName = L"push "+to_wstring(i);
+
+				switch (childSCGObjects[i]->GetType())
+				{
+				case CSG_UNION:
+					csgName += L"(Union)";
+					break;
+				case CSG_DIFFERENCE:
+					csgName += L"(Dif)";
+					break;
+				case CSG_INTERSECTION:
+					csgName += L"(Inter)";
+					break;
+				default:
+					break;
+				}
+
+				m_objectListUI->AddParameter(L"    " + csgName,
+					bind(&cOperator::SelectCSGObjectOn, this, placeholders::_1), (UINT64)childSCGObjects[i].get());
+			}
+		}
+	}
+}
+
+void cOperator::SelectPlane(UINT64 address)
+{
+	m_objectControl->ClearParameters();
+	UIMG->UIOn(m_objectControl);
+
+	cPlane* plane = reinterpret_cast<cPlane*>(address);
+
+	if (!m_currOperation)
+	{
+		OBJCOORD->ObjectRegistration(plane);
+	}
+	
+	m_objectControl->AddParameter(L"quater X : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().x);
+	m_objectControl->AddParameter(L"quater Y : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().y);
+	m_objectControl->AddParameter(L"quater Z : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().z);
+	m_objectControl->AddParameter(L"quater W : ", OPERDATATYPE_FLOAT, (void*)&plane->GetQuaternion().w);
+	m_objectControl->AddParameter(L"pos    X : ", OPERDATATYPE_FLOAT, (void*)&plane->GetPos().x);
+	m_objectControl->AddParameter(L"pos    Y : ", OPERDATATYPE_FLOAT, (void*)&plane->GetPos().y);
+	m_objectControl->AddParameter(L"pos    Z : ", OPERDATATYPE_FLOAT, (void*)&plane->GetPos().z);
+}
+
+void cOperator::SelectDraws(UINT64 address)
+{
+	m_objectControl->ClearParameters();
+
+	DrawItems* draws = reinterpret_cast<DrawItems*>(address);
+
+	if (m_currDraws == nullptr)
+	{
+		m_currDraws = draws;
+	}
+}
+
+void cOperator::SelectMeshs(UINT64 address)
+{
+	m_objectControl->ClearParameters();
+
+
+}
+
+void cOperator::SelectCSGObjectOn(UINT64 address)
+{
+	m_objectControl->ClearParameters();
+
+	cCSGObject* scgObject= reinterpret_cast<cCSGObject*>(address);
+	scgObject->SetOnState(!scgObject->GetOnState());
+
+	if (m_currMesh)
+	{
+		m_currMesh->SubObjectSubAbsorption();
+	}
 }

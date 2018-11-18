@@ -49,7 +49,7 @@ void cRenderItem::Update()
 				XMMATRIX texTransform = XMLoadFloat4x4(&(*it)->instanceData.TexTransform);
 				XMStoreFloat4x4(&data.World, XMMatrixTranspose(world));
 				XMStoreFloat4x4(&data.TexTransform, XMMatrixTranspose(texTransform));
-
+			
 				m_currFrameCB->CopyData(m_renderInstanceCount, data);
 				(*it)->numFramesDirty = gNumFrameResources;
 			}
@@ -91,6 +91,19 @@ void cRenderItem::SetGeometry(const MeshGeometry * geometry, string submeshName)
 	m_indexCount = subMesh.indexCount;
 	m_baseVertexLocation = subMesh.baseVertexLocation;
 	m_startIndexLocation = subMesh.startIndexLocation;
+}
+
+void cRenderItem::ThisInstanceIsEndRender(shared_ptr<RenderInstance> instance)
+{
+	for (auto it = m_instances.begin(); it != m_instances.end(); it++)
+	{
+		if (*it == instance)
+		{
+			m_instances.push_back(instance);
+			m_instances.erase(it);
+			return;
+		}
+	}
 }
 
 shared_ptr<RenderInstance> cRenderItem::GetRenderIsntance()

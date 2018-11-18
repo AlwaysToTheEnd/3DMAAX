@@ -230,7 +230,7 @@ void cOcTree::OctreeNode::CreateChildNode()
 	XMFLOAT3 childSize = boundBox.Extents;
 	childNodePos = childNodePos - childSize;
 
-	childNodePos.y += childSize.y * 2; //this position is current octreeNode`s Boundbox on LTF;
+	childNodePos.y += childSize.y * 2; //this position is LTF on current octreeNode`s Boundbox;
 	m_nodes[0] = make_unique<cOcTree::OctreeNode>(childNodePos, childSize, m_geo);
 	childNodePos.x += childSize.x; // ¡æ
 	m_nodes[1] = make_unique<cOcTree::OctreeNode>(childNodePos, childSize, m_geo);
@@ -240,7 +240,7 @@ void cOcTree::OctreeNode::CreateChildNode()
 	m_nodes[3] = make_unique<cOcTree::OctreeNode>(childNodePos, childSize, m_geo);
 
 	childNodePos.y += childSize.y; // ¡è 
-	childNodePos.z += childSize.z; // ¢Ö  this position is current octreeNode`s Boundbox on LTB;
+	childNodePos.z += childSize.z; // ¢Ö  this position is LTB on current octreeNode`s Boundbox;
 	m_nodes[4] = make_unique<cOcTree::OctreeNode>(childNodePos, childSize, m_geo);
 	childNodePos.x += childSize.x; // ¡æ
 	m_nodes[5] = make_unique<cOcTree::OctreeNode>(childNodePos, childSize, m_geo);

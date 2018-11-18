@@ -1,4 +1,5 @@
 #pragma once
+class cPlane;
 
 enum DRAWOBJECTSPLACE
 {
@@ -20,10 +21,11 @@ public:
 
 	void DeleteBackObject();
 	void SetPickRender(UINT key);
-	UINT GetObjectNum() { return (UINT)m_objects.size(); }
+	UINT GetObjectNum() const { return (UINT)m_objects.size(); }
 
 	template<typename T>
 	vector<T*> GetObjectsPtr();
+
 	void DeleteObject(cObject* object);
 	void SetRenderState(bool value);
 
@@ -46,8 +48,6 @@ inline vector<T*> cDrawElement::GetObjectsPtr()
 	return objectPtrs;
 }
 
-class cPlane;
-
 struct DrawItems
 {
 	vector<unique_ptr<cDrawElement>>	m_draws;
@@ -66,21 +66,6 @@ struct DrawItems
 			it->SetRenderState(value);
 		}
 	}
-
-	/*DrawItems(DrawItems& rhs)
-	{
-	m_draws.resize(rhs.m_draws.size());
-
-	for (size_t i = 0; i < m_draws.size(); i++)
-	{
-	m_draws[i] = move(rhs.m_draws[i]);
-	}
-
-	m_plane = rhs.m_plane;
-
-	rhs.m_draws.clear();
-	rhs.m_plane = nullptr;
-	}*/
 
 	void SetPickRender(UINT key)
 	{

@@ -9,6 +9,10 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 D12D3Maaax::~D12D3Maaax()
 {
 	m_operator = nullptr;
+	m_TextureHeap = nullptr;
+	m_cubeMapRenderInstance = nullptr;
+	m_cubeMapRender = nullptr;
+	delete UIMG;
 	delete MESHMG;
 	delete RENDERITEMMG;
 	delete OBJCOORD;
@@ -44,7 +48,7 @@ bool D12D3Maaax::Initialize()
 	FlushCommandQueue();
 
 	MESHMG->MeshBuildUpGPU();
-	
+
 	OnResize();
 
 	return true;
@@ -76,9 +80,11 @@ void D12D3Maaax::Update()
 	}
 
 	m_Camera.Update();
+	UpdateShadowMatrix();
 	UpdateMainPassCB();
-	INPUTMG->Update(m_Camera.GetEyePos(),*m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
-	
+	INPUTMG->Update(m_Camera.GetEyePos(), *m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
+	UIMG->Update();
+
 	m_operator->Update();
 	OBJCOORD->Update();
 
@@ -86,7 +92,7 @@ void D12D3Maaax::Update()
 	RENDERITEMMG->Update();
 	UpdateMaterialCBs();
 
-	if (GetAsyncKeyState(VK_F2)&0x0001)
+	if (GetAsyncKeyState(VK_F2) & 0x0001)
 	{
 		m_isBaseWireFrameMode = !m_isBaseWireFrameMode;
 	}
@@ -99,7 +105,7 @@ void D12D3Maaax::Draw()
 	ThrowIfFailed(cmdListAlloc->Reset());
 
 	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc,
-		m_PSOs["base"].Get()));
+		m_PSOs["cubeMap"].Get()));
 
 	m_CommandList->RSSetViewports(1, &m_ScreenViewport);
 	m_CommandList->RSSetScissorRects(1, &m_ScissorRect);
@@ -107,7 +113,7 @@ void D12D3Maaax::Draw()
 	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LimeGreen, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::Gray, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -121,16 +127,27 @@ void D12D3Maaax::Draw()
 	auto matBuffer = m_CurrFrameResource->materialBuffer->Resource();
 	m_CommandList->SetGraphicsRootShaderResourceView(1, matBuffer->GetGPUVirtualAddress());
 
-	m_CommandList->SetGraphicsRootDescriptorTable(3,
-		m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart());
+	D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_TextureHeap->GetHeap()->GetGPUDescriptorHandleForHeapStart();
+	m_CommandList->SetGraphicsRootDescriptorTable(3, srvHandle);
+	srvHandle.ptr += m_CBV_SRV_UAV_DescriptorSize * m_TextureHeap->GetTextureIndex("cubeMap");
+	m_CommandList->SetGraphicsRootDescriptorTable(4, srvHandle);
+	srvHandle.ptr += m_CBV_SRV_UAV_DescriptorSize;
+	m_CommandList->SetGraphicsRootDescriptorTable(5, srvHandle);
 	/////////////////////////////
 
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
 	m_CommandList->SetGraphicsRootConstantBufferView(2, passCBAddress);
 
+	RENDERITEMMG->Render(m_CommandList.Get(), "cubeMap");
+
 	if (m_isBaseWireFrameMode)
 	{
 		m_CommandList->SetPipelineState(m_PSOs["baseWF"].Get());
+	}
+	else
+	{
+		DrawShadowMap();
+		m_CommandList->SetPipelineState(m_PSOs["base"].Get());
 	}
 
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
@@ -140,8 +157,8 @@ void D12D3Maaax::Draw()
 	RENDERITEMMG->Render(m_CommandList.Get(), "line");
 
 	m_CommandList->SetPipelineState(m_PSOs["drawElement"].Get());
-	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 	RENDERITEMMG->Render(m_CommandList.Get(), "dot");
+	RENDERITEMMG->Render(m_CommandList.Get(), "objectCoordinator");
 
 	m_CommandList->SetPipelineState(m_PSOs["planes"].Get());
 	RENDERITEMMG->Render(m_CommandList.Get(), "plane");
@@ -198,12 +215,47 @@ void D12D3Maaax::UpdateMaterialCBs()
 	}
 }
 
+void D12D3Maaax::UpdateShadowMatrix()
+{
+	const float sceneSphereRadius = m_Camera.GetDistance();
+
+	XMVECTOR lightDir = XMVector3Normalize(XMLoadFloat3(&m_MainPassCB.Lights[0].direction));
+	XMVECTOR targetPos = XMLoadFloat3(&m_Camera.GetTargetPos());
+	XMVECTOR lightPos = (targetPos -(1.0f*sceneSphereRadius*lightDir));
+	XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMMATRIX lightView = XMMatrixLookAtLH(lightPos, targetPos, lightUp);
+
+	XMFLOAT3 sphereCenterLS;
+	XMStoreFloat3(&sphereCenterLS, XMVector3TransformCoord(targetPos, lightView));
+
+	float l = sphereCenterLS.x - sceneSphereRadius;
+	float b = sphereCenterLS.y - sceneSphereRadius;
+	float n = sphereCenterLS.z - sceneSphereRadius;
+	float r = sphereCenterLS.x + sceneSphereRadius;
+	float t = sphereCenterLS.y + sceneSphereRadius;
+	float f = sphereCenterLS.z + sceneSphereRadius;
+
+	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+	XMMATRIX T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	XMMATRIX S = lightView * lightProj* T;
+	XMStoreFloat4x4(&m_ShadowMapMatrix, S);
+	XMStoreFloat4x4(&m_RightVeiwProjMatrix, lightView*lightProj);
+}
+
 void D12D3Maaax::UpdateMainPassCB()
 {
 	auto currPassCB = m_CurrFrameResource->passCB.get();
 
 	XMMATRIX view = XMLoadFloat4x4(m_Camera.GetViewMatrix());
 	XMMATRIX proj = XMLoadFloat4x4(&m_3DProj);
+	XMMATRIX rightViewProjMatrix = XMLoadFloat4x4(&m_RightVeiwProjMatrix);
+	XMMATRIX shadowMapMatrix = XMLoadFloat4x4(&m_ShadowMapMatrix);
 
 	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
@@ -216,6 +268,8 @@ void D12D3Maaax::UpdateMainPassCB()
 	XMStoreFloat4x4(&m_MainPassCB.invProj, XMMatrixTranspose(invProj));
 	XMStoreFloat4x4(&m_MainPassCB.viewProj, XMMatrixTranspose(viewProj));
 	XMStoreFloat4x4(&m_MainPassCB.invViewProj, XMMatrixTranspose(invViewProj));
+	XMStoreFloat4x4(&m_MainPassCB.rightViewProj, XMMatrixTranspose(rightViewProjMatrix));
+	XMStoreFloat4x4(&m_MainPassCB.shadowMapMatrix, XMMatrixTranspose(shadowMapMatrix));
 	m_MainPassCB.eyePosW = m_Camera.GetEyePos();
 	m_MainPassCB.renderTargetSize = XMFLOAT2((float)m_ClientWidth, (float)m_ClientHeight);
 	m_MainPassCB.invRenderTargetSize = XMFLOAT2(1.0f / m_ClientWidth, 1.0f / m_ClientHeight);
@@ -244,21 +298,49 @@ void D12D3Maaax::UpdateMainPassCB()
 	currPassCB->CopyData(1, m_MainPassCB);
 }
 
+void D12D3Maaax::DrawShadowMap()
+{
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap").Get(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_ShadowDsvHeap->GetCPUDescriptorHandleForHeapStart();
+	m_CommandList->ClearDepthStencilView(dsvHandle,
+		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	m_CommandList->OMSetRenderTargets(0, nullptr, false, &dsvHandle);
+
+	m_CommandList->SetPipelineState(m_PSOs["shadowMap"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "base");
+	RENDERITEMMG->Render(m_CommandList.Get(), cMesh::m_meshRenderName);
+
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap").Get(),
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
+
+	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
+}
+
 void D12D3Maaax::BuildRootSignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE texTable;
-	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, MAXTEXTURENUM, 0);
+	CD3DX12_DESCRIPTOR_RANGE cubeMapTexTable;
+	cubeMapTexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-	CD3DX12_ROOT_PARAMETER slotRootParam[4];
+	CD3DX12_DESCRIPTOR_RANGE shadowMapTexTable;
+	shadowMapTexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+
+	CD3DX12_DESCRIPTOR_RANGE texTable;
+	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, (UINT)m_TextureNames.size(), 2);
+
+	CD3DX12_ROOT_PARAMETER slotRootParam[6];
 	slotRootParam[0].InitAsShaderResourceView(0, 1);
 	slotRootParam[1].InitAsShaderResourceView(1, 1);
 	slotRootParam[2].InitAsConstantBufferView(0);
 	slotRootParam[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParam[4].InitAsDescriptorTable(1, &cubeMapTexTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParam[5].InitAsDescriptorTable(1, &shadowMapTexTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	auto staticSamplers = GetStaticSamplers();
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootDesc;
-	rootDesc.Init(4, slotRootParam, (UINT)staticSamplers.size(),
+	rootDesc.Init(6, slotRootParam, (UINT)staticSamplers.size(),
 		staticSamplers.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> serializedRootSig = nullptr;
@@ -288,6 +370,12 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 	m_Shaders["drawElementVS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "VS", "vs_5_1");
 	m_Shaders["drawElementPS"] = d3dUtil::CompileShader(L"Shaders\\DrawElementSahder.hlsl", nullptr, "PS", "ps_5_1");
 
+	m_Shaders["cubeMapVS"] = d3dUtil::CompileShader(L"Shaders\\CubeMapShader.hlsl", nullptr, "VS", "vs_5_1");
+	m_Shaders["cubeMapPS"] = d3dUtil::CompileShader(L"Shaders\\CubeMapShader.hlsl", nullptr, "PS", "ps_5_1");
+
+	m_Shaders["shadowMapVS"] = d3dUtil::CompileShader(L"Shaders\\ShadowShader.hlsl", nullptr, "VS", "vs_5_1");
+	m_Shaders["shadowMapPS"] = d3dUtil::CompileShader(L"Shaders\\ShadowShader.hlsl", nullptr, "PS", "ps_5_1");
+
 	m_NTVertexInputLayout =
 	{
 		{ "POSITION" ,0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
@@ -307,13 +395,43 @@ void D12D3Maaax::BuildGeometry()
 	cDrawPlane::MeshSetUp();
 	cDrawLines::MeshSetUp();
 	cDrawDot::MeshSetUp();
-	cUIObject::MeshSetUp();
 	cObjectCoordinator::MeshSetUp();
+
+	GeometryGenerator gen;
+	vector<NT_Vertex> vertices;
+
+	GeometryGenerator::MeshData sphere = gen.CreateSphere(0.5f, 30, 30);
+	vertices.resize(sphere.Vertices.size());
+
+	for (int i = 0; i < sphere.Vertices.size(); i++)
+	{
+		vertices[i].pos = sphere.Vertices[i].Position;
+		vertices[i].normal = sphere.Vertices[i].Normal;
+		vertices[i].uv = sphere.Vertices[i].TexC;
+	}
+
+	vector<UINT16> indices = sphere.GetIndices16();
+	m_cubeMapSphere = MESHMG->AddMeshGeometry("cubeMap", vertices.data(), indices.data(),
+		sizeof(NT_Vertex), sizeof(NT_Vertex)* (UINT)vertices.size(),
+		DXGI_FORMAT_R16_UINT, sizeof(UINT16)*(UINT)indices.size(), false);
+
+	UIMG->Build();
 }
 
 void D12D3Maaax::BuildPSOs()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
+	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
+	transparencyBlendDesc.BlendEnable = true;
+	transparencyBlendDesc.LogicOpEnable = false;
+	transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	ZeroMemory(&opaquePsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	opaquePsoDesc.InputLayout = { m_NTVertexInputLayout.data(), (UINT)m_NTVertexInputLayout.size() };
@@ -331,9 +449,11 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	//opaquePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	opaquePsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.SampleMask = UINT_MAX;
 	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 	opaquePsoDesc.NumRenderTargets = 1;
 	opaquePsoDesc.RTVFormats[0] = m_BackBufferFormat;
 	opaquePsoDesc.SampleDesc.Count = m_4xMsaaState ? 4 : 1;
@@ -341,22 +461,43 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["base"])));
 
+	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["baseWF"])));
 	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowMapPsoDesc = opaquePsoDesc;
+	shadowMapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	shadowMapPsoDesc.NumRenderTargets = 0;
+	shadowMapPsoDesc.RasterizerState.DepthBias = 30000;
+	shadowMapPsoDesc.RasterizerState.DepthBiasClamp = 0.02f;
+	shadowMapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
+	shadowMapPsoDesc.VS = {
+		reinterpret_cast<BYTE*>(m_Shaders["shadowMapVS"]->GetBufferPointer()),
+		m_Shaders["shadowMapVS"]->GetBufferSize()
+	};
+	shadowMapPsoDesc.PS = {
+		reinterpret_cast<BYTE*>(m_Shaders["shadowMapPS"]->GetBufferPointer()),
+		m_Shaders["shadowMapPS"]->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&shadowMapPsoDesc, IID_PPV_ARGS(&m_PSOs["shadowMap"])));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC cubeMapPsoDesc = opaquePsoDesc;
+	cubeMapPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	cubeMapPsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	cubeMapPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["cubeMapVS"]->GetBufferPointer()),
+		m_Shaders["cubeMapVS"]->GetBufferSize()
+	};
+	cubeMapPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(m_Shaders["cubeMapPS"]->GetBufferPointer()),
+		m_Shaders["cubeMapPS"]->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&cubeMapPsoDesc, IID_PPV_ARGS(&m_PSOs["cubeMap"])));
+
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
-	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
-	transparencyBlendDesc.BlendEnable = true;
-	transparencyBlendDesc.LogicOpEnable = false;
-	transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-	transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
-	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	transparentPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 	transparentPsoDesc.VS =
@@ -407,6 +548,7 @@ void D12D3Maaax::BuildPSOs()
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["planes"])));
 
 	RENDERITEMMG->AddRenderSet("base");
+	RENDERITEMMG->AddRenderSet("cubeMap");
 	RENDERITEMMG->AddRenderSet("objectCoordinator");
 	RENDERITEMMG->AddRenderSet("plane");
 	RENDERITEMMG->AddRenderSet("line");
@@ -417,8 +559,74 @@ void D12D3Maaax::BuildPSOs()
 
 void D12D3Maaax::BuildTextures()
 {
-	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), MAXTEXTURENUM);
-	m_TextureHeap->AddTexture(m_CommandQueue.Get(), "ice", L"Texture/ice.dds");
+	wstring fileName;
+	const wstring folderName = L"Texture/";
+	m_TextureNames.push_back("ui.png");
+	m_TextureNames.push_back("plane.png");
+	m_TextureNames.push_back("line.png");
+	m_TextureNames.push_back("dots.png");
+	m_TextureNames.push_back("writing.png");
+	m_TextureNames.push_back("push.png");
+	m_TextureNames.push_back("CreateMesh.png");
+	m_TextureNames.push_back("ice.dds");
+
+	vector<string> otherUsesTextures;
+	otherUsesTextures.push_back("cubeMap");
+	otherUsesTextures.push_back("shadowMap");
+
+	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), (UINT)m_TextureNames.size() + (UINT)otherUsesTextures.size());
+
+	for (auto& it : m_TextureNames)
+	{
+		fileName.assign(it.begin(), it.end());
+		m_TextureHeap->AddTexture(m_CommandQueue.Get(), it, folderName + fileName);
+	}
+
+	m_TextureHeap->AddCubeMapTexture(m_CommandQueue.Get(), "cubeMap", folderName + L"cubeMap.dds");
+	BuildShadowMap();
+}
+
+void D12D3Maaax::BuildShadowMap()
+{
+	{
+		D3D12_RESOURCE_DESC texDesc;
+		ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
+		texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		texDesc.Alignment = 0;
+		texDesc.Width = m_ClientWidth;
+		texDesc.Height = m_ClientHeight;
+		texDesc.DepthOrArraySize = 1;
+		texDesc.MipLevels = 1;
+		texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+		texDesc.SampleDesc.Count = 1;
+		texDesc.SampleDesc.Quality = 0;
+		texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+		D3D12_CLEAR_VALUE optClear;
+		optClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		optClear.DepthStencil.Depth = 1.0f;
+		optClear.DepthStencil.Stencil = 0;
+
+		m_TextureHeap->AddNullTexture("shadowMap", DXGI_FORMAT_R24_UNORM_X8_TYPELESS, &texDesc, &optClear);
+	}
+
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
+		dsvHeapDesc.NumDescriptors = 1;
+		dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		dsvHeapDesc.NodeMask = 0;
+		ThrowIfFailed(m_D3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(m_ShadowDsvHeap.GetAddressOf())));
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		dsvDesc.Texture2D.MipSlice = 0;
+		m_D3dDevice->CreateDepthStencilView(m_TextureHeap->GetTexture("shadowMap").Get(), &dsvDesc,
+			m_ShadowDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	}
 }
 
 void D12D3Maaax::BuildFrameResources()
@@ -432,37 +640,36 @@ void D12D3Maaax::BuildFrameResources()
 
 void D12D3Maaax::BuildMaterials()
 {
-	auto wirefence = make_unique<Material>();
-	wirefence->name = "wirefence";
-	wirefence->matCBIndex = (int)m_Materials.size();
-	wirefence->diffuseSrvHeapIndex = 0;
-	wirefence->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	wirefence->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	wirefence->roughness = 0.25f;
+	for (auto& it : m_TextureNames)
+	{
+		auto material = make_unique<Material>();
+		material->name = it;
+		material->matCBIndex = (int)m_Materials.size();
+		material->diffuseMapIndex = m_TextureHeap->GetTextureIndex(it);
+		material->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		material->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+		material->roughness = 0.25f;
 
-	m_Materials["wirefence"] = move(wirefence);
-
-	auto icemirror = std::make_unique<Material>();
-	icemirror->name = "icemirror";
-	icemirror->matCBIndex = (int)m_Materials.size();
-	icemirror->diffuseSrvHeapIndex = 2;
-	icemirror->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
-	icemirror->fresnel0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	icemirror->roughness = 0.5f;
-
-	m_Materials["icemirror"] = std::move(icemirror);
+		m_Materials[it] = move(material);
+	}
 }
 
 void D12D3Maaax::BuildObjects()
 {
-	cOperation::OperationsBaseSetup(RENDERITEMMG->AddRenderItem("ui"));
+	cOperation::OperationsBaseSetup();
 	m_operator = make_unique<cOperator>();
-	m_operator->SetUp();
+	m_operator->Build();
 
-	OBJCOORD->SetUp();
+	m_cubeMapRender = RENDERITEMMG->AddRenderItem("cubeMap");
+	m_cubeMapRender->SetGeometry(m_cubeMapSphere, m_cubeMapSphere->name);
+	m_cubeMapRenderInstance = m_cubeMapRender->GetRenderIsntance();
+	m_cubeMapRenderInstance->m_isRenderOK = true;
+	XMStoreFloat4x4(&m_cubeMapRenderInstance->instanceData.World, XMMatrixScaling(5000.0f, 5000.0f, 5000.0f));
+
+	OBJCOORD->Build();
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> D12D3Maaax::GetStaticSamplers()
 {
 	const CD3DX12_STATIC_SAMPLER_DESC pointWrap(
 		0, // shaderRegister
@@ -510,9 +717,22 @@ std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()
 		0.0f,                              // mipLODBias
 		8);                                // maxAnisotropy
 
+	const CD3DX12_STATIC_SAMPLER_DESC shadow(
+		6, // shaderRegister
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressW
+		0.0f,                               // mipLODBias
+		16,                                 // maxAnisotropy
+		D3D12_COMPARISON_FUNC_LESS_EQUAL,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
+
 	return {
 		pointWrap, pointClamp,
 		linearWrap, linearClamp,
-		anisotropicWrap, anisotropicClamp };
+		anisotropicWrap, anisotropicClamp,
+		shadow
+	};
 }
 

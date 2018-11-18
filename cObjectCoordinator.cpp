@@ -29,7 +29,7 @@ void cObjectCoordinator::MeshSetUp()
 	for (int i = 0; i < sphere.Vertices.size(); i++)
 	{
 		vertices[i].pos = sphere.Vertices[i].Position;
-		XMStoreFloat4(&vertices[i].color, Colors::Gray.v);
+		XMStoreFloat4(&vertices[i].color, Colors::Black.v);
 	}
 
 	indices = sphere.GetIndices16();
@@ -120,7 +120,7 @@ void cObjectCoordinator::MeshSetUp()
 		DXGI_FORMAT_R16_UINT, (UINT)indices.size() * sizeof(UINT16), false, &subMeshs);
 }
 
-void cObjectCoordinator::SetUp()
+void cObjectCoordinator::Build()
 {
 	m_arrowRenderItem = RENDERITEMMG->AddRenderItem("objectCoordinator");
 	m_arrowRenderItem->SetGeometry(m_geo, "arrow");
@@ -231,7 +231,7 @@ void cObjectCoordinator::Update()
 			{
 				XMVECTOR plane;
 				float normalDot;
-				float t;
+				float dist;
 				switch (m_controlState)
 				{
 				case cObjectCoordinator::AXIS_X:
@@ -239,8 +239,8 @@ void cObjectCoordinator::Update()
 					normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
 					if (normalDot != 0)
 					{
-						t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
-						XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+						dist = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
+						XMVECTOR pos = mouseRay.origin + mouseRay.ray*dist;
 						m_prevTranslationValue = pos.m128_f32[0];
 					}
 					break;
@@ -249,8 +249,8 @@ void cObjectCoordinator::Update()
 					normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
 					if (normalDot != 0)
 					{
-						t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
-						XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+						dist = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
+						XMVECTOR pos = mouseRay.origin + mouseRay.ray*dist;
 						m_prevTranslationValue = pos.m128_f32[1];
 					}
 					break;
@@ -259,8 +259,8 @@ void cObjectCoordinator::Update()
 					normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
 					if (normalDot != 0)
 					{
-						t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
-						XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+						dist = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
+						XMVECTOR pos = mouseRay.origin + mouseRay.ray*dist;
 						m_prevTranslationValue = pos.m128_f32[2];
 					}
 					break;
@@ -304,7 +304,7 @@ void cObjectCoordinator::ObjectTranslation()
 	PICKRAY mouseRay = INPUTMG->GetMousePickLay();
 	XMVECTOR plane;
 	float normalDot;
-	float t;
+	float dist;
 
 	switch (m_controlState)
 	{
@@ -313,8 +313,8 @@ void cObjectCoordinator::ObjectTranslation()
 		normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
 		if (normalDot != 0)
 		{
-			t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
-			XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+			dist = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
+			XMVECTOR pos = mouseRay.origin + mouseRay.ray*dist;
 
 			float translationValue = pos.m128_f32[0]- m_prevTranslationValue;
 			m_controlObject->m_pos.x += translationValue;
@@ -326,8 +326,8 @@ void cObjectCoordinator::ObjectTranslation()
 		normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
 		if (normalDot != 0)
 		{
-			t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
-			XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+			dist = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
+			XMVECTOR pos = mouseRay.origin + mouseRay.ray*dist;
 			
 			float translationValue = pos.m128_f32[1] - m_prevTranslationValue;
 			m_controlObject->m_pos.y += translationValue;
@@ -339,8 +339,8 @@ void cObjectCoordinator::ObjectTranslation()
 		normalDot = XMVector3Dot(plane, mouseRay.ray).m128_f32[0];
 		if (normalDot != 0)
 		{
-			t = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
-			XMVECTOR pos = mouseRay.origin + mouseRay.ray*t;
+			dist = (XMVector3Dot(-plane, mouseRay.origin).m128_f32[0] - plane.m128_f32[3]) / normalDot;
+			XMVECTOR pos = mouseRay.origin + mouseRay.ray*dist;
 			
 			float translationValue = pos.m128_f32[2] - m_prevTranslationValue;
 			m_controlObject->m_pos.z += translationValue;
@@ -349,109 +349,3 @@ void cObjectCoordinator::ObjectTranslation()
 		break;
 	}
 }
-
-//if (m_controlObject == nullptr)
-//{
-//	m_sphereRenderInstance->m_isRenderOK = false;
-//	return;
-//}
-//else
-//{
-//	m_sphereRenderInstance->instanceData.World = m_controlObject->GetMatrix();
-//	m_sphereRenderInstance->numFramesDirty = gNumFrameResources;
-//	m_sphereRenderInstance->m_isRenderOK = true;
-//	m_arrowRenderInstance->m_isRenderOK = true;
-//	m_arrowRenderInstance->numFramesDirty = gNumFrameResources;
-//}
-//
-//XMVECTOR objCenter = XMLoadFloat3(&m_controlObject->m_pos);
-//XMVECTOR objRotation = XMLoadFloat3(&m_controlObject->m_rotation);
-//XMMATRIX objectMat = XMLoadFloat4x4(&m_controlObject->GetMatrix());
-//XMMATRIX invObjMat = XMMatrixInverse(&XMVECTOR(), objectMat);
-////XMMATRIX invTransPos = MathHelper::InverseTranspose(objectMat);
-////XMMATRIX rotationMat = XMMatrixRotationRollPitchYawFromVector(objRotation);
-//
-//PICKRAY mouseRay = INPUTMG->GetMousePickLay();
-//PICKRAY objectLocalRay;
-//XMVECTOR pickPos;
-//objectLocalRay.ray = XMVector3Normalize(XMVector3TransformNormal(mouseRay.ray, invObjMat));
-//objectLocalRay.origin = XMVector3TransformCoord(mouseRay.origin, invObjMat);
-//
-//float distance;
-//
-//if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
-//{
-//	if (m_geo->octree->Picking(objectLocalRay, distance))
-//	{
-//		pickPos = (mouseRay.origin + mouseRay.ray*distance);
-//		m_arrowRenderInstance->instanceData.World._41 = pickPos.m128_f32[0];
-//		m_arrowRenderInstance->instanceData.World._42 = pickPos.m128_f32[1];
-//		m_arrowRenderInstance->instanceData.World._43 = pickPos.m128_f32[2];
-//
-//		XMStoreFloat3(&m_prevVec, XMVector3Normalize(pickPos - objCenter));
-//		m_isRotationControl = true;
-//	}
-//}
-
-//if (!INPUTMG->GetMouseDownStay(VK_LBUTTON))
-//{
-//	m_isRotationControl = false;
-//}
-//
-//if (m_isRotationControl)
-//{
-//	if (m_geo->octree->Picking(objectLocalRay, distance))
-//	{
-//		pickPos = (mouseRay.origin + mouseRay.ray*distance);
-//
-//		XMVECTOR currVector = XMVector3Normalize(pickPos - objCenter);
-//		XMVECTOR prevVector = XMLoadFloat3(&m_prevVec);
-//		XMVECTOR rotationQuater = XMQuaternionRotationAxis(prevVector, XMVector3AngleBetweenNormals(prevVector, currVector).m128_f32[0]);
-//		XMVECTOR rotationValue;
-//
-//		double q2sqr = rotationQuater.m128_f32[1] * rotationQuater.m128_f32[1];
-//		double t0 = -2.0 * (q2sqr + rotationQuater.m128_f32[2] * rotationQuater.m128_f32[2]) + 1.0;
-//		double t1 = +2.0 * (rotationQuater.m128_f32[0] * rotationQuater.m128_f32[1] + rotationQuater.m128_f32[3] * rotationQuater.m128_f32[2]);
-//		double t2 = -2.0 * (rotationQuater.m128_f32[0] * rotationQuater.m128_f32[2] - rotationQuater.m128_f32[3] * rotationQuater.m128_f32[1]);
-//		double t3 = +2.0 * (rotationQuater.m128_f32[2] * rotationQuater.m128_f32[2] + rotationQuater.m128_f32[3] * rotationQuater.m128_f32[0]);
-//		double t4 = -2.0 * (rotationQuater.m128_f32[0] * rotationQuater.m128_f32[0] + q2sqr) + 1.0;
-//
-//		t2 = t2 > 1.0 ? 1.0 : t2;
-//		t2 = t2 < -1.0 ? -1.0 : t2;
-//
-//		rotationValue.m128_f32[0] = asin(t2);
-//		rotationValue.m128_f32[1] = atan2(t3, t4);
-//		rotationValue.m128_f32[2] = atan2(t1, t0);
-//		rotationValue.m128_f32[3] = 0;
-//
-//		XMStoreFloat3(&m_controlObject->m_rotation, objRotation + rotationValue);
-//		XMStoreFloat3(&m_prevVec, currVector);
-//	}
-//	else
-//	{
-//		m_isRotationControl = false;
-//	}
-//}
-
-
-/*if (GetAsyncKeyState(VK_F1))
-{
-	m_controlObject->m_quaternion.y = XM_PIDIV4;
-	m_controlObject->m_quaternion.x = 0;
-	m_controlObject->m_quaternion.z = 0;
-	m_controlObject->m_pos.x = 2;
-}*/
-
-//if (GetAsyncKeyState(VK_UP))
-//{
-//	objRotation.m128_f32[0]+= 0.5f*DELTATIME;
-//	XMStoreFloat4(&m_controlObject->m_rotation,
-//		XMQuaternionNormalize(objRotation));
-//}
-
-//if (GetAsyncKeyState(VK_RIGHT))
-//{
-//	objRotation.m128_f32[1] += 0.5f*DELTATIME;
-//	XMStoreFloat4(&m_controlObject->m_rotation,
-//		XMQuaternionNormalize(objRotation));
-//}

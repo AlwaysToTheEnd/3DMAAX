@@ -13,21 +13,23 @@ cUIButton::~cUIButton()
 {
 }
 
-void cUIButton::UIUpdate()
+void cUIButton::InputDataUpdate()
 {
-	assert(m_Param != -1);
-
-	RECT buttonRect;
-	buttonRect.left = (LONG)m_renderInstance->instanceData.World._41;
-	buttonRect.top = (LONG)m_renderInstance->instanceData.World._42;
-	buttonRect.right = buttonRect.left + (LONG)m_renderInstance->instanceData.World._11;
-	buttonRect.bottom= buttonRect.top + (LONG)m_renderInstance->instanceData.World._22;
-
-	if (PtInRect(&buttonRect, INPUTMG->GetMousePosPt()))
+	if (PtInRect(&m_uiRECT, INPUTMG->GetMousePosPt()))
 	{
 		if (INPUTMG->GetMouseUp(VK_LBUTTON))
 		{
 			m_ActiveFunc(m_Param);
 		}
 	}
+}
+
+void cUIButton::UIUpdate()
+{
+	assert(m_Param != -1);
+
+	m_uiRECT.left = (LONG)m_renderInstance->instanceData.World._41;
+	m_uiRECT.top = (LONG)m_renderInstance->instanceData.World._42;
+	m_uiRECT.right = m_uiRECT.left + (LONG)m_renderInstance->instanceData.World._11;
+	m_uiRECT.bottom= m_uiRECT.top + (LONG)m_renderInstance->instanceData.World._22;
 }

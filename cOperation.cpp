@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-shared_ptr<cRenderItem> cOperation::m_OperatorUi = nullptr;
+cUIOperWindow*			cOperation::m_operControl = nullptr;
 shared_ptr<cRenderItem> cOperation::m_prevViewRender = nullptr;
 shared_ptr<RenderInstance> cOperation::m_prevViewRenderInstance = nullptr;
 MeshGeometry* cOperation::m_previewGeo = nullptr;
@@ -17,10 +17,9 @@ void CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
 		if (endcheck != endLinkPoint)
 		{
 			cycleDots.push_back(GetDotsToParents());
+			return;
 		}
-		break;
 	}
-
 
 	for (auto it = leaveLines.begin(); it != leaveLines.end(); )
 	{
@@ -102,11 +101,10 @@ vector<const cDot*> CycleLine::GetDotsToParents()
 }
 
 
-void cOperation::OperationsBaseSetup(shared_ptr<cRenderItem> renderItem)
+void cOperation::OperationsBaseSetup()
 {
-	m_OperatorUi = renderItem;
-	cUIObject::SetGeoAtRenderItem(renderItem);
-
+	m_operControl = UIMG->AddUI<cUIOperWindow>("operationWindow");
+	m_operControl->SetPos({ 550,50,0 });
 	m_previewGeo = MESHMG->AddTemporaryMesh("previewGeo");
 	m_prevViewRender = RENDERITEMMG->AddRenderItem(cMesh::m_meshRenderName);
 	m_prevViewRender->SetGeometry(m_previewGeo, m_previewGeo->name);
@@ -115,22 +113,29 @@ void cOperation::OperationsBaseSetup(shared_ptr<cRenderItem> renderItem)
 	m_prevViewRender->SetRenderOK(false);
 }
 
-void cOperation::SetUp()
+cOperation::cOperation(OPERATIONTYPE type)
+	: m_operType(type)
+	, m_operationText(nullptr)
+	, m_operState(false)
+	, m_worksSate(0)
+	, m_currObjectControlParam(-2)
 {
-	m_operControl.Build(m_OperatorUi);
-	m_operControl.SetPos({ 650,100,0 });
+}
+
+void cOperation::Build()
+{
 	m_operationText = FONTMANAGER->GetFont("baseFont");
 	m_operationText->isRender = false;
-	m_operationText->color = Colors::Red;
+	m_operationText->color = Colors::OrangeRed;
 	m_operationText->printString = L"";
-	m_operationText->pos = { 30,30,0 };
+	m_operationText->pos = { 20,50,0 };
 }
 
 void cOperation::EndOperation()
 {
-	m_operState = false; 
-	m_operControl.SetRenderState(false); 
-	m_operControl.ClearParameters();
+	m_operState = false;
+	UIMG->UIOff(m_operControl);
+	m_operControl->ClearParameters();
 	m_prevViewRender->SetRenderOK(false);
 	OBJCOORD->ObjectRegistration(nullptr);
 
@@ -141,10 +146,17 @@ void cOperation::EndOperation()
 	m_worksSate = 0;
 }
 
+void cOperation::StartOperation()
+{
+	m_operState = true; 
+	m_operControl->ClearParameters();
+}
+
 bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawItems, DrawItems *& currDrawItems)
 {
 	if (currDrawItems != nullptr)
 	{
+		currDrawItems->SetPickRender(2);
 		m_currObjectControlParam = -2;
 		return true;
 	}
@@ -153,22 +165,21 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 	{
 	case -2:
 	{
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 
 		for (auto& it : drawItems)
 		{
-			m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_currObjectControlParam);
+			m_operControl->AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
-		m_operationText->printString = L"Select Draws";
+		m_operationText->printString = L"그림 오브젝트 선택";
 		m_operationText->isRender = true;
-		m_operControl.SetRenderState(true);
+		UIMG->UIOn(m_operControl);
 		m_currObjectControlParam = -1;
 	}
-		break;
+	break;
 	case -1:
 	{
-		m_operControl.Update(XMMatrixIdentity());
 	}
 	break;
 	default:
@@ -180,8 +191,9 @@ bool cOperation::CurrDrawCheckAndPick(unordered_map<wstring, DrawItems>& drawIte
 		}
 
 		currDrawItems = &it->second;
+		it->second.SetPickRender(2);
 		m_operationText->isRender = false;
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 		m_currObjectControlParam = -2;
 		return true;
 	}
@@ -203,22 +215,22 @@ bool cOperation::CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMes
 	{
 	case -2:
 	{
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 
 		for (auto& it : meshs)
 		{
-			m_operControl.AddParameter(it.first, DXGI_FORMAT_R32_SINT, &m_currObjectControlParam);
+			m_operControl->AddParameter(it.first, OPERDATATYPE_INDEX, &m_currObjectControlParam);
 		}
 
-		m_operationText->printString = L"Select Mesh";
+		m_operationText->printString = L"작업할 메쉬 선택";
 		m_operationText->isRender = true;
-		m_operControl.SetRenderState(true);
+		UIMG->UIOn(m_operControl);
 		m_currObjectControlParam = -1;
 	}
 	break;
 	case -1:
 	{
-		m_operControl.Update(XMMatrixIdentity());
+
 	}
 	break;
 	default:
@@ -231,7 +243,7 @@ bool cOperation::CurrMeshCheckAndPick(unordered_map<wstring, cMesh>& meshs, cMes
 
 		currMesh = &it->second;
 		m_operationText->isRender = false;
-		m_operControl.ClearParameters();
+		m_operControl->ClearParameters();
 		m_currObjectControlParam = -2;
 		return true;
 	}
@@ -402,40 +414,27 @@ bool cOperation::EqualCheck(vector<const cDot*>& lhs, vector<const cDot*>& rhs)
 	return true;
 }
 
-bool cOperation::CheckCWCycle(vector<const cDot*>& cycle)
+bool cOperation::CheckCWCycle(const vector<const cDot*>& cycle) const
 {
-	bool isRightCycle = false;
+	//http://www.gisdeveloper.co.kr/?p=805
 
-	XMVECTOR currDot = XMLoadFloat3(&cycle[0]->GetPosC());
-	XMVECTOR nextDot = XMLoadFloat3(&cycle[1]->GetPosC());
-	XMVECTOR line0Dir = XMVector3Normalize(nextDot - currDot);
+	bool isRightCycle = false;
 
 	float allAngle = 0;
 	for (size_t i = 0; i < cycle.size() - 1; i++)
 	{
-		XMVECTOR endDot = XMLoadFloat3(&cycle[(i + 2) % (UINT)cycle.size()]->GetPosC());
-		XMVECTOR line1Dir = XMVector3Normalize(endDot - nextDot);
+		XMVECTOR currDot = XMLoadFloat3(&cycle[i]->GetPosC());
+		XMVECTOR nextDot = XMLoadFloat3(&cycle[i + 1]->GetPosC());
 
-		float angle = 0;
-		XMStoreFloat(&angle, XMVector3AngleBetweenNormals(line0Dir, line1Dir));
+		float x0 = currDot.m128_f32[0];
+		float x1 = nextDot.m128_f32[0];
+		float y0 = currDot.m128_f32[1];
+		float y1 = nextDot.m128_f32[1];
 
-		XMVECTOR cross = XMVector3Cross(line0Dir, line1Dir);
-
-		if (cross.m128_f32[2] > 0)
-		{
-			allAngle -= angle;
-		}
-		else
-		{
-			allAngle += angle;
-		}
-
-		currDot = nextDot;
-		nextDot = endDot;
-		line0Dir = line1Dir;
+		allAngle += (x0*y1) - (x1*y0);
 	}
 
-	return allAngle >= 0;
+	return allAngle < 0;
 }
 
 XMVECTOR XM_CALLCONV cOperation::GetNormalFromTriangle(const XMFLOAT3 & pos1, const XMFLOAT3 & pos2, const XMFLOAT3 & pos3)
@@ -461,7 +460,7 @@ bool cOperation::PickPlane(cDrawPlane* planes, cPlane ** plane)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
-		if (!m_operControl.IsMousePosInUIWindow())
+		if (!m_operControl->IsMousePosInUI())
 		{
 			cObject* pickPlane = nullptr;
 			if (planes->Picking(&pickPlane))
@@ -476,11 +475,11 @@ bool cOperation::PickPlane(cDrawPlane* planes, cPlane ** plane)
 	return false;
 }
 
-cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
+cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems, bool* isAddDot)
 {
 	if (INPUTMG->GetMouseOneDown(VK_LBUTTON))
 	{
-		if (!m_operControl.IsMousePosInUIWindow())
+		if (!m_operControl->IsMousePosInUI())
 		{
 			float distance;
 			PICKRAY ray = INPUTMG->GetMousePickLay();
@@ -489,10 +488,18 @@ cDot * cOperation::AddDotAtCurrPlane(DrawItems* drawItems)
 				cObject* pickDot = nullptr;
 				if (drawItems->m_draws[DRAW_DOTS]->Picking(&pickDot))
 				{
+					if (isAddDot)
+					{
+						*isAddDot = false;
+					}
 					cDot* resultDot = static_cast<cDot*>(pickDot);
 					return resultDot;
 				}
 
+				if (isAddDot)
+				{
+					*isAddDot = true;
+				}
 				XMMATRIX planeInvMat = XMMatrixInverse(&XMVECTOR(), drawItems->m_plane->GetXMMatrix());
 				XMVECTOR pos = ray.origin + ray.ray*distance;
 				pos = XMVector3TransformCoord(pos, planeInvMat);

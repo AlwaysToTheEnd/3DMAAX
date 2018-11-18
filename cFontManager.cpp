@@ -19,17 +19,32 @@ void cFontManager::Build(ID3D12Device * device, ID3D12CommandQueue * queue)
 	m_spriteBatch = std::make_unique<SpriteBatch>(device, resourceUpload, pd);
 
 	m_fonts["baseFont"] = std::make_unique<SpriteFont>(device, resourceUpload,
-		L"myfile.spritefont",
-		m_resourceDescriptors->GetCpuHandle(Descriptors::MyFont),
-		m_resourceDescriptors->GetGpuHandle(Descriptors::MyFont));
+		L"font/baseFont.spritefont",
+		m_resourceDescriptors->GetCpuHandle(Descriptors::BaseFont),
+		m_resourceDescriptors->GetGpuHandle(Descriptors::BaseFont));
 
 	auto uploadResourcesFinished = resourceUpload.End(queue);
 
 	uploadResourcesFinished.wait();
 }
 
-void cFontManager::AddFont(const string & fontName, const wstring & fileName)
+void cFontManager::AddFont(ID3D12Device * device, ID3D12CommandQueue * queue, const string & fontName, const wstring & fileName)
 {
+	/*ResourceUploadBatch resourceUpload(device);
+	resourceUpload.Begin();
+
+	RenderTargetState rtState(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_D32_FLOAT);
+	SpriteBatchPipelineStateDescription pd(rtState);
+	m_spriteBatch = std::make_unique<SpriteBatch>(device, resourceUpload, pd);
+
+	m_fonts[fontName] = std::make_unique<SpriteFont>(device, resourceUpload,
+		fileName.c_str(),
+		m_resourceDescriptors->GetCpuHandle(Descriptors::BaseFont),
+		m_resourceDescriptors->GetGpuHandle(Descriptors::BaseFont));
+
+	auto uploadResourcesFinished = resourceUpload.End(queue);
+
+	uploadResourcesFinished.wait();*/
 }
 
 void cFontManager::Resize(UINT clientWidth, UINT clientHeight)

@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="D12App">
       <UniqueIdentifier>{f1d175c1-594c-4e78-87b6-9cb83d0f6093}</UniqueIdentifier>
     </Filter>
@@ -76,6 +72,16 @@
     <Filter Include="Objects\Meshs">
       <UniqueIdentifier>{c6c5c7e8-9b4d-4cf0-b4dc-10b5402db280}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\cUITypes">
+      <UniqueIdentifier>{fb4b6f31-b4d8-450b-babe-4cc37b252508}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManagedClass\cUIObjectMG">
+      <UniqueIdentifier>{30680e04-0d82-4770-966a-73142a8b1d1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -135,23 +141,14 @@
     <ClInclude Include="D12D3Maaax.h">
       <Filter>D12App\D12D3Maaax</Filter>
     </ClInclude>
-    <ClInclude Include="cInputDeviceMG.h">
-      <Filter>ManagedClass\cInputDeviceMG</Filter>
-    </ClInclude>
     <ClInclude Include="cDrawElement.h">
       <Filter>Objects\ElementObject</Filter>
     </ClInclude>
     <ClInclude Include="cOperation.h">
       <Filter>cOperation</Filter>
     </ClInclude>
-    <ClInclude Include="cUIButton.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="cOperator.h">
       <Filter>cOperation\cOperator</Filter>
-    </ClInclude>
-    <ClInclude Include="cUIOperWindow.h">
-      <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="cButtonCollector.h">
       <Filter>UI\cButtonCollector</Filter>
@@ -194,6 +191,18 @@
     </ClInclude>
     <ClInclude Include="cMesh.h">
       <Filter>Objects\Meshs</Filter>
+    </ClInclude>
+    <ClInclude Include="cUIButton.h">
+      <Filter>UI\cUITypes</Filter>
+    </ClInclude>
+    <ClInclude Include="cUIOperWindow.h">
+      <Filter>UI\cUITypes</Filter>
+    </ClInclude>
+    <ClInclude Include="cUIObjectMG.h">
+      <Filter>ManagedClass\cUIObjectMG</Filter>
+    </ClInclude>
+    <ClInclude Include="cInputDeviceMG.h">
+      <Filter>ManagedClass\cInputDeviceMG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -254,14 +263,8 @@
     <ClCompile Include="cOperation.cpp">
       <Filter>cOperation</Filter>
     </ClCompile>
-    <ClCompile Include="cUIButton.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="cOperator.cpp">
       <Filter>cOperation\cOperator</Filter>
-    </ClCompile>
-    <ClCompile Include="cUIOperWindow.cpp">
-      <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="cButtonCollector.cpp">
       <Filter>UI\cButtonCollector</Filter>
@@ -305,6 +308,15 @@
     <ClCompile Include="cMesh.cpp">
       <Filter>Objects\Meshs</Filter>
     </ClCompile>
+    <ClCompile Include="cUIButton.cpp">
+      <Filter>UI\cUITypes</Filter>
+    </ClCompile>
+    <ClCompile Include="cUIOperWindow.cpp">
+      <Filter>UI\cUITypes</Filter>
+    </ClCompile>
+    <ClCompile Include="cUIObjectMG.cpp">
+      <Filter>ManagedClass\cUIObjectMG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="05_Texture.rc">
@@ -329,9 +341,6 @@
     <FxCompile Include="Shaders\UIShader.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
-    <FxCompile Include="ShadowShader.hlsl">
-      <Filter>리소스 파일</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\DrawElementSahder.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
@@ -339,6 +348,12 @@
       <Filter>리소스 파일</Filter>
     </FxCompile>
     <FxCompile Include="BezierGeometry.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMapShader.hlsl">
+      <Filter>리소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowShader.hlsl">
       <Filter>리소스 파일</Filter>
     </FxCompile>
   </ItemGroup>

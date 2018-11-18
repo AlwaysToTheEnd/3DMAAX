@@ -168,6 +168,7 @@ void cMeshgeometryMG::ClearGeometry(MeshGeometry * geo)
 	geo->indexUploadBuffer = nullptr;
 	geo->octree = nullptr;
 	geo->DrawArgs.clear();
+	FlushCommandQueue();
 }
 
 void cMeshgeometryMG::DataInputGeometry(MeshGeometry * geo, const void * vertexData, const void * indexData, UINT vertexByteStride, UINT vertexBufferByteSize, DXGI_FORMAT indexFormat, UINT indexBufferByteSize, bool leaveDataInCPU, const unordered_map<string, SubMeshGeometry>* subMeshs)

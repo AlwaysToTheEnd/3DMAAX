@@ -1,5 +1,5 @@
 #pragma once
-#define NOMALBUTTONSIZE 30
+#define NOMALBUTTONSIZE 40
 
 class cOperator
 {
@@ -7,18 +7,24 @@ public:
 	cOperator();
 	~cOperator();
 
-	void SetUp();
+	void Build();
 	void Update();
 
 	void SetRenderState(bool value);
 
 private:
 	bool OperationCheck();
-	void OperationStart(int type);
+	void ObjectListUIUpdate();
 
 private:
-	const int						m_ButtonMtlTexBaseIndex = 0;
-	shared_ptr<cRenderItem>			m_buttonRenderItem;
+	void OperationStart(int type);
+	void SelectPlane(UINT64 address);
+	void SelectDraws(UINT64 address);
+	void SelectMeshs(UINT64 address);
+	void SelectCSGObjectOn(UINT64 address);
+
+private:
+	const int						m_ButtonMtlTexBaseIndex = 1;
 	cButtonCollector				m_operSelectButtons;
 
 	vector<unique_ptr<cOperation>>	m_operations;
@@ -29,5 +35,7 @@ private:
 	unordered_map<wstring, DrawItems>	m_drawItems;
 	DrawItems*							m_currDraws;
 	cMesh*								m_currMesh;
+	cUIOperWindow*						m_objectListUI;
+	cUIOperWindow*						m_objectControl;
 };
 

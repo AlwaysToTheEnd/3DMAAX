@@ -11,9 +11,7 @@ cCamera::cCamera()
 	, m_RotY(0)
 	, m_View(MathHelper::Identity4x4())
 {
-
 }
-
 
 cCamera::~cCamera()
 {
@@ -84,6 +82,18 @@ void cCamera::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		m_Distance -= GET_WHEEL_DELTA_WPARAM(wParam) / 100.0f;
 	}
 	break;
+	}
+}
+
+XMFLOAT3 cCamera::GetTargetPos() const
+{
+	if (m_target)
+	{
+		return m_target->GetWorldPos();
+	}
+	else
+	{
+		return XMFLOAT3(0,0,0);
 	}
 }
 

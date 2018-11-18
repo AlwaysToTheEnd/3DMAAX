@@ -20,6 +20,8 @@ struct PassConstants
 	XMFLOAT4X4 invProj = MathHelper::Identity4x4();
 	XMFLOAT4X4 viewProj = MathHelper::Identity4x4();
 	XMFLOAT4X4 invViewProj = MathHelper::Identity4x4();
+	XMFLOAT4X4 rightViewProj= MathHelper::Identity4x4();
+	XMFLOAT4X4 shadowMapMatrix= MathHelper::Identity4x4();
 	XMFLOAT3 eyePosW = { 0.0f, 0.0f, 0.0f };
 	float cbPerObjectPad1 = 0.0f;
 	XMFLOAT2 renderTargetSize = { 0.0f, 0.0f };
@@ -39,6 +41,14 @@ struct NT_Vertex
 	XMFLOAT3 pos;
 	XMFLOAT3 normal;
 	XMFLOAT2 uv;
+
+	NT_Vertex() {}
+	NT_Vertex(XMFLOAT3 _pos, XMFLOAT3 _normal, XMFLOAT2 _uv)
+	{
+		pos = _pos;
+		normal = _normal;
+		uv = _uv;
+	}
 };
 
 struct C_Vertex

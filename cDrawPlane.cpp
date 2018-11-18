@@ -11,7 +11,6 @@ cPlane::~cPlane()
 
 }
 
-
 bool XM_CALLCONV cPlane::Picking(PICKRAY ray, float & distance)
 {
 	XMMATRIX world = XMLoadFloat4x4(&m_renderInstance->instanceData.World);

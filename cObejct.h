@@ -20,6 +20,7 @@ public:
 	XMFLOAT4& GetQuaternion() { return m_quaternion; }
 	XMFLOAT3& GetScale() { return m_scale; }
 
+	bool GetRenderState() const { return m_renderInstance->m_isRenderOK; }
 	XMMATRIX XM_CALLCONV GetXMMatrix() const { return XMLoadFloat4x4(&m_renderInstance->instanceData.World); }
 	XMFLOAT4X4 GetMatrix() const { return m_renderInstance->instanceData.World; }
 	const XMFLOAT3& GetPosC() const { return m_pos; }

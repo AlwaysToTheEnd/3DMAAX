@@ -18,6 +18,7 @@ public:
 	void SetPrimitiveType(D3D12_PRIMITIVE_TOPOLOGY type) { m_primitiveType = type; }
 	void SetGeometry(const MeshGeometry* geometry, string submeshName);
 	void SetRenderOK(bool value) { m_isRenderOK = value; }
+	void ThisInstanceIsEndRender(shared_ptr<RenderInstance> instance);
 
 	shared_ptr<RenderInstance> GetRenderIsntance();
 

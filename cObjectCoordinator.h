@@ -22,7 +22,7 @@ public:
 		return instance;
 	}
 
-	void SetUp();
+	void Build();
 	void Update();
 	void ObjectRegistration(cObject* object) { m_controlObject = object; }
 	cObject* GetCurrObject() { return m_controlObject; }
