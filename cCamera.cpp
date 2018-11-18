@@ -85,6 +85,18 @@ void cCamera::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 }
 
+XMFLOAT3 cCamera::GetTargetPos() const
+{
+	if (m_target)
+	{
+		return m_target->GetWorldPos();
+	}
+	else
+	{
+		return XMFLOAT3(0,0,0);
+	}
+}
+
 void cCamera::SetTargetAndSettingAngle(const cObject * target)
 {
 	m_target = target;

@@ -16,9 +16,13 @@ private:
 	virtual void Draw() override;
 
 	void UpdateMaterialCBs();
+	void UpdateShadowMatrix();
 	void UpdateMainPassCB();
 
+	void DrawShadowMap();
+
 	void BuildTextures();
+	void BuildShadowMap();
 	void BuildMaterials();
 	void BuildRootSignature();
 	void BuildShadersAndInputLayout();
@@ -27,7 +31,7 @@ private:
 	void BuildObjects();
 	void BuildFrameResources();
 
-	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+	array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
 
 private:
 	vector<unique_ptr<FrameResource>>	m_FrameResources;
@@ -54,4 +58,9 @@ private:
 	shared_ptr<cRenderItem>		m_cubeMapRender = nullptr;
 	shared_ptr<RenderInstance>	m_cubeMapRenderInstance = nullptr;
 	bool						m_isBaseWireFrameMode = false;
+
+private:
+	ComPtr<ID3D12DescriptorHeap>	m_ShadowDsvHeap = nullptr;
+	XMFLOAT4X4						m_ShadowMapMatrix = MathHelper::Identity4x4();
+	XMFLOAT4X4						m_RightVeiwProjMatrix = MathHelper::Identity4x4();
 };

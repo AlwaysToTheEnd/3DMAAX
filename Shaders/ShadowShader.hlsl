@@ -42,7 +42,7 @@ VertexOut VS(VertexIn vin, uint instanceID : SV_InstanceID)
 	
     float4 posW = mul(float4(vin.PosL * instData.SizeScale, 1.0f), world);
 
-    vout.PosH = mul(posW, gViewProj);
+    vout.PosH = mul(posW, gRightViewProj);
 	
     float4 texC = mul(float4(vin.TexC, 0.0f, 1.0f), texTransform);
     vout.TexC = mul(texC, matData.MatTransform).xy;
@@ -50,7 +50,7 @@ VertexOut VS(VertexIn vin, uint instanceID : SV_InstanceID)
     return vout;
 }
 
-void PS(VertexOut pin) : SV_Target
+void PS(VertexOut pin)
 {
     MaterialData matData = gMaterialData[pin.MatIndex];
     float4 diffuseAlbedo = matData.DiffuseAlbedo;

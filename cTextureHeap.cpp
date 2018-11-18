@@ -106,15 +106,43 @@ void cTextureHeap::AddCubeMapTexture(ID3D12CommandQueue * cmdqueue, const string
 	m_device->CreateShaderResourceView(addTexture.tex.resource.Get(), &srvDesc, srvHeapHandle);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE cTextureHeap::GetTexture(const string& name)
+void cTextureHeap::AddNullTexture(const string & name, DXGI_FORMAT srvFormat,
+	const D3D12_RESOURCE_DESC* resourceDesc, const D3D12_CLEAR_VALUE* optClear)
+{
+	auto it = m_Textures.find(name);
+	assert(it == m_Textures.end() && "This name is overlapping name");
+
+	TEXTURENUM addTexture;
+	addTexture.num = (UINT)m_Textures.size();
+	addTexture.tex.name = name;
+
+	m_device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE, resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, optClear,
+		IID_PPV_ARGS(addTexture.tex.resource.GetAddressOf()));
+
+	m_Textures[name] = addTexture;
+
+	auto srvHeapHandle = (CD3DX12_CPU_DESCRIPTOR_HANDLE)m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+	srvHeapHandle.Offset(addTexture.num, m_SrvDescriptorSize);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = srvFormat;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.Texture2D.PlaneSlice = 0;
+
+	m_device->CreateShaderResourceView(m_Textures[name].tex.resource.Get(), &srvDesc, srvHeapHandle);
+}
+
+ComPtr<ID3D12Resource> cTextureHeap::GetTexture(const string& name)
 {
 	auto it = m_Textures.find(name);
 	assert(it != m_Textures.end() && "can not find this name");
 
-	auto srvHeapHandle = (CD3DX12_GPU_DESCRIPTOR_HANDLE)m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
-	srvHeapHandle.Offset(it->second.num, m_SrvDescriptorSize);
-
-	return srvHeapHandle;
+	return it->second.tex.resource;
 }
 
 UINT cTextureHeap::GetTextureIndex(const string& name) const

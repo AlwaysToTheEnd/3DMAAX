@@ -80,6 +80,7 @@ void D12D3Maaax::Update()
 	}
 
 	m_Camera.Update();
+	UpdateShadowMatrix();
 	UpdateMainPassCB();
 	INPUTMG->Update(m_Camera.GetEyePos(), *m_Camera.GetViewMatrix(), m_3DProj, (float)m_ClientWidth, (float)m_ClientHeight);
 	UIMG->Update();
@@ -130,6 +131,8 @@ void D12D3Maaax::Draw()
 	m_CommandList->SetGraphicsRootDescriptorTable(3, srvHandle);
 	srvHandle.ptr += m_CBV_SRV_UAV_DescriptorSize * m_TextureHeap->GetTextureIndex("cubeMap");
 	m_CommandList->SetGraphicsRootDescriptorTable(4, srvHandle);
+	srvHandle.ptr += m_CBV_SRV_UAV_DescriptorSize;
+	m_CommandList->SetGraphicsRootDescriptorTable(5, srvHandle);
 	/////////////////////////////
 
 	auto passCBAddress = m_CurrFrameResource->passCB->Resource()->GetGPUVirtualAddress();
@@ -143,6 +146,7 @@ void D12D3Maaax::Draw()
 	}
 	else
 	{
+		DrawShadowMap();
 		m_CommandList->SetPipelineState(m_PSOs["base"].Get());
 	}
 
@@ -211,12 +215,47 @@ void D12D3Maaax::UpdateMaterialCBs()
 	}
 }
 
+void D12D3Maaax::UpdateShadowMatrix()
+{
+	const float sceneSphereRadius = m_Camera.GetDistance();
+
+	XMVECTOR lightDir = XMVector3Normalize(XMLoadFloat3(&m_MainPassCB.Lights[0].direction));
+	XMVECTOR targetPos = XMLoadFloat3(&m_Camera.GetTargetPos());
+	XMVECTOR lightPos = (targetPos -(1.0f*sceneSphereRadius*lightDir));
+	XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMMATRIX lightView = XMMatrixLookAtLH(lightPos, targetPos, lightUp);
+
+	XMFLOAT3 sphereCenterLS;
+	XMStoreFloat3(&sphereCenterLS, XMVector3TransformCoord(targetPos, lightView));
+
+	float l = sphereCenterLS.x - sceneSphereRadius;
+	float b = sphereCenterLS.y - sceneSphereRadius;
+	float n = sphereCenterLS.z - sceneSphereRadius;
+	float r = sphereCenterLS.x + sceneSphereRadius;
+	float t = sphereCenterLS.y + sceneSphereRadius;
+	float f = sphereCenterLS.z + sceneSphereRadius;
+
+	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+	XMMATRIX T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	XMMATRIX S = lightView * lightProj* T;
+	XMStoreFloat4x4(&m_ShadowMapMatrix, S);
+	XMStoreFloat4x4(&m_RightVeiwProjMatrix, lightView*lightProj);
+}
+
 void D12D3Maaax::UpdateMainPassCB()
 {
 	auto currPassCB = m_CurrFrameResource->passCB.get();
 
 	XMMATRIX view = XMLoadFloat4x4(m_Camera.GetViewMatrix());
 	XMMATRIX proj = XMLoadFloat4x4(&m_3DProj);
+	XMMATRIX rightViewProjMatrix = XMLoadFloat4x4(&m_RightVeiwProjMatrix);
+	XMMATRIX shadowMapMatrix = XMLoadFloat4x4(&m_ShadowMapMatrix);
 
 	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
@@ -229,6 +268,8 @@ void D12D3Maaax::UpdateMainPassCB()
 	XMStoreFloat4x4(&m_MainPassCB.invProj, XMMatrixTranspose(invProj));
 	XMStoreFloat4x4(&m_MainPassCB.viewProj, XMMatrixTranspose(viewProj));
 	XMStoreFloat4x4(&m_MainPassCB.invViewProj, XMMatrixTranspose(invViewProj));
+	XMStoreFloat4x4(&m_MainPassCB.rightViewProj, XMMatrixTranspose(rightViewProjMatrix));
+	XMStoreFloat4x4(&m_MainPassCB.shadowMapMatrix, XMMatrixTranspose(shadowMapMatrix));
 	m_MainPassCB.eyePosW = m_Camera.GetEyePos();
 	m_MainPassCB.renderTargetSize = XMFLOAT2((float)m_ClientWidth, (float)m_ClientHeight);
 	m_MainPassCB.invRenderTargetSize = XMFLOAT2(1.0f / m_ClientWidth, 1.0f / m_ClientHeight);
@@ -257,25 +298,49 @@ void D12D3Maaax::UpdateMainPassCB()
 	currPassCB->CopyData(1, m_MainPassCB);
 }
 
+void D12D3Maaax::DrawShadowMap()
+{
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap").Get(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_ShadowDsvHeap->GetCPUDescriptorHandleForHeapStart();
+	m_CommandList->ClearDepthStencilView(dsvHandle,
+		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	m_CommandList->OMSetRenderTargets(0, nullptr, false, &dsvHandle);
+
+	m_CommandList->SetPipelineState(m_PSOs["shadowMap"].Get());
+	RENDERITEMMG->Render(m_CommandList.Get(), "base");
+	RENDERITEMMG->Render(m_CommandList.Get(), cMesh::m_meshRenderName);
+
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap").Get(),
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
+
+	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
+}
+
 void D12D3Maaax::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE cubeMapTexTable;
 	cubeMapTexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-	CD3DX12_DESCRIPTOR_RANGE texTable;
-	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_TextureHeap->GetTexturesNum(), 1);
+	CD3DX12_DESCRIPTOR_RANGE shadowMapTexTable;
+	shadowMapTexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
 
-	CD3DX12_ROOT_PARAMETER slotRootParam[5];
+	CD3DX12_DESCRIPTOR_RANGE texTable;
+	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, (UINT)m_TextureNames.size(), 2);
+
+	CD3DX12_ROOT_PARAMETER slotRootParam[6];
 	slotRootParam[0].InitAsShaderResourceView(0, 1);
 	slotRootParam[1].InitAsShaderResourceView(1, 1);
 	slotRootParam[2].InitAsConstantBufferView(0);
 	slotRootParam[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
 	slotRootParam[4].InitAsDescriptorTable(1, &cubeMapTexTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParam[5].InitAsDescriptorTable(1, &shadowMapTexTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	auto staticSamplers = GetStaticSamplers();
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootDesc;
-	rootDesc.Init(5, slotRootParam, (UINT)staticSamplers.size(),
+	rootDesc.Init(6, slotRootParam, (UINT)staticSamplers.size(),
 		staticSamplers.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> serializedRootSig = nullptr;
@@ -307,6 +372,9 @@ void D12D3Maaax::BuildShadersAndInputLayout()
 
 	m_Shaders["cubeMapVS"] = d3dUtil::CompileShader(L"Shaders\\CubeMapShader.hlsl", nullptr, "VS", "vs_5_1");
 	m_Shaders["cubeMapPS"] = d3dUtil::CompileShader(L"Shaders\\CubeMapShader.hlsl", nullptr, "PS", "ps_5_1");
+
+	m_Shaders["shadowMapVS"] = d3dUtil::CompileShader(L"Shaders\\ShadowShader.hlsl", nullptr, "VS", "vs_5_1");
+	m_Shaders["shadowMapPS"] = d3dUtil::CompileShader(L"Shaders\\ShadowShader.hlsl", nullptr, "PS", "ps_5_1");
 
 	m_NTVertexInputLayout =
 	{
@@ -385,6 +453,7 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.SampleMask = UINT_MAX;
 	opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 	opaquePsoDesc.NumRenderTargets = 1;
 	opaquePsoDesc.RTVFormats[0] = m_BackBufferFormat;
 	opaquePsoDesc.SampleDesc.Count = m_4xMsaaState ? 4 : 1;
@@ -392,10 +461,26 @@ void D12D3Maaax::BuildPSOs()
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["base"])));
 
-	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs["baseWF"])));
 	opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowMapPsoDesc = opaquePsoDesc;
+	shadowMapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	shadowMapPsoDesc.NumRenderTargets = 0;
+	shadowMapPsoDesc.RasterizerState.DepthBias = 30000;
+	shadowMapPsoDesc.RasterizerState.DepthBiasClamp = 0.02f;
+	shadowMapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
+	shadowMapPsoDesc.VS = {
+		reinterpret_cast<BYTE*>(m_Shaders["shadowMapVS"]->GetBufferPointer()),
+		m_Shaders["shadowMapVS"]->GetBufferSize()
+	};
+	shadowMapPsoDesc.PS = {
+		reinterpret_cast<BYTE*>(m_Shaders["shadowMapPS"]->GetBufferPointer()),
+		m_Shaders["shadowMapPS"]->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3dDevice->CreateGraphicsPipelineState(&shadowMapPsoDesc, IID_PPV_ARGS(&m_PSOs["shadowMap"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC cubeMapPsoDesc = opaquePsoDesc;
 	cubeMapPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
@@ -484,7 +569,12 @@ void D12D3Maaax::BuildTextures()
 	m_TextureNames.push_back("push.png");
 	m_TextureNames.push_back("CreateMesh.png");
 	m_TextureNames.push_back("ice.dds");
-	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), (UINT)m_TextureNames.size() + 1);
+
+	vector<string> otherUsesTextures;
+	otherUsesTextures.push_back("cubeMap");
+	otherUsesTextures.push_back("shadowMap");
+
+	m_TextureHeap = make_unique<cTextureHeap>(m_D3dDevice.Get(), (UINT)m_TextureNames.size() + (UINT)otherUsesTextures.size());
 
 	for (auto& it : m_TextureNames)
 	{
@@ -493,6 +583,50 @@ void D12D3Maaax::BuildTextures()
 	}
 
 	m_TextureHeap->AddCubeMapTexture(m_CommandQueue.Get(), "cubeMap", folderName + L"cubeMap.dds");
+	BuildShadowMap();
+}
+
+void D12D3Maaax::BuildShadowMap()
+{
+	{
+		D3D12_RESOURCE_DESC texDesc;
+		ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
+		texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		texDesc.Alignment = 0;
+		texDesc.Width = m_ClientWidth;
+		texDesc.Height = m_ClientHeight;
+		texDesc.DepthOrArraySize = 1;
+		texDesc.MipLevels = 1;
+		texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+		texDesc.SampleDesc.Count = 1;
+		texDesc.SampleDesc.Quality = 0;
+		texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+		D3D12_CLEAR_VALUE optClear;
+		optClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		optClear.DepthStencil.Depth = 1.0f;
+		optClear.DepthStencil.Stencil = 0;
+
+		m_TextureHeap->AddNullTexture("shadowMap", DXGI_FORMAT_R24_UNORM_X8_TYPELESS, &texDesc, &optClear);
+	}
+
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
+		dsvHeapDesc.NumDescriptors = 1;
+		dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		dsvHeapDesc.NodeMask = 0;
+		ThrowIfFailed(m_D3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(m_ShadowDsvHeap.GetAddressOf())));
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		dsvDesc.Texture2D.MipSlice = 0;
+		m_D3dDevice->CreateDepthStencilView(m_TextureHeap->GetTexture("shadowMap").Get(), &dsvDesc,
+			m_ShadowDsvHeap->GetCPUDescriptorHandleForHeapStart());
+	}
 }
 
 void D12D3Maaax::BuildFrameResources()
@@ -535,7 +669,7 @@ void D12D3Maaax::BuildObjects()
 	OBJCOORD->Build();
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> D12D3Maaax::GetStaticSamplers()
 {
 	const CD3DX12_STATIC_SAMPLER_DESC pointWrap(
 		0, // shaderRegister
@@ -583,9 +717,22 @@ std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> D12D3Maaax::GetStaticSamplers()
 		0.0f,                              // mipLODBias
 		8);                                // maxAnisotropy
 
+	const CD3DX12_STATIC_SAMPLER_DESC shadow(
+		6, // shaderRegister
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressW
+		0.0f,                               // mipLODBias
+		16,                                 // maxAnisotropy
+		D3D12_COMPARISON_FUNC_LESS_EQUAL,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
+
 	return {
 		pointWrap, pointClamp,
 		linearWrap, linearClamp,
-		anisotropicWrap, anisotropicClamp };
+		anisotropicWrap, anisotropicClamp,
+		shadow
+	};
 }
 

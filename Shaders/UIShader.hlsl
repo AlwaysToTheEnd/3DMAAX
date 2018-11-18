@@ -54,5 +54,12 @@ float4 PS(VertexOut pin) : SV_Target
     MaterialData matData = gMaterialData[pin.MatIndex];
     uint diffuseTexIndex = matData.DiffuseMapIndex;
 	
-    return gDiffuseMap[diffuseTexIndex].Sample(gsamLinearWrap, pin.TexC);
+    if(diffuseTexIndex==5)
+    {
+        return float4(gShadowMap.Sample(gsamLinearWrap, pin.TexC).rrr, 1.0f);
+    }
+    else
+    {
+        return gDiffuseMap[diffuseTexIndex].Sample(gsamLinearWrap, pin.TexC);
+    }
 }
