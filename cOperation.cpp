@@ -17,10 +17,9 @@ void CycleLine::CycleLineCheck(list<cLine*>& leaveLines,
 		if (endcheck != endLinkPoint)
 		{
 			cycleDots.push_back(GetDotsToParents());
+			return;
 		}
-		break;
 	}
-
 
 	for (auto it = leaveLines.begin(); it != leaveLines.end(); )
 	{
