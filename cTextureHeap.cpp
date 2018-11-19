@@ -137,12 +137,12 @@ void cTextureHeap::AddNullTexture(const string & name, DXGI_FORMAT srvFormat,
 	m_device->CreateShaderResourceView(m_Textures[name].tex.resource.Get(), &srvDesc, srvHeapHandle);
 }
 
-ComPtr<ID3D12Resource> cTextureHeap::GetTexture(const string& name)
+ID3D12Resource* cTextureHeap::GetTexture(const string& name)
 {
 	auto it = m_Textures.find(name);
 	assert(it != m_Textures.end() && "can not find this name");
 
-	return it->second.tex.resource;
+	return it->second.tex.resource.Get();
 }
 
 UINT cTextureHeap::GetTextureIndex(const string& name) const

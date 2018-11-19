@@ -14,7 +14,7 @@ public:
 		const D3D12_RESOURCE_DESC* resourceDesc,const D3D12_CLEAR_VALUE* optClear);
 
 	ID3D12DescriptorHeap* GetHeap() { return m_SrvHeap.Get(); }
-	ComPtr<ID3D12Resource> GetTexture(const string& name);
+	ID3D12Resource* GetTexture(const string& name);
 	
 	UINT GetTextureIndex(const string& name) const;
 	UINT GetTexturesNum() const { return (UINT)m_Textures.size(); }

@@ -8,8 +8,12 @@ D12D3Maaax::D12D3Maaax(HINSTANCE hInstance)
 
 D12D3Maaax::~D12D3Maaax()
 {
-	m_operator = nullptr;
+	if (m_D3dDevice != nullptr)
+		FlushCommandQueue();
+
+	m_ShadowDsvHeap = nullptr;
 	m_TextureHeap = nullptr;
+	m_operator = nullptr;
 	m_cubeMapRenderInstance = nullptr;
 	m_cubeMapRender = nullptr;
 	delete UIMG;
@@ -22,8 +26,6 @@ D12D3Maaax::~D12D3Maaax()
 		FlushCommandQueue();
 
 	delete FONTMANAGER;
-
-	FlushCommandQueue();
 }
 
 bool D12D3Maaax::Initialize()
@@ -302,7 +304,7 @@ void D12D3Maaax::UpdateMainPassCB()
 
 void D12D3Maaax::DrawShadowMap()
 {
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap").Get(),
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap"),
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_ShadowDsvHeap->GetCPUDescriptorHandleForHeapStart();
@@ -314,7 +316,7 @@ void D12D3Maaax::DrawShadowMap()
 	RENDERITEMMG->Render(m_CommandList.Get(), "base");
 	RENDERITEMMG->Render(m_CommandList.Get(), cMesh::m_meshRenderName);
 
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap").Get(),
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_TextureHeap->GetTexture("shadowMap"),
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 
 	m_CommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
@@ -626,7 +628,7 @@ void D12D3Maaax::BuildShadowMap()
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		dsvDesc.Texture2D.MipSlice = 0;
-		m_D3dDevice->CreateDepthStencilView(m_TextureHeap->GetTexture("shadowMap").Get(), &dsvDesc,
+		m_D3dDevice->CreateDepthStencilView(m_TextureHeap->GetTexture("shadowMap"), &dsvDesc,
 			m_ShadowDsvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 }
