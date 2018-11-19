@@ -22,6 +22,8 @@ D12D3Maaax::~D12D3Maaax()
 		FlushCommandQueue();
 
 	delete FONTMANAGER;
+
+	FlushCommandQueue();
 }
 
 bool D12D3Maaax::Initialize()
