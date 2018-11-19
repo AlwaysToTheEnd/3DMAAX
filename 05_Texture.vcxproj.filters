@@ -357,7 +357,4 @@
       <Filter>리소스 파일</Filter>
     </FxCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>
