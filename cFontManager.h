@@ -33,7 +33,6 @@ public:
 
 	void Resize(UINT clientWidth, UINT clientHeight);
 	void Render(ID3D12GraphicsCommandList* cmdList);
-	void Commit(ID3D12CommandQueue* queue);
 
 private:
 	cFontManager();

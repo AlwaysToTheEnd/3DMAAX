@@ -5,7 +5,6 @@ cFontManager* cFontManager::instance = nullptr;
 void cFontManager::Build(ID3D12Device * device, ID3D12CommandQueue * queue)
 {
 	m_graphicsMemory = std::make_unique<GraphicsMemory>(device);
-
 	m_resourceDescriptors = std::make_unique<DescriptorHeap>(device,
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
@@ -105,10 +104,6 @@ void cFontManager::Render(ID3D12GraphicsCommandList * cmdList)
 	m_spriteBatch->End();
 }
 
-void cFontManager::Commit(ID3D12CommandQueue * queue)
-{
-	m_graphicsMemory->Commit(queue);
-}
 
 cFontManager::cFontManager()
 {
