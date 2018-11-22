@@ -73,14 +73,14 @@ shared_ptr<RenderFont> cFontManager::GetFont(string fontName)
 	}
 }
 
-void cFontManager::Render(ID3D12GraphicsCommandList * cmdList)
+void cFontManager::Render(ID3D12GraphicsCommandList * cmdList, ID3D12CommandQueue* cmdQueue)
 {
 	ID3D12DescriptorHeap* heaps[] = { m_resourceDescriptors->Heap() };
 	cmdList->SetDescriptorHeaps(_countof(heaps), heaps);
 
 	m_spriteBatch->Begin(cmdList);
 
-	DirectX::SimpleMath::Vector2 origin = {0,0};
+	DirectX::SimpleMath::Vector2 origin = { 0,0 };
 
 	for (auto it = m_renderFonts.begin(); it != m_renderFonts.end();)
 	{
@@ -102,6 +102,8 @@ void cFontManager::Render(ID3D12GraphicsCommandList * cmdList)
 	}
 
 	m_spriteBatch->End();
+
+	m_graphicsMemory->Commit(cmdQueue);
 }
 
 

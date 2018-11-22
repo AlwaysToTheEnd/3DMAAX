@@ -175,7 +175,7 @@ void D12D3Maaax::Draw()
 
 	////////////////////////////////
 
-	FONTMANAGER->Render(m_CommandList.Get());
+	FONTMANAGER->Render(m_CommandList.Get(), m_CommandQueue.Get());
 
 	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

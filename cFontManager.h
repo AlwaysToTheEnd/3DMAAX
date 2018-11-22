@@ -32,7 +32,7 @@ public:
 	shared_ptr<RenderFont> GetFont(string fontName);
 
 	void Resize(UINT clientWidth, UINT clientHeight);
-	void Render(ID3D12GraphicsCommandList* cmdList);
+	void Render(ID3D12GraphicsCommandList* cmdList, ID3D12CommandQueue* cmdQueue);
 
 private:
 	cFontManager();
