@@ -93,9 +93,6 @@
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="05_Texture.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="D12Util.h">
       <Filter>ManagedClass\D12Util</Filter>
     </ClInclude>
@@ -204,12 +201,12 @@
     <ClInclude Include="cInputDeviceMG.h">
       <Filter>ManagedClass\cInputDeviceMG</Filter>
     </ClInclude>
+    <ClInclude Include="D3DMaxx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="05_Texture.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="D12Util.cpp">
@@ -316,6 +313,9 @@
     </ClCompile>
     <ClCompile Include="cUIObjectMG.cpp">
       <Filter>ManagedClass\cUIObjectMG</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DMaxx.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
