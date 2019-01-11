@@ -23,7 +23,7 @@
     <ProjectGuid>{4518C32F-E7E7-4265-B196-9761EEB437D3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>My05Texture</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>P7.CGH3DMax</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
